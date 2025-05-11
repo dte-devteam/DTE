@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicTokenEngine", "DynamicTokenEngine\DynamicTokenEngine.vcxproj", "{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utility", "Utility\Utility.vcxproj", "{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
+	ProjectSection(SolutionItems) = preProject
+		example.dte = example.dte
+		TODO.txt = TODO.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Debug|x64.ActiveCfg = Debug|x64
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Debug|x64.Build.0 = Debug|x64
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Debug|x86.ActiveCfg = Debug|Win32
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Debug|x86.Build.0 = Debug|Win32
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Release|x64.ActiveCfg = Release|x64
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Release|x64.Build.0 = Release|x64
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Release|x86.ActiveCfg = Release|Win32
+		{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}.Release|x86.Build.0 = Release|Win32
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Debug|x64.ActiveCfg = Debug|x64
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Debug|x64.Build.0 = Debug|x64
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Debug|x86.ActiveCfg = Debug|Win32
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Debug|x86.Build.0 = Debug|Win32
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x64.ActiveCfg = Release|x64
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x64.Build.0 = Release|x64
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x86.ActiveCfg = Release|Win32
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C430359-EC60-4FF6-A350-FA001C3B55E3}
+	EndGlobalSection
+EndGlobal

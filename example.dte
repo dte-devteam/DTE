@@ -1,0 +1,45 @@
+//this is a comment
+/*
+
+this is a very big comment
+
+*/
+my_int = 5		//unit
+my_float = 0.5	//unit
+my_array = {	//table with noname units
+	1 2.0f 3 4 5
+}
+my_string = "ABC"	//unit
+
+this_is_empty_table = {}
+this_is_table = { a = 5 }
+
+this_is_a = this_is_table["a"]
+this_is_a = this_is_table[0]
+
+my_float = 5	//now int (???)
+
+my_function(a, b) = {
+	return a > b
+}
+a = my_function
+a = a(5, 4)
+
+
+this_is_empty_table["str_name"] = my_function
+this_is_empty_table["str_name"](5,4)
+
+a = #this_is_empty_table //will output 1
+
+this_is_empty_table[a] = 5 //will add/set 5 at index a [begin;end], otherwise error
+
+
+var_module = import "filename"
+
+a = var_module["sin"](a)
+
+
+//func(...)??? use arg as Lua?
+
+//c/c++ func: print
+print("hello world!")
