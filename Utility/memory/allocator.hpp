@@ -19,12 +19,12 @@ namespace dte_utils {
 		using pointer = type*;
 		using const_pointer = const_type*;
 		public:
-			allocator(size_type num = 0) : mem_handler(num * sizeof(T)) {}
+			allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
 			allocator(const allocator&) = delete;
 			allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
 			void resize(size_type num) {
-				static_assert(std::is_trivial_v<T>, "do not try reallocating nontrivial data");
-				mem_handler::resize(num * sizeof(T));
+				static_assert(std::is_trivial_v<type>, "do not try reallocating nontrivial data");
+				mem_handler::resize(num * sizeof(type));
 			}
 			allocator& operator=(const allocator&) = delete;
 			allocator& operator=(allocator&& other) noexcept {

@@ -20,18 +20,24 @@ namespace dte_utils {
 			return this->get_used() - 1;
 		}
 		bool empty_str() const {
-			return !(str_len());
+			return !str_len();
 		}
 
 
 		dynamic_string substr(size_type from, size_type to) {
+			if (from > to) {
+				throw invalid_range();
+			}
+			if (to > str_len()) {
+				throw out_of_range();
+			}
 			dynamic_string new_str(this->begin() + from, to - from, 0);
 			new_str.push_back(0);
 			return new_str;
 		}
 
 
-		template<copy_constructible<T> U, template<copy_constructible<T>> typename UA>
+		template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
 		dynamic_string& operator +=(const dynamic_string<U, UA>& other) {
 			this->pop_back();
 			dynamic_array<T, A>::operator+=(other);
@@ -40,14 +46,14 @@ namespace dte_utils {
 			}
 			return *this;
 		}
-		template<copy_constructible<T> U, size_t N>
+		template<copy_constructible<type> U, size_t N>
 		dynamic_string& operator +=(const U(&arr)[N]) {
 			this->pop_back();
 			dynamic_array<T, A>::operator+=(arr);
 			return *this;
 		}
 
-		template<copy_constructible<T> U, template<copy_constructible<T>> typename UA>
+		template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
 		dynamic_string operator+(const dynamic_string<U, UA>& other) const {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, other.get_used());
 			array_to_array(new_str.end(), other.begin(), other.get_used());
@@ -55,7 +61,7 @@ namespace dte_utils {
 			return new_str;
 		}
 
-		template<copy_constructible<T> U, size_t N>
+		template<copy_constructible<type> U, size_t N>
 		dynamic_string operator+(const U(&arr)[N]) {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, N);
 			array_to_array(new_str.end(), arr, N);

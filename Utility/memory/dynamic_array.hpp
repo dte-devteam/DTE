@@ -27,7 +27,7 @@ namespace dte_utils {
 				return new_allocator;
 			}
 		public:
-			template<copy_constructible<T> U>
+			template<copy_constructible<type> U>
 			void insert(pointer pos, const U& value) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -36,7 +36,7 @@ namespace dte_utils {
 					this->_allocated = this->_extend_by_el();
 					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
 					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), value);
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
@@ -50,7 +50,7 @@ namespace dte_utils {
 				}
 				++this->_used;
 			}
-			template<move_constructible<T> U>
+			template<move_constructible<type> U>
 			void insert(pointer pos, U&& value) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -59,7 +59,7 @@ namespace dte_utils {
 					this->_allocated = this->_extend_by_el();
 					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
 					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), value);
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
@@ -74,7 +74,7 @@ namespace dte_utils {
 				++this->_used;
 			}
 			
-			template<copy_constructible<T> U>
+			template<copy_constructible<type> U>
 			void insert(pointer pos, const U& value, size_type num) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -88,7 +88,7 @@ namespace dte_utils {
 						--num;
 						++target;
 					}
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
@@ -110,7 +110,7 @@ namespace dte_utils {
 					}
 				}
 			}
-			template<copy_constructible<T> U>
+			template<copy_constructible<type> U>
 			void insert(pointer pos, const U* first, const U* last) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -125,7 +125,7 @@ namespace dte_utils {
 						++first;
 						++target;
 					}
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
@@ -147,13 +147,12 @@ namespace dte_utils {
 					}
 				}
 			}
-			template<copy_constructible<T> U>
-			void insert(pointer pos, std::initializer_list<U> il) {
+			void insert(pointer pos, std::initializer_list<type> il) {
 				insert(pos, il.begin(), il.end());
 			}
 
 			template<typename ...Args>
-			void emplace(pointer pos, Args&&... args) requires std::is_constructible_v<T, Args&&...> {
+			void emplace(pointer pos, Args&&... args) requires std::is_constructible_v<type, Args&&...> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
@@ -161,7 +160,7 @@ namespace dte_utils {
 					this->_allocated = this->_extend_by_el();
 					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
 					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), std::forward<Args>(args)...);
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
@@ -184,8 +183,8 @@ namespace dte_utils {
 					std::swap(*++pos, *pos);
 				}
 				--this->_used;
-				if constexpr (!std::is_trivially_destructible_v<T>) {
-					this->end()->~T();
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					this->end()->~type();
 				}
 			}
 			void erase(pointer first, pointer last) {
@@ -201,7 +200,7 @@ namespace dte_utils {
 					++first;
 					++last;
 				}
-				if constexpr (!std::is_trivially_destructible_v<T>) {
+				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(this->end() - size, this->end());
 				}
 				this->_used -= size;
@@ -214,13 +213,20 @@ namespace dte_utils {
 				}
 				--this->_used;
 				std::swap(*pos, *(this->end()));
-				this->end()->~T();
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					this->end()->~type();
+				}
 			}
 			//is effective in larger arrays and smaller removal
 			void remove(pointer first, pointer last) {
-				//TODO: if first/last is out or range
+				if (first > last) {
+					throw invalid_range();
+				}
+				if (first < this->begin() || last > this->end()) {
+					throw out_of_range();
+				}
 				if (last == this->end()) {
-					if constexpr (!std::is_trivially_destructible_v<T>) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(first, this->end());
 					}
 					this->_used -= last - first;
@@ -230,7 +236,9 @@ namespace dte_utils {
 					this->_used -= last - first;
 					while (last != first) {
 						std::swap(*--last, *--over_pos);
-						over_pos->~T();
+						if constexpr (!std::is_trivially_destructible_v<type>) {
+							over_pos->~type();
+						}
 					}
 				}
 			}

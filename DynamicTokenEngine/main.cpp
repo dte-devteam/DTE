@@ -39,11 +39,16 @@ int main(int argc, const char* argv[]) {
 	//std::cout << allocatable<unit> << std::endl;
 	std::is_assignable_v<A, double>;
 	char aaa[] = { 'A', 'B' };
-	static_array<static_array<char, 2>, 2> abc { 
-		static_array<char, 2>({'A','B'}), 
-		static_array<char, 2>({'C','\0'})
+	static_array<static_array<char, 2>, 3> abc { 
+		{L'A',L'B'},
+		{'A','B'},
+		{'C','\0'}
 	};
 	std::cout << abc[0].begin() << std::endl;
+
+	//static_array<char, 2> aaaaa;
+	//const static_array<wchar_t, 2> bbbbb{ L'A', L'A' };
+	//aaaaa = bbbbb;
 	
 	unit uuu1 = unit(ptrdiff_t(10));
 	unit uuu2 = unit(dynamic_cstring("DEF"));

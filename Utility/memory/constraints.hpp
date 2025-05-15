@@ -25,4 +25,9 @@ namespace dte_utils {
 		t == 0;
 		t != 0;
 	};
+
+	template<typename U, typename T>
+	concept copy_assignable = requires(const U & u, T t) {
+		t = u;
+	};
 }

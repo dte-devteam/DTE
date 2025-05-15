@@ -5,8 +5,9 @@ namespace dte_utils {
 	template<allocatable T>
 	struct weak_ref {
 		using size_type = ref_counter::size_type;
+		using type = T;
 		protected:
-			ref_pointer<T> _instance;
+			ref_pointer<type> _instance;
 			ref_counter* _counter;
 			void _weak_decrease() const {
 				if (!--_counter->weak_owners) {
@@ -15,14 +16,14 @@ namespace dte_utils {
 			}
 			void _strong_decrease() {
 				if (!--this->_counter->strong_owners && this->_instance) {
-					if constexpr (!std::is_trivially_destructible_v<T>) {
-						this->_instance->~T();
+					if constexpr (!std::is_trivially_destructible_v<type>) {
+						this->_instance->~type();
 					}
 					free(this->_instance);
 				}
 			}
 		public:
-			weak_ref(ref_pointer<T> instance = nullptr) : _instance(instance), _counter(tmalloc<ref_counter>(1)) {
+			weak_ref(ref_pointer<type> instance = nullptr) : _instance(instance), _counter(tmalloc<ref_counter>(1)) {
 				place_at(_counter, static_cast<size_type>(1), static_cast<size_type>(0));
 			}
 			weak_ref(const weak_ref& other) : _instance(other._instance), _counter(other._counter)  {
@@ -30,7 +31,7 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U>
+			requires std::is_base_of_v<type, U>
 			weak_ref(const weak_ref<U>& other) : _instance(other.get()), _counter(const_cast<ref_counter*>(other.get_counter())) {
 				++_counter->weak_owners;
 			}
@@ -45,11 +46,11 @@ namespace dte_utils {
 			bool expired() const {
 				return !get_counter()->strong_owners;
 			}
-			ref_pointer<T> get() const {
+			ref_pointer<type> get() const {
 				return _instance;
 			}
 
-			weak_ref& operator=(ref_pointer<T> instance) {
+			weak_ref& operator=(ref_pointer<type> instance) {
 				_instance = instance;
 				if (--_counter->weak_owners) {
 					_counter = tmalloc<ref_counter>(1);
@@ -58,7 +59,7 @@ namespace dte_utils {
 				return *this;
 			}
 			template<allocatable U>
-			requires std::is_base_of_v<T, U> || std::is_same_v<T, U>
+			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			weak_ref& operator=(const weak_ref<U>& other) {
 				if (reinterpret_cast<weak_ref<U>*>(this) == &other) {
 					return *this;
@@ -85,21 +86,21 @@ namespace dte_utils {
 			}
 
 
-			T& operator*() const
-			requires !return_type_v<T> {
+			type& operator*() const
+			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return *_instance;
 			}
-			T* operator->() const
-			requires !return_type_v<T> {
+			type* operator->() const
+			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return _instance;
 			}
-			template<typename R = return_type_t<T>, typename ...Args>
+			template<typename R = return_type_t<type>, typename ...Args>
 			R operator()(Args&&... args) const {
 				return _instance(std::forward<Args>(args)...);
 			}

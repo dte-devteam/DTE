@@ -5,6 +5,7 @@ namespace dte_utils {
 	template<allocatable T>
 	struct unknown_ref : weak_ref<T> {
 		using size_type = weak_ref<T>::size_type;
+		using type = weak_ref<T>::type;
 		protected:
 			bool _strength;
 			void _unknown_decrease() {
@@ -21,7 +22,7 @@ namespace dte_utils {
 				}
 			}
 		public:
-			unknown_ref(ref_pointer<T> instance = nullptr, bool strength = false) : weak_ref<T>(instance), _strength(strength) {
+			unknown_ref(ref_pointer<type> instance = nullptr, bool strength = false) : weak_ref<T>(instance), _strength(strength) {
 				if (get_strength()) {
 					++this->_counter->strong_owners;
 				}
@@ -31,13 +32,13 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U>
+			requires std::is_base_of_v<type, U>
 			unknown_ref(const unknown_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
 				_unknown_increase();
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U> || std::is_same_v<T, U>
+			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref(const weak_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
 				_unknown_increase();
 			}
@@ -59,7 +60,7 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U> || std::is_same_v<T, U>
+			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref& operator=(ref_pointer<U> instance) {
 				_unknown_decrease();
 				this->_instance = instance;
@@ -71,7 +72,7 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U> || std::is_same_v<T, U>
+			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref& operator=(const unknown_ref<U>& other) {
 				if (reinterpret_cast<unknown_ref<U>*>(this) == &other) {
 					return *this;
@@ -94,7 +95,7 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<T, U> || std::is_same_v<T, U>
+			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref& operator=(const weak_ref<U>& other) {
 				if (reinterpret_cast<weak_ref<U>*>(this) == &other) {
 					return *this;

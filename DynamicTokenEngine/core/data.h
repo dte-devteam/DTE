@@ -54,20 +54,20 @@ struct unit {
 		data _data;
 	public:
 		unit() : _type(NIL) {}
-		explicit unit(const ptrdiff_t i_val) : _type(INT) {
+		unit(const ptrdiff_t i_val) : _type(INT) {
 			_data.int_val = i_val;
 		}
-		explicit unit(const floatpoint fp_val) : _type(FP) {
+		unit(const floatpoint fp_val) : _type(FP) {
 			_data.float_val = fp_val;
 		}
-		explicit unit(const func f_val) : _type(FUNC) {
+		unit(const func f_val) : _type(FUNC) {
 			_data.func_val = f_val;
 		}
-		explicit unit(mem_handler&& m_val) : _type(VOID) {
+		unit(mem_handler&& m_val) : _type(VOID) {
 			_data.int_val = 0; //create nullptr
 			_data.mem_val = std::move(m_val);
 		}
-		explicit unit(const dynamic_cstring& cstr) : _type(CSTR) {
+		unit(const dynamic_cstring& cstr) : _type(CSTR) {
 			new (&_data.cstr) mem_wrapper<dynamic_cstring>(cstr);
 		}
 
@@ -89,7 +89,7 @@ struct unit {
 					_data.mem_val.~mem_handler();
 					break;
 				case unit::CSTR:
-					_data.cstr.~mem_wrapper<dynamic_cstring>();
+					_data.cstr.~mem_wrapper();
 					break;
 				default:
 					break;

@@ -18,7 +18,7 @@ namespace dte_utils {
 				place_at(--iter);
 			}
 		}
-		template<copy_constructible<T> U>
+		template<copy_constructible<type> U>
 		static_array(const U (&arr)[N]) {
 			pointer iter = begin();
 			for (const U& val : arr) {
@@ -26,13 +26,12 @@ namespace dte_utils {
 				++iter;
 			}
 		}
-		template<copy_constructible<T> U>
-		static_array(std::initializer_list<U> il) {
+		static_array(std::initializer_list<type> il) {
 			if (il.size() != N) {
 				throw invalid_range();
 			}
 			pointer iter = begin();
-			for (const U& val : il) {
+			for (const_type& val : il) {
 				place_at(iter, val);
 				++iter;
 			}
@@ -45,7 +44,7 @@ namespace dte_utils {
 				++iter;
 			}
 		}
-		template<copy_constructible<T> U>
+		template<copy_constructible<type> U>
 		static_array(const static_array<U, N> other) {
 			pointer iter = begin();
 			for (const U& val : other) {
@@ -80,7 +79,7 @@ namespace dte_utils {
 			}
 			return *this;
 		}
-		template<typename U>
+		template<copy_assignable<type> U>
 		static_array& operator=(const static_array<U, N>& other) {
 			if (this == &other) {
 				return *this;
