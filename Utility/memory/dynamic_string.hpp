@@ -31,7 +31,7 @@ namespace dte_utils {
 			if (to > str_len()) {
 				throw out_of_range();
 			}
-			dynamic_string new_str(this->begin() + from, to - from, 0);
+			dynamic_string new_str(this->begin() + from, to - from, 1);
 			new_str.push_back(0);
 			return new_str;
 		}

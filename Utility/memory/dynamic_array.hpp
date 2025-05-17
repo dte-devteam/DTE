@@ -179,12 +179,12 @@ namespace dte_utils {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
+				--this->_used;
 				while (pos != this->end()) {
 					std::swap(*++pos, *pos);
 				}
-				--this->_used;
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					this->end()->~type();
+					destuct_at(this->end());
 				}
 			}
 			void erase(pointer first, pointer last) {
@@ -214,7 +214,7 @@ namespace dte_utils {
 				--this->_used;
 				std::swap(*pos, *(this->end()));
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					this->end()->~type();
+					destuct_at(this->end());
 				}
 			}
 			//is effective in larger arrays and smaller removal
@@ -237,7 +237,7 @@ namespace dte_utils {
 					while (last != first) {
 						std::swap(*--last, *--over_pos);
 						if constexpr (!std::is_trivially_destructible_v<type>) {
-							over_pos->~type();
+							destuct_at(over_pos);
 						}
 					}
 				}

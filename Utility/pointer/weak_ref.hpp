@@ -17,7 +17,7 @@ namespace dte_utils {
 			void _strong_decrease() {
 				if (!--this->_counter->strong_owners && this->_instance) {
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						this->_instance->~type();
+						destuct_at(this->_instance);
 					}
 					free(this->_instance);
 				}

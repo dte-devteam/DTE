@@ -19,8 +19,10 @@ namespace dte_utils {
 			place_at(static_cast<type*>(_ptr), std::move(value));
 		}
 		~mem_wrapper() {
-			if (_ptr) {
-				static_cast<type*>(_ptr)->~type();
+			if constexpr (!std::is_trivially_destructible_v<type>) {
+				if (_ptr) {
+					destuct_at(static_cast<type*>(_ptr));
+				}
 			}
 		}
 

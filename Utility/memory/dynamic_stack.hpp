@@ -63,25 +63,25 @@ namespace dte_utils {
 
 
 			type& front() {
-				if (!_used) {
+				if (!get_used()) {
 					throw zero_size_access();
 				}
 				return *begin();
 			}
 			const_type& front() const {
-				if (!_used) {
+				if (!get_used()) {
 					throw zero_size_access();
 				}
 				return *begin();
 			}
 			type& back() {
-				if (!_used) {
+				if (!get_used()) {
 					throw zero_size_access();
 				}
 				return *(end() - 1);
 			}
 			const_type& back() const {
-				if (!_used) {
+				if (!get_used()) {
 					throw zero_size_access();
 				}
 				return *(end() - 1);
@@ -89,13 +89,13 @@ namespace dte_utils {
 
 
 			type& operator[](size_type index) {
-				if (!(index < _used)) {
+				if (!(index < get_used())) {
 					throw out_of_range();
 				}
 				return this->_allocator[index];
 			}
 			const_type& operator[](size_type index) const {
-				if (!(index < _used)) {
+				if (!(index < get_used())) {
 					throw out_of_range();
 				}
 				return this->_allocator[index];
@@ -128,7 +128,7 @@ namespace dte_utils {
 				if (from > to) {
 					throw invalid_range();
 				}
-				if (to > _used) {
+				if (to > get_used()) {
 					throw out_of_range();
 				}
 				pointer i = begin() + to;
@@ -145,7 +145,7 @@ namespace dte_utils {
 				if (from > to) {
 					throw invalid_range();
 				}
-				if (to > _used) {
+				if (to > get_used()) {
 					throw out_of_range();
 				}
 				const_pointer i = begin() + to;
@@ -249,16 +249,16 @@ namespace dte_utils {
 				++_used;
 			}
 			void pop_back() {
-				if (!_used) {
+				if (!get_used()) {
 					throw zero_size_access();
 				}
 				--_used;
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					end()->~type();
+					destuct_at(end());
 				}
 			}
 			void pop_back(size_type num) {
-				if (num > _used) {
+				if (num > get_used()) {
 					throw out_of_range();
 				}
 				if constexpr (!std::is_trivially_destructible_v<type>) {
