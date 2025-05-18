@@ -230,7 +230,8 @@ namespace dte_utils {
 				}
 				++_used;
 			}
-			template<typename ...Args> requires std::is_constructible_v<type, Args&&...>
+			template<typename ...Args>
+			requires std::is_constructible_v<type, Args&&...>
 			void emplace_back(Args&&... args) {
 				if (this->get_allocated() == get_used()) {
 					//emplace reallocated

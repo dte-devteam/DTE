@@ -152,7 +152,8 @@ namespace dte_utils {
 			}
 
 			template<typename ...Args>
-			void emplace(pointer pos, Args&&... args) requires std::is_constructible_v<type, Args&&...> {
+			requires std::is_constructible_v<type, Args&&...>
+			void emplace(pointer pos, Args&&... args) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
