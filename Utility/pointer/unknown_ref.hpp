@@ -2,7 +2,8 @@
 #include "weak_ref.hpp"
 #include "exceptions/pointer_exception.hpp"
 namespace dte_utils {
-	template<allocatable T>
+	template<typename T>
+	requires std::is_destructible_v<T>
 	struct unknown_ref : weak_ref<T> {
 		using size_type = weak_ref<T>::size_type;
 		using type = weak_ref<T>::type;

@@ -2,7 +2,8 @@
 #include "weak_ref.hpp"
 #include "exceptions/pointer_exception.hpp"
 namespace dte_utils {
-	template<allocatable T>
+	template<typename T>
+	requires std::is_destructible_v<T>
 	struct strong_ref : weak_ref<T> {
 		using size_type = weak_ref<T>::size_type;
 		using type = weak_ref<T>::type;
@@ -53,7 +54,7 @@ namespace dte_utils {
 					return *this;
 				}
 				this->_strong_decrease();
-				weak_ref<type>::operator=(other);
+				weak_ref<T>::operator=(other);
 				++this->_counter->strong_owners;
 				return *this;
 			}
@@ -77,7 +78,7 @@ namespace dte_utils {
 					throw bad_weak_ptr();
 				}
 				this->_strong_decrease();
-				weak_ref<type>::operator=(other);
+				weak_ref<T>::operator=(other);
 				++this->_counter->strong_owners;
 				return *this;
 			}

@@ -2,7 +2,8 @@
 #include "memory/memory.hpp"
 #include "ref.hpp"
 namespace dte_utils {
-	template<allocatable T>
+	template<typename T>
+	requires std::is_destructible_v<T>
 	struct unique_ref {
 		using type = T;
 		protected:

@@ -2,7 +2,7 @@
 #include "ref.hpp"
 #include "memory/memory.hpp"
 namespace dte_utils {
-	template<allocatable T>
+	template<typename T>
 	struct weak_ref {
 		using size_type = ref_counter::size_type;
 		using type = T;
@@ -15,11 +15,11 @@ namespace dte_utils {
 				}
 			}
 			void _strong_decrease() {
-				if (!--this->_counter->strong_owners && this->_instance) {
+				if (!--_counter->strong_owners && _instance) {
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destuct_at(this->_instance);
+						destuct_at(_instance);
 					}
-					free(this->_instance);
+					free(_instance);
 				}
 			}
 		public:
