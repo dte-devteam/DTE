@@ -65,6 +65,27 @@ namespace dte_utils {
 	}
 
 
+	template<typename T, copy_constructible<T> U>
+	inline T* cnew(const U& value) {
+		T* ptr = tmalloc<T>(1);
+		place_at(ptr, value);
+		return ptr;
+	}
+	template<typename T, move_constructible<T> U>
+	inline T* cnew(U&& value) {
+		T* ptr = tmalloc<T>(1);
+		place_at(ptr, std::move(value));
+		return ptr;
+	}
+	template<typename T, typename ...Args>
+	requires std::is_constructible_v<T, Args&&...>
+	inline T* cnew(Args&&... args) {
+		T* ptr = tmalloc<T>(1);
+		place_at(ptr, std::forward<Args>(args)...);
+		return ptr;
+	}
+
+
 	template<typename T>
 	requires std::is_destructible_v<T>
 	inline void destuct_at(T* at) {

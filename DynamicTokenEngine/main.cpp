@@ -3,7 +3,7 @@
 
 #include "memory/static_array.hpp"
 
-#include "core/data.h"
+#include "core/unit.hpp"
 
 #include <iostream>
 
@@ -53,10 +53,30 @@ int main(int argc, const char* argv[]) {
 	unit uuu1 = unit(ptrdiff_t(10));
 	unit uuu2 = unit(dynamic_cstring("DEF"));
 	uuu1 = uuu2;
-	std::cout << uuu1.get<dynamic_cstring>().begin() << std::endl;
+	uuu1 = unit(dynamic_cstring("AAA"));
+	std::cout << uuu1.get_cstr().begin() << std::endl;
+	uuu1 = unit(ptrdiff_t(10));
+	std::cout << uuu1.get_int() << std::endl;
+	uuu1 = ptrdiff_t(11);
+	uuu1 = 12.5F;
+	std::cout << uuu1.get_fp() << std::endl;
+	uuu1 = "NEW";
+	std::cout << uuu1.get_cstr().begin() << std::endl;
 
-	test_memory();
-	test_pointer();
+	unit uuu3;
+	uuu3._set_table();
+	uuu3._type = unit::TABLE;
+
+	strong_ref<table>* ttt = new strong_ref<table>(cnew<table>());
+
+	uuu3 = *ttt;
+
+	delete ttt;
+
+	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
+
+	//test_memory();
+	//test_pointer();
 
 	std::cin.get();
 	return 0;
