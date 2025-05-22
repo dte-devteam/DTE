@@ -16,12 +16,6 @@ namespace dte_utils {
 			}
 
 			template<allocatable U>
-			requires std::is_base_of_v<type, U>
-			strong_ref(const strong_ref<U>& other) : weak_ref<T>(other) {
-				++this->_counter->strong_owners;
-			}
-
-			template<allocatable U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			strong_ref(const weak_ref<U>& other) : weak_ref<T>(other) {
 				if (other.expired()) {
@@ -35,9 +29,7 @@ namespace dte_utils {
 			}
 
 
-			template<allocatable U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			strong_ref& operator=(ref_pointer<U> instance) {
+			strong_ref& operator=(ref_pointer<type> instance) {
 				this->_strong_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {
@@ -47,10 +39,9 @@ namespace dte_utils {
 				return *this;
 			}
 
-			template<allocatable U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			strong_ref& operator=(const strong_ref<U>& other) {
-				if (reinterpret_cast<strong_ref<U>*>(this) == &other) {
+			
+			strong_ref& operator=(const strong_ref& other) {
+				if (this == &other) {
 					return *this;
 				}
 				this->_strong_decrease();

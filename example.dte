@@ -4,12 +4,26 @@
 this is a very big comment
 
 */
+@this_is_macro = "str value"
+@macro_func(val) = val
+@complex_macro = {
+	"first value"
+	"secode value"
+	{ "value in braces" }
+}
+@complex_macro_func(val) = {
+	other_val = val
+}
+other_val = nil
+@complex_macro_func(4) //will unwrap to "other_val = 4"
+
 my_int = 5		//unit
 my_float = 0.5	//unit
 my_array = {	//table with noname units
 	1 2.0f 3 4 5
 }
 my_string = "ABC"	//unit
+my_string = @this_is_macro
 
 this_is_empty_table = {}
 this_is_table = { a = 5 }
@@ -34,7 +48,8 @@ a = #this_is_empty_table //will output 1
 this_is_empty_table[a] = 5 //will add/set 5 at index a [begin;end], otherwise error
 
 
-var_module = import "filename"
+var_module = import("filename")
+var_other_module = import(my_string)	//allow loading name-formed module
 
 a = var_module["sin"](a)
 

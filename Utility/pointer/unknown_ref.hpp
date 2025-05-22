@@ -29,18 +29,18 @@ namespace dte_utils {
 				}
 			}
 			unknown_ref(const unknown_ref& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
-				_unknown_increase();
-			}
-
-			template<allocatable U>
-			requires std::is_base_of_v<type, U>
-			unknown_ref(const unknown_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
+				if (get_strength() && other.expired()) {
+					throw bad_weak_ptr();
+				}
 				_unknown_increase();
 			}
 
 			template<allocatable U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref(const weak_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
+				if (get_strength() && other.expired()) {
+					throw bad_weak_ptr();
+				}
 				_unknown_increase();
 			}
 
@@ -60,9 +60,10 @@ namespace dte_utils {
 				_unknown_increase();
 			}
 
-			template<allocatable U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref& operator=(ref_pointer<U> instance) {
+
+
+			
+			unknown_ref& operator=(ref_pointer<type> instance) {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {
@@ -72,10 +73,10 @@ namespace dte_utils {
 				return *this;
 			}
 
-			template<allocatable U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref& operator=(const unknown_ref<U>& other) {
-				if (reinterpret_cast<unknown_ref<U>*>(this) == &other) {
+
+			
+			unknown_ref& operator=(const unknown_ref& other) {
+				if (this == &other) {
 					return *this;
 				}
 				_unknown_decrease();

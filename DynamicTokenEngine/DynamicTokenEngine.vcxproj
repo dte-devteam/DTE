@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core\table.hpp" />
     <ClInclude Include="core\unit.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tests\data.hpp" />
@@ -177,6 +178,7 @@
     <Image Include="dte_logo.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\table.cpp" />
     <ClCompile Include="core\unit.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

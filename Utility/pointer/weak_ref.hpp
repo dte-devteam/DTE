@@ -58,10 +58,9 @@ namespace dte_utils {
 				}
 				return *this;
 			}
-			template<allocatable U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			weak_ref& operator=(const weak_ref<U>& other) {
-				if (reinterpret_cast<weak_ref<U>*>(this) == &other) {
+
+			weak_ref& operator=(const weak_ref& other) {
+				if (this == &other) {
 					return *this;
 				}
 				_instance = other.get();

@@ -20,5 +20,9 @@
 
 
 #ifndef CPU_WORD	//may be predefined
+#ifdef _WIN64
 #define CPU_WORD unsigned long long	//temp solution for 64x (CPU word may be other size)
+#else
+#define CPU_WORD unsigned long	//temp solution for 86x (CPU word may be other size)
+#endif
 #endif

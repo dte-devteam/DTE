@@ -4,6 +4,7 @@
 #include "memory/static_array.hpp"
 
 #include "core/unit.hpp"
+#include "core/table.hpp"
 
 #include <iostream>
 
@@ -33,12 +34,6 @@ ull measure(F&& f, Args&&... args) {
 }
 */
 int main(int argc, const char* argv[]) {
-	std::is_assignable_v<A, A&&>;
-	std::is_constructible_v<int[3], A&&>;
-	//std::cout << dte_utils::nullable<std::vector<int>> << std::endl;
-	//std::cout << allocatable<unit> << std::endl;
-	std::is_assignable_v<A, double>;
-	char aaa[] = { 'A', 'B' };
 	static_array<static_array<char, 2>, 3> abc { 
 		{L'A',L'B'},
 		{'A','B'},
@@ -46,26 +41,7 @@ int main(int argc, const char* argv[]) {
 	};
 	std::cout << abc[0].begin() << std::endl;
 
-	//static_array<char, 2> aaaaa;
-	//const static_array<wchar_t, 2> bbbbb{ L'A', L'A' };
-	//aaaaa = bbbbb;
-	
-	unit uuu1 = unit(ptrdiff_t(10));
-	unit uuu2 = unit(dynamic_cstring("DEF"));
-	uuu1 = uuu2;
-	uuu1 = unit(dynamic_cstring("AAA"));
-	std::cout << uuu1.get_cstr().begin() << std::endl;
-	uuu1 = unit(ptrdiff_t(10));
-	std::cout << uuu1.get_int() << std::endl;
-	uuu1 = ptrdiff_t(11);
-	uuu1 = 12.5F;
-	std::cout << uuu1.get_fp() << std::endl;
-	uuu1 = "NEW";
-	std::cout << uuu1.get_cstr().begin() << std::endl;
-
 	unit uuu3;
-	uuu3._set_table();
-	uuu3._type = unit::TABLE;
 
 	strong_ref<table>* ttt = new strong_ref<table>(cnew<table>());
 
@@ -73,7 +49,9 @@ int main(int argc, const char* argv[]) {
 
 	delete ttt;
 
+	std::cout << uuu3.get_table_ref().get_counter()->weak_owners << std::endl;
 	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
+
 
 	//test_memory();
 	//test_pointer();

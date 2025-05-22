@@ -1,6 +1,5 @@
 #include "unit.hpp"
-
-#include <iostream>
+#include "table.hpp"
 using namespace dte_utils;
 void unit::_set_void() {
 	new (&_data.mem_val) mem_handler();
@@ -68,6 +67,38 @@ void unit::clr_value() {
 }
 
 
+unit::unit() : _type(NIL) {}
+unit::unit(const ptrdiff_t& i_val) : _type(INT) {
+	_data.int_val = i_val;
+}
+unit::unit(const floatpoint& fp_val) : _type(FP) {
+	_data.float_val = fp_val;
+}
+unit::unit(const func& f_val) : _type(FUNC) {
+	_data.func_val = f_val;
+}
+unit::unit(mem_handler&& m_val) : _type(VOID) {
+	_data.int_val = 0; //create nullptr
+	_data.mem_val = std::move(m_val);
+}
+unit::unit(const dynamic_cstring& cstr) : _type(CSTR) {
+	new (&_data.mem_val) mem_handler(sizeof(dynamic_cstring));
+	new (static_cast<void*>(_data.mem_val)) dynamic_cstring(cstr);
+}
+
+unit::unit(const unit& other) : _type(other._type) {
+	if (other._type == VOID) {
+		throw exception(0, "void can`t be copied!");
+	}
+	//we can use copy memory by type
+	_data.int_val = other._data.int_val;
+}
+unit::unit(unit&& other) noexcept : _type(other._type) {
+	other._type = NIL;
+	//we can use copy memory by type
+	_data.int_val = other._data.int_val;
+}
+
 
 unit::~unit() {
 	_release_type();
@@ -92,7 +123,7 @@ unit& unit::operator=(const unit& other) {
 			}
 			break;
 		case TABLE:
-			_set_table();
+			_set_table(other.get_table_ref());
 			break;
 		default:
 			//we can use copy memory by type
@@ -171,29 +202,15 @@ unit& unit::operator=(const weak_ref<table>& t_pointer) {
 		throw bad_weak_ptr();
 	}
 	if (_type == TABLE) {
-		/*weak_ref<table>& ref = get_table_ref();
-		ref_counter* counter = const_cast<ref_counter*>(ref.get_counter());
-		if (!--counter->strong_owners) {
-			ref.get()->~table();
-		}
-		ref = t_pointer;
-		counter = const_cast<ref_counter*>(ref.get_counter());
-		++counter->strong_owners;*/
-
-
 		weak_ref<table>& ref = get_table_ref();
 		ref_counter* counter = const_cast<ref_counter*>(ref.get_counter());
 		if (!--counter->strong_owners) {
 			destuct_at(ref.get());
-			std::cout << "D" << std::endl;
 		}
-
 		_type = TABLE;
 		ref = t_pointer;
-		++const_cast<ref_counter*>(
-			ref.get_counter()
-		)->strong_owners;
-		ref;
+		counter = const_cast<ref_counter*>(ref.get_counter());
+		++counter->strong_owners;
 	}
 	else {
 		_release_type();

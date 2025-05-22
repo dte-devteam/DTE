@@ -4,8 +4,6 @@
 #include "constraints.hpp"
 #include <malloc.h>
 #include <type_traits>
-
-#include <iostream>
 //TODO: some typenames cant be void/arrays
 namespace dte_utils {
 	inline void* xmalloc(size_t size) {

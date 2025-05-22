@@ -3,8 +3,6 @@
 #include "memory/mem_wrapper.hpp"
 #include "pointer/strong_ref.hpp"
 #include "types.hpp"
-
-#include <iostream>
 using namespace dte_utils;
 /*
 struct type {};
@@ -52,7 +50,7 @@ struct unit {
 		mem_wrapper<dynamic_cstring> cstr;	//cstring
 		mem_wrapper<weak_ref<table>> t_val;	//table
 	};
-	//protected:
+	protected:
 		type _type;
 		data _data;
 
@@ -76,37 +74,15 @@ struct unit {
 
 		void _release_type();
 	public:
-		unit() : _type(NIL) {}
-		unit(const ptrdiff_t& i_val) : _type(INT) {
-			_data.int_val = i_val;
-		}
-		unit(const floatpoint& fp_val) : _type(FP) {
-			_data.float_val = fp_val;
-		}
-		unit(const func& f_val) : _type(FUNC) {
-			_data.func_val = f_val;
-		}
-		unit(mem_handler&& m_val) : _type(VOID) {
-			_data.int_val = 0; //create nullptr
-			_data.mem_val = std::move(m_val);
-		}
-		unit(const dynamic_cstring& cstr) : _type(CSTR) {
-			new (&_data.mem_val) mem_handler(sizeof(dynamic_cstring));
-			new (static_cast<void*>(_data.mem_val)) dynamic_cstring(cstr);
-		}
+		unit();
+		unit(const ptrdiff_t& i_val);
+		unit(const floatpoint& fp_val);
+		unit(const func& f_val);
+		unit(mem_handler&& m_val);
+		unit(const dynamic_cstring& cstr);
 
-		unit(const unit& other) : _type(other._type) {
-			if (other._type == VOID) {
-				throw exception(0, "void can`t be copied!");
-			}
-			//we can use copy memory by type
-			_data.int_val = other._data.int_val;
-		}
-		unit(unit&& other) noexcept : _type(other._type) {
-			other._type = NIL;
-			//we can use copy memory by type
-			_data.int_val = other._data.int_val;
-		}
+		unit(const unit& other);
+		unit(unit&& other) noexcept;
 		~unit();
 
 		unit& operator=(const unit& other);
@@ -160,15 +136,3 @@ struct unit {
 
 		void clr_value();
 };
-struct table_unit {
-	unit u;
-	dynamic_cstring name;
-};
-struct table {
-	size_t index_offset;
-	dynamic_array<table_unit> t_units;
-	~table() {
-		std::cout << "RELEASED" << std::endl;
-	}
-};
-
