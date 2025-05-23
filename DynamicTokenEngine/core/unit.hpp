@@ -1,31 +1,11 @@
 #pragma once
 #include "memory/dynamic_string.hpp"
 #include "memory/mem_wrapper.hpp"
-#include "pointer/strong_ref.hpp"
+#include "pointer/weak_ref.hpp"
 #include "types.hpp"
 using namespace dte_utils;
-/*
-struct type {};
-struct data_unit {
-	data_unit(const data_unit&) {}
-	data_unit(data_unit&&) noexcept {}
-	~data_unit() {}
-
-	data_unit& operator=(data_unit&&) noexcept {
-		return *this;
-	}
-
-	dynamic_cstring name;
-	strong_ref<type> data_type;
-	mem_handler mh;
-};
-struct table {
-	dynamic_array<data_unit> aaa;
-};
-*/
-using func = int(*)(void*);//TODO
-
-
+struct function_stack;
+using func = size_t(*)(function_stack&, size_t);//TODO
 
 struct table;
 struct unit {

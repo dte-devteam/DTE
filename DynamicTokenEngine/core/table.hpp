@@ -31,13 +31,12 @@ struct table {
 	table_unit& operator[](size_t index) {
 		return _t_units[index + _index_offset];
 	}
-	table_unit& operator[](dynamic_cstring name) {
+	table_unit& operator[](const dynamic_cstring& name) {
 		for (table_unit& tu : _t_units) {
 			if (tu.name == name) {
 				return tu;
 			}
 		}
-		//TODO
 		throw exception();
 	}
 	~table() {

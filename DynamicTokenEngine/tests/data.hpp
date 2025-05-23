@@ -47,7 +47,10 @@ struct A {
 		return *this;
 	}
 };
-struct B : A {};
+struct B : A {
+	using A::A;
+	~B() {}
+};
 template<dte_utils::sizeof_limits T>
 struct ballocator : dte_utils::mem_handler {
 	using size_type = mem_handler::size_type;

@@ -33,8 +33,10 @@ namespace dte_utils {
 				this->_strong_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {
-					this->_counter = tmalloc<ref_counter>(1);
-					place_at(this->_counter, static_cast<size_type>(1), static_cast<size_type>(1));
+					this->_counter = cnew<ref_counter>(
+						static_cast<size_type>(1),
+						static_cast<size_type>(1)
+					);
 				}
 				return *this;
 			}

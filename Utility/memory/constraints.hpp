@@ -1,5 +1,4 @@
 #pragma once
-#include <concepts>
 #include <type_traits>
 namespace dte_utils {
 	template<typename T>
@@ -27,7 +26,7 @@ namespace dte_utils {
 	};
 
 	template<typename U, typename T>
-	concept copy_assignable = requires(const U & u, T t) {
+	concept copy_assignable = requires(const U& u, T t) {
 		t = u;
 	};
 }

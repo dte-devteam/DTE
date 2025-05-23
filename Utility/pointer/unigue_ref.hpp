@@ -15,14 +15,7 @@ namespace dte_utils {
 				other._instance = nullptr;
 			}
 			~unique_ref() {
-				if (_instance) {
-					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destuct_at(_instance);
-					}
-					if constexpr (!return_type_v<type>) {
-						free(_instance);
-					}
-				}
+				cdelete(_instance);
 			}
 
 			unique_ref& operator=(const unique_ref&) = delete;

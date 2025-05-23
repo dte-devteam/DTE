@@ -1,5 +1,6 @@
 #include "unit.hpp"
 #include "table.hpp"
+#include "exceptions/pointer_exception.hpp"
 using namespace dte_utils;
 void unit::_set_void() {
 	new (&_data.mem_val) mem_handler();

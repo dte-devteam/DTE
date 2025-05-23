@@ -11,21 +11,16 @@ namespace dte_utils {
 			ref_counter* _counter;
 			void _weak_decrease() const {
 				if (!--_counter->weak_owners) {
-					free(_counter);
+					cdelete(_counter);
 				}
 			}
 			void _strong_decrease() {
-				if (!--_counter->strong_owners && _instance) {
-					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destuct_at(_instance);
-					}
-					free(_instance);
+				if (!--_counter->strong_owners) {
+					cdelete(_instance);
 				}
 			}
 		public:
-			weak_ref(ref_pointer<type> instance = nullptr) : _instance(instance), _counter(tmalloc<ref_counter>(1)) {
-				place_at(_counter, static_cast<size_type>(1), static_cast<size_type>(0));
-			}
+			weak_ref(ref_pointer<type> instance = nullptr) : _instance(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
 			weak_ref(const weak_ref& other) : _instance(other._instance), _counter(other._counter)  {
 				++_counter->weak_owners;
 			}
@@ -53,8 +48,10 @@ namespace dte_utils {
 			weak_ref& operator=(ref_pointer<type> instance) {
 				_instance = instance;
 				if (--_counter->weak_owners) {
-					_counter = tmalloc<ref_counter>(1);
-					place_at(_counter, static_cast<size_type>(1), static_cast<size_type>(0));
+					_counter = cnew<ref_counter>(
+						static_cast<size_type>(1),
+						static_cast<size_type>(0)
+					);
 				}
 				return *this;
 			}

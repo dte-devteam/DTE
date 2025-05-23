@@ -14,8 +14,7 @@ inline void test_unigue_ref_constructor_0() {
 inline void test_unigue_ref_constructor_1() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
-	A* mem = dte_utils::tmalloc<A>(1);
-	dte_utils::place_at(mem);
+	A* mem = dte_utils::cnew<A>();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 	dte_utils::unique_ref<A>* r = new dte_utils::unique_ref<A>(mem);
 	delete r;
@@ -26,10 +25,8 @@ inline void test_unigue_ref_constructor_1() {
 inline void test_unigue_ref_operator() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
-	A* mem1 = dte_utils::tmalloc<A>(1);
-	A* mem2 = dte_utils::tmalloc<A>(1);
-	dte_utils::place_at(mem1, 10);
-	dte_utils::place_at(mem2, 100);
+	A* mem1 = dte_utils::cnew<A>(10);
+	A* mem2 = dte_utils::cnew<A>(100);
 	dte_utils::unique_ref<A>* r1 = new dte_utils::unique_ref<A>(mem1);
 	dte_utils::unique_ref<A>* r2 = new dte_utils::unique_ref<A>(mem2);
 	std::cout << (*r1)->i << " & " << (*r2)->i << std::endl;

@@ -11,6 +11,9 @@ inline void test_weak_ref_constructor_0() {
 	dte_utils::weak_ref<B>* wr2 = new dte_utils::weak_ref<B>(dte_utils::tmalloc<B>(1));
 	dte_utils::weak_ref<A>* wr3 = new dte_utils::weak_ref<A>(*wr2);
 
+	free(wr1->get());
+	free(wr2->get());
+
 	delete wr1;
 	delete wr2;
 	delete wr3;
@@ -23,14 +26,19 @@ inline void test_weak_ref_constructor_0() {
 inline void test_weak_ref_constructor_1() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
-	dte_utils::weak_ref<A>* wr = new dte_utils::weak_ref<A>(dte_utils::tmalloc<A>(1));
-	dte_utils::place_at(wr->get(), 10);
-	std::cout << (*wr)->i << std::endl;
-	wr->get()->~A();
-	free(wr->get());
-	*wr = nullptr;
+	dte_utils::weak_ref<A>* wr1 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(10));
+	dte_utils::weak_ref<A>* wr2 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(100));
+	std::cout << (*wr1)->i << " & " << (*wr2)->i << std::endl;
+	*wr1 = std::move(*wr2);
+	std::cout << (*wr1)->i << " & " << (*wr2)->i << std::endl;
+	dte_utils::cdelete(wr1->get());
+	dte_utils::cdelete(wr2->get());
+	*wr1 = nullptr;
+	delete wr1;
+	delete wr2;
 	log_A();
 }
+
 
 inline void test_weak_ref() {
 	test_weak_ref_constructor_0();

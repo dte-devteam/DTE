@@ -2,8 +2,8 @@
 #include "target_architecture.hpp"
 #include "exceptions/memory_exception.hpp"
 #include "constraints.hpp"
+#include "function_traits.hpp"
 #include <malloc.h>
-#include <type_traits>
 //TODO: some typenames cant be void/arrays
 namespace dte_utils {
 	inline void* xmalloc(size_t size) {
@@ -95,6 +95,21 @@ namespace dte_utils {
 		}
 		else {
 			at->~T();
+		}
+	}
+
+	template<typename T>
+	requires std::is_destructible_v<T>
+	inline void cdelete(T* at) {
+		if (at) {
+			//don`t call destructor of trivial type
+			if constexpr (!std::is_trivially_destructible_v<T>) {
+				destuct_at(at);
+			}
+			//function can`t be freed
+			if constexpr (!return_type_v<T>) {
+				free(at);
+			}
 		}
 	}
 

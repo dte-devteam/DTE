@@ -6,6 +6,10 @@
 #include "core/unit.hpp"
 #include "core/table.hpp"
 
+#include "core/function_stack.hpp"
+
+#include "core/function.hpp"
+
 #include <iostream>
 
 #include <chrono>
@@ -14,7 +18,6 @@
 
 #include <vector>
 using namespace dte_utils;
-
 
 
 /*
@@ -41,20 +44,24 @@ int main(int argc, const char* argv[]) {
 	};
 	std::cout << abc[0].begin() << std::endl;
 
+	/*
 	unit uuu3;
-
 	strong_ref<table>* ttt = new strong_ref<table>(cnew<table>());
-
 	uuu3 = *ttt;
-
 	delete ttt;
-
 	std::cout << uuu3.get_table_ref().get_counter()->weak_owners << std::endl;
 	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
-
+	*/
 
 	//test_memory();
 	//test_pointer();
+
+
+
+	
+
+
+
 
 	std::cin.get();
 	return 0;

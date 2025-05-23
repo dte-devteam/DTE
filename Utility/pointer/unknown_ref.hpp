@@ -29,18 +29,12 @@ namespace dte_utils {
 				}
 			}
 			unknown_ref(const unknown_ref& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
-				if (get_strength() && other.expired()) {
-					throw bad_weak_ptr();
-				}
 				_unknown_increase();
 			}
 
 			template<allocatable U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref(const weak_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
-				if (get_strength() && other.expired()) {
-					throw bad_weak_ptr();
-				}
 				_unknown_increase();
 			}
 
@@ -67,8 +61,10 @@ namespace dte_utils {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {
-					this->_counter = tmalloc<ref_counter>(1);
-					place_at(this->_counter, static_cast<size_type>(1), static_cast<size_type>(get_strength() ? 1 : 0));
+					this->_counter = cnew<ref_counter>(
+						static_cast<size_type>(1),
+						static_cast<size_type>(get_strength() ? 1 : 0)
+					);
 				}
 				return *this;
 			}
