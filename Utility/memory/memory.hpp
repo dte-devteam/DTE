@@ -16,7 +16,7 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<sizeof_limits T>
+	template<typename T>
 	inline T* tmalloc(size_t num) {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
 	}
@@ -27,7 +27,7 @@ namespace dte_utils {
 		}
 		throw bad_realloc();
 	}
-	template<sizeof_limits T>
+	template<typename T>
 	inline T* trealloc(T* block, size_t num) {
 		return static_cast<T*>(xrealloc(block, num * sizeof(T)));
 	}

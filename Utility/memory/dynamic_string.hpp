@@ -1,8 +1,8 @@
 #pragma once
 #include "dynamic_array.hpp"
 namespace dte_utils {
-	template<allocatable T, template<allocatable> typename A = allocator>
-	requires is_allocator<A, T> && std::is_move_assignable_v<T> && nullable<T>
+	template<typename T, template<typename> typename A = allocator>
+	requires is_allocator_v<A, T>
 	struct dynamic_string : dynamic_array<T, A> {
 		using size_type = dynamic_array<T, A>::size_type;
 		using type = dynamic_array<T, A>::type;
@@ -37,7 +37,7 @@ namespace dte_utils {
 		}
 
 
-		template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
+		template<typename U, template<typename> typename UA>
 		dynamic_string& operator +=(const dynamic_string<U, UA>& other) {
 			this->pop_back();
 			dynamic_array<T, A>::operator+=(other);
@@ -46,14 +46,14 @@ namespace dte_utils {
 			}
 			return *this;
 		}
-		template<copy_constructible<type> U, size_t N>
+		template<typename U, size_t N>
 		dynamic_string& operator +=(const U(&arr)[N]) {
 			this->pop_back();
 			dynamic_array<T, A>::operator+=(arr);
 			return *this;
 		}
 
-		template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
+		template<typename U, template<typename> typename UA>
 		dynamic_string operator+(const dynamic_string<U, UA>& other) const {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, other.get_used());
 			array_to_array(new_str.end(), other.begin(), other.get_used());
@@ -61,15 +61,13 @@ namespace dte_utils {
 			return new_str;
 		}
 
-		template<copy_constructible<type> U, size_t N>
+		template<typename U, size_t N>
 		dynamic_string operator+(const U(&arr)[N]) {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, N);
 			array_to_array(new_str.end(), arr, N);
 			new_str._used += N;
 			return new_str;
-		}
-
-		
+		}		
 	};
 
 	using dynamic_cstring = dynamic_string<char>;

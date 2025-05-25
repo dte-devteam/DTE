@@ -2,7 +2,7 @@
 #include "mem_handler.hpp"
 namespace dte_utils {
 	template<template<typename> typename U, typename T>
-	concept is_allocator = sizeof_limits<T> && requires(U<T> u) {
+	inline constexpr bool is_allocator_v = requires(U<T> u) {
 		typename U<T>::size_type;
 		typename U<T>::type;
 		typename U<T>::const_type;
@@ -11,7 +11,7 @@ namespace dte_utils {
 		static_cast<typename U<T>::const_pointer>(u);
 	};
 
-	template<sizeof_limits T>
+	template<typename T>
 	struct allocator : mem_handler {
 		using size_type = mem_handler::size_type;
 		using type = T;

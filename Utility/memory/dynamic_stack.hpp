@@ -3,8 +3,8 @@
 #include "exceptions/logic_exception.hpp"
 #include <initializer_list>
 namespace dte_utils {
-	template<allocatable T, template<allocatable> typename A = allocator>
-	requires is_allocator<A, T>
+	template<typename T, template<typename> typename A = allocator>
+	requires is_allocator_v<A, T>
 	struct dynamic_stack : alloc_handler<T, A> {
 		using size_type = alloc_handler<T, A>::size_type;
 		using type = alloc_handler<T, A>::type;
@@ -23,9 +23,9 @@ namespace dte_utils {
 			}
 		public:
 			dynamic_stack(size_type alocate_size = 0) : _used(0), alloc_handler<T, A>(alocate_size) {}
-			template<copy_constructible<type> U, size_type N>
+			template<typename U, size_type N>
 			dynamic_stack(const U(&arr)[N], size_type reserved_size = 0) : dynamic_stack(arr, N, reserved_size) {}
-			template<copy_constructible<type> U>
+			template<typename U>
 			dynamic_stack(const U* array, size_type used_size, size_type reserved_size) : _used(used_size), alloc_handler<T, A>(used_size + reserved_size) {
 				array_to_array(begin(), array, get_used());
 			}
@@ -37,7 +37,7 @@ namespace dte_utils {
 				other._used = 0;
 			}
 			
-			template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
+			template<typename U, template<typename> typename UA>
 			dynamic_stack(const dynamic_stack<U, UA>& other) : _used(other.get_used()), alloc_handler<T, A>(other.get_allocated()) {
 				array_to_array(begin(), other.begin(), get_used());
 			}
@@ -103,8 +103,7 @@ namespace dte_utils {
 
 
 
-			template<typename P>
-			pointer find(P predicate) {
+			pointer find(bool (*predicate)(type&)) {
 				pointer i = end();
 				while (i != begin()) {
 					if (predicate(*--i)) {
@@ -113,8 +112,7 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			template<typename P>
-			const_pointer find(P predicate) const {
+			pointer find(bool (*predicate)(const_type&)) const {
 				const_pointer i = end();
 				while (i != begin()) {
 					if (predicate(*--i)) {
@@ -123,8 +121,7 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			template<typename P>
-			pointer find_ranged(P predicate, size_type from, size_type to) {
+			pointer find_ranged(bool (*predicate)(type&), size_type from, size_type to) {
 				if (from > to) {
 					throw invalid_range();
 				}
@@ -140,8 +137,7 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			template<typename P>
-			const_pointer find_ranged(P predicate, size_type from, size_type to) const {
+			const_pointer find_ranged(bool (*predicate)(const_type&), size_type from, size_type to) const {
 				if (from > to) {
 					throw invalid_range();
 				}
@@ -193,9 +189,9 @@ namespace dte_utils {
 				_used = 0;
 			}
 
-
-			template<copy_constructible<type> U>
-			void push_back(const U& value) {
+			
+			template<typename U>
+			void push_back(U& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
@@ -212,26 +208,25 @@ namespace dte_utils {
 				}
 				++_used;
 			}
-			template<move_constructible<type> U>
+			template<typename U>
 			void push_back(U&& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
 					A<T> new_allocator = _provide_buffer();
 					this->_allocator = std::move(new_allocator);
-					place_at(end(), value);
+					place_at(end(), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(static_cast<pointer>(new_allocator), static_cast<pointer>(new_allocator) + get_used());
 					}
 				}
 				else {
 					//push unused
-					place_at(end(), value);
+					place_at(end(), std::move(value));
 				}
 				++_used;
 			}
 			template<typename ...Args>
-			requires std::is_constructible_v<type, Args&&...>
 			void emplace_back(Args&&... args) {
 				if (this->get_allocated() == get_used()) {
 					//emplace reallocated
@@ -316,7 +311,7 @@ namespace dte_utils {
 			}
 
 
-			template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
+			template<typename U, template<typename> typename UA>
 			dynamic_stack& operator =(const dynamic_stack<U, UA>& other) {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
@@ -345,7 +340,7 @@ namespace dte_utils {
 				_used = il.size();
 				return *this;
 			}
-			template<copy_constructible<type> U, size_type N>
+			template<typename U, size_type N>
 			dynamic_stack& operator =(const U(&arr)[N]) {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
@@ -361,7 +356,7 @@ namespace dte_utils {
 			}
 
 
-			template<copy_constructible<type> U, template<copy_constructible<type>> typename UA>
+			template<typename U, template<typename> typename UA>
 			dynamic_stack& operator +=(const dynamic_stack<U, UA>& other) {
 				if (get_used() + other.get_used() > this->get_allocated()) {
 					this->_allocated = get_used() + other.get_used();
@@ -398,7 +393,7 @@ namespace dte_utils {
 				_used += il.size();
 				return *this;
 			}
-			template<copy_constructible<type> U, size_type N>
+			template<typename U, size_type N>
 			dynamic_stack& operator +=(const U(&arr)[N]) {
 				if (get_used() + N > this->get_allocated()) {
 					this->_allocated = get_used() + N;
@@ -417,7 +412,7 @@ namespace dte_utils {
 			}
 
 			
-			template<copy_constructible<type> U, template<sizeof_limits> typename UA>
+			template<typename U, template<typename> typename UA>
 			dynamic_stack operator +(const dynamic_stack<U, UA>& other) {
 				dynamic_stack new_stack(begin(), get_used(), other.get_used());
 				array_to_array(new_stack.end(), other.begin(), other.get_used());
@@ -425,7 +420,7 @@ namespace dte_utils {
 				return new_stack;
 			}
 
-			template<copy_constructible<type> U, size_type N>
+			template<typename U, size_type N>
 			dynamic_stack operator +(const U(&arr)[N]) {
 				dynamic_stack new_stack(begin(), get_used(), N);
 				array_to_array(new_stack.end(), arr, N);

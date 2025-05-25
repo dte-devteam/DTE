@@ -1,7 +1,7 @@
 #pragma once
 #include "mem_handler.hpp"
 namespace dte_utils {
-	template<allocatable T>
+	template<typename T>
 	struct mem_wrapper : mem_handler {
 		using type = T;
 		using const_type = const type;

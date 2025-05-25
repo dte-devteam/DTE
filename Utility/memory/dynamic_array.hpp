@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "dynamic_stack.hpp"
 namespace dte_utils {
-	template<allocatable T, template<allocatable> typename A = allocator>
-	requires is_allocator<A, T> && std::is_move_assignable_v<T>
+	template<typename T, template<typename> typename A = allocator>
+	requires is_allocator_v<A, T>
 	struct dynamic_array : dynamic_stack<T, A> {
 		using size_type = dynamic_stack<T, A>::size_type;
 		using type = dynamic_stack<T, A>::type;
@@ -12,7 +12,7 @@ namespace dte_utils {
 		using dynamic_stack<T, A>::dynamic_stack;
 		protected:
 			A<T> _provide_spaced_buffer(pointer gap_pointer, size_type gap_size) const {
-				A<T> new_allocator(this->get_allocated()+1000);
+				A<T> new_allocator(this->get_allocated() + gap_size);
 				size_type first_section_size = gap_pointer - this->begin();
 				array_to_array(
 					static_cast<pointer>(new_allocator), 
@@ -27,7 +27,7 @@ namespace dte_utils {
 				return new_allocator;
 			}
 		public:
-			template<copy_constructible<type> U>
+			template<typename U>
 			void insert(pointer pos, const U& value) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -50,7 +50,7 @@ namespace dte_utils {
 				}
 				++this->_used;
 			}
-			template<move_constructible<type> U>
+			template<typename U>
 			void insert(pointer pos, U&& value) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -58,7 +58,7 @@ namespace dte_utils {
 				if (this->get_used() == this->get_allocated()) {
 					this->_allocated = this->_extend_by_el();
 					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), value);
+					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
@@ -66,7 +66,7 @@ namespace dte_utils {
 				}
 				else {
 					pointer over_pos = this->end();
-					place_at(over_pos, value);
+					place_at(over_pos, std::move(value));
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
 					}
@@ -74,7 +74,7 @@ namespace dte_utils {
 				++this->_used;
 			}
 			
-			template<copy_constructible<type> U>
+			template<typename U>
 			void insert(pointer pos, const U& value, size_type num) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -110,7 +110,7 @@ namespace dte_utils {
 					}
 				}
 			}
-			template<copy_constructible<type> U>
+			template<typename U>
 			void insert(pointer pos, const U* first, const U* last) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
@@ -120,11 +120,11 @@ namespace dte_utils {
 					this->_allocated = this->get_used() + num;
 					A<T> new_allocator = _provide_spaced_buffer(pos, num);
 					pointer target = static_cast<pointer>(new_allocator) + (pos - this->begin());
-					while (first != last) {
-						place_at(target, *first);
-						++first;
-						++target;
-					}
+					array_to_array(
+						target,
+						first,
+						num
+					);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
@@ -152,7 +152,6 @@ namespace dte_utils {
 			}
 
 			template<typename ...Args>
-			requires std::is_constructible_v<type, Args&&...>
 			void emplace(pointer pos, Args&&... args) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();

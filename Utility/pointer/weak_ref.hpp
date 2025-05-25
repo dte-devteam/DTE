@@ -25,7 +25,7 @@ namespace dte_utils {
 				++_counter->weak_owners;
 			}
 
-			template<allocatable U>
+			template<typename U>
 			requires std::is_base_of_v<type, U>
 			weak_ref(const weak_ref<U>& other) : _instance(other.get()), _counter(const_cast<ref_counter*>(other.get_counter())) {
 				++_counter->weak_owners;

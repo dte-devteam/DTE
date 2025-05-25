@@ -17,16 +17,13 @@ void unit::_set_cstr(const dynamic_cstring& cstr) {
 }
 
 void unit::_set_table() {
-	new (&_data.t_val) mem_wrapper<weak_ref<table>>(cnew<table>());
-	++const_cast<ref_counter*>(_data.t_val.get().get_counter())->strong_owners;
+	place_at(&_data.t_val, cnew<table>());
 }
 void unit::_set_table(table&& t_val) {
-	new (&_data.t_val) mem_wrapper<weak_ref<table>>(cnew<table>(std::move(t_val)));
-	++const_cast<ref_counter*>(_data.t_val.get().get_counter())->strong_owners;
+	place_at(&_data.t_val, cnew<table>(std::move(t_val)));
 }
 void unit::_set_table(const weak_ref<table>& t_pointer) {
-	new (&_data.t_val) mem_wrapper<weak_ref<table>>(t_pointer);
-	++const_cast<ref_counter*>(_data.t_val.get().get_counter())->strong_owners;
+	place_at(&_data.t_val, t_pointer);
 }
 
 
@@ -38,11 +35,6 @@ void unit::_release_cstr() {
 	_data.cstr.~mem_wrapper();
 }
 void unit::_release_table() {
-	const weak_ref<table>& ref = get_table_ref();
-	ref_counter* counter = const_cast<ref_counter*>(ref.get_counter());
-	if (!--counter->strong_owners) {
-		destuct_at(ref.get());
-	}
 	_data.t_val.~mem_wrapper();
 }
 
@@ -199,19 +191,8 @@ unit& unit::operator=(table&& t_val) {
 	return *this;
 }
 unit& unit::operator=(const weak_ref<table>& t_pointer) {
-	if (t_pointer.expired()) {
-		throw bad_weak_ptr();
-	}
 	if (_type == TABLE) {
-		weak_ref<table>& ref = get_table_ref();
-		ref_counter* counter = const_cast<ref_counter*>(ref.get_counter());
-		if (!--counter->strong_owners) {
-			destuct_at(ref.get());
-		}
-		_type = TABLE;
-		ref = t_pointer;
-		counter = const_cast<ref_counter*>(ref.get_counter());
-		++counter->strong_owners;
+		get_table_ref() = t_pointer;
 	}
 	else {
 		_release_type();
@@ -302,13 +283,13 @@ const table& unit::get_table() const {
 	throw exception(0, "wrong return type");
 }
 
-weak_ref<table>& unit::get_table_ref() {
+strong_ref<table>& unit::get_table_ref() {
 	if (_type == TABLE) {
 		return _data.t_val.get();
 	}
 	throw exception(0, "wrong return type");
 }
-const weak_ref<table>& unit::get_table_ref() const {
+const strong_ref<table>& unit::get_table_ref() const {
 	if (_type == TABLE) {
 		return _data.t_val.get();
 	}

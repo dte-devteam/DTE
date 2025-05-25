@@ -31,7 +31,7 @@ namespace dte_utils {
 				_unknown_increase();
 			}
 
-			template<allocatable U>
+			template<typename U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref(const weak_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
 				_unknown_increase();
@@ -91,7 +91,7 @@ namespace dte_utils {
 				return *this;
 			}
 
-			template<allocatable U>
+			template<typename U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
 			unknown_ref& operator=(const weak_ref<U>& other) {
 				if (reinterpret_cast<weak_ref<U>*>(this) == &other) {

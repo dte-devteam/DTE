@@ -1,8 +1,8 @@
 #pragma once
 #include "allocator.hpp"
 namespace dte_utils {
-	template<sizeof_limits T, template<typename> typename A = allocator>
-	requires is_allocator<A, T>
+	template<typename T, template<typename> typename A = allocator>
+	requires is_allocator_v<A, T>
 	struct alloc_handler {
 		using size_type = A<T>::size_type;
 		using type = A<T>::type;
@@ -18,7 +18,7 @@ namespace dte_utils {
 			alloc_handler(alloc_handler&& other) noexcept : _allocated(other.get_allocated()), _allocator(std::move(other._allocator)) {
 				other._allocated = 0;
 			}
-			template<typename U, template<sizeof_limits> typename A = allocator>
+			template<typename U, template<typename> typename A = allocator>
 			alloc_handler(const alloc_handler<U, A>& other) : alloc_handler(other.get_allocated()) {}
 			size_type get_allocated() const {
 				return _allocated;

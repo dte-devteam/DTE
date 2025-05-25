@@ -1,7 +1,7 @@
 #pragma once
 #include "memory/dynamic_string.hpp"
 #include "memory/mem_wrapper.hpp"
-#include "pointer/weak_ref.hpp"
+#include "pointer/strong_ref.hpp"
 #include "types.hpp"
 using namespace dte_utils;
 struct function_stack;
@@ -28,7 +28,7 @@ struct unit {
 		func		func_val;				//function
 		mem_handler	mem_val;				//void block
 		mem_wrapper<dynamic_cstring> cstr;	//cstring
-		mem_wrapper<weak_ref<table>> t_val;	//table
+		mem_wrapper<strong_ref<table>> t_val;	//table
 	};
 	protected:
 		type _type;
@@ -109,8 +109,8 @@ struct unit {
 		table& get_table();
 		const table& get_table() const;
 
-		weak_ref<table>& get_table_ref();
-		const weak_ref<table>& get_table_ref() const;
+		strong_ref<table>& get_table_ref();
+		const strong_ref<table>& get_table_ref() const;
 
 
 
