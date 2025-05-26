@@ -5,3 +5,4 @@ typedef double floatpoint;
 #else
 typedef float floatpoint;
 #endif
+typedef void(*destructor)(void*);

@@ -10,10 +10,10 @@ void unit::_set_void(mem_handler&& mem_val) {
 }
 
 void unit::_set_cstr() {
-	new (&_data.cstr) mem_wrapper<dynamic_cstring>();
+	new (&_data.cstr) tmem_wrapper<dynamic_cstring>();
 }
 void unit::_set_cstr(const dynamic_cstring& cstr) {
-	new (&_data.cstr) mem_wrapper<dynamic_cstring>(cstr);
+	new (&_data.cstr) tmem_wrapper<dynamic_cstring>(cstr);
 }
 
 void unit::_set_table() {
@@ -32,10 +32,10 @@ void unit::_release_void() {
 	_data.mem_val.~mem_handler();
 }
 void unit::_release_cstr() {
-	_data.cstr.~mem_wrapper();
+	_data.cstr.~tmem_wrapper();
 }
 void unit::_release_table() {
-	_data.t_val.~mem_wrapper();
+	_data.t_val.~tmem_wrapper();
 }
 
 

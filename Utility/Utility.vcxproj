@@ -27,7 +27,8 @@
     <ClCompile Include="memory\memory.hpp" />
     <ClCompile Include="memory\allocator.hpp" />
     <ClCompile Include="memory\dynamic_stack.hpp" />
-    <ClCompile Include="memory\mem_handler.hpp" />
+    <ClCompile Include="memory\mem_handler.cpp" />
+    <ClCompile Include="memory\xmem_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exceptions\logic_exception.hpp" />
@@ -35,8 +36,10 @@
     <ClInclude Include="memory\dynamic_array.hpp" />
     <ClInclude Include="memory\dynamic_string.hpp" />
     <ClInclude Include="function_traits.hpp" />
+    <ClInclude Include="memory\mem_handler.hpp" />
     <ClInclude Include="memory\mem_wrapper.hpp" />
     <ClInclude Include="memory\static_array.hpp" />
+    <ClInclude Include="memory\xmem_wrapper.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />
     <ClInclude Include="pointer\unigue_ref.hpp" />

@@ -27,8 +27,8 @@ struct unit {
 		floatpoint	float_val;				//float point
 		func		func_val;				//function
 		mem_handler	mem_val;				//void block
-		mem_wrapper<dynamic_cstring> cstr;	//cstring
-		mem_wrapper<strong_ref<table>> t_val;	//table
+		tmem_wrapper<dynamic_cstring> cstr;	//cstring
+		tmem_wrapper<strong_ref<table>> t_val;	//table
 	};
 	protected:
 		type _type;

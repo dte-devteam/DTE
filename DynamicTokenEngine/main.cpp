@@ -3,6 +3,8 @@
 
 #include "memory/static_array.hpp"
 
+#include "memory/xmem_wrapper.hpp"
+
 #include "core/unit.hpp"
 #include "core/table.hpp"
 
@@ -36,6 +38,15 @@ ull measure(F&& f, Args&&... args) {
 	return __rdtsc() - start_time;
 }
 */
+struct F
+{
+	~F() {
+		std::cout << "~F()\n";
+	}
+};
+void fd(void* f) {
+	static_cast<F*>(f)->~F();
+}
 int main(int argc, const char* argv[]) {
 	static_array<static_array<char, 2>, 3> abc { 
 		{L'A',L'B'},
@@ -59,7 +70,7 @@ int main(int argc, const char* argv[]) {
 
 
 
-
+	xmem_wrapper v(cnew<F>(), fd);
 	
 
 
