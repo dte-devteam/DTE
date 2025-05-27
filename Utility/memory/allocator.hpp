@@ -1,5 +1,6 @@
 #pragma once
 #include "mem_handler.hpp"
+#include <utility>
 namespace dte_utils {
 	template<template<typename> typename U, typename T>
 	inline constexpr bool is_allocator_v = requires(U<T> u) {
