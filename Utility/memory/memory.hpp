@@ -1,7 +1,6 @@
 #pragma once
 #include "target_architecture.hpp"
 #include "exceptions/memory_exception.hpp"
-#include "constraints.hpp"
 #include "function_traits.hpp"
 #include <malloc.h>
 //TODO: some typenames cant be void/arrays
@@ -33,7 +32,7 @@ namespace dte_utils {
 	}
 	
 
-	template<typename T, copy_constructible<T> U>
+	template<typename T, typename U>
 	inline void place_at(T* at, const U& value) {
 		if constexpr (std::is_trivially_constructible_v<T, const U&>) {
 			*at = static_cast<T>(value);
@@ -42,7 +41,7 @@ namespace dte_utils {
 			new (at) T(static_cast<T>(value));
 		}
 	}
-	template<typename T, move_constructible<T> U>
+	template<typename T, typename U>
 	inline void place_at(T* at, U&& value) {
 		if constexpr (std::is_trivially_constructible_v<T, U&&>) {
 			*at = static_cast<T&&>(value);
@@ -52,7 +51,6 @@ namespace dte_utils {
 		}
 	}
 	template<typename T, typename ...Args>
-	requires std::is_constructible_v<T, Args&&...>
 	inline void place_at(T* at, Args&&... args) {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
 			*at = { std::forward<Args>(args)... };
@@ -63,20 +61,19 @@ namespace dte_utils {
 	}
 
 
-	template<typename T, copy_constructible<T> U>
+	template<typename T, typename U>
 	inline T* cnew(const U& value) {
 		T* ptr = tmalloc<T>(1);
 		place_at(ptr, value);
 		return ptr;
 	}
-	template<typename T, move_constructible<T> U>
+	template<typename T, typename U>
 	inline T* cnew(U&& value) {
 		T* ptr = tmalloc<T>(1);
 		place_at(ptr, std::move(value));
 		return ptr;
 	}
 	template<typename T, typename ...Args>
-	requires std::is_constructible_v<T, Args&&...>
 	inline T* cnew(Args&&... args) {
 		T* ptr = tmalloc<T>(1);
 		place_at(ptr, std::forward<Args>(args)...);
@@ -85,7 +82,6 @@ namespace dte_utils {
 
 
 	template<typename T>
-	requires std::is_destructible_v<T>
 	inline void destuct_at(T* at) {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		if constexpr (std::is_array_v<T>) {
@@ -99,7 +95,6 @@ namespace dte_utils {
 	}
 
 	template<typename T>
-	requires std::is_destructible_v<T>
 	inline void cdelete(T* at) {
 		if (at) {
 			//don`t call destructor of trivial type
@@ -115,14 +110,13 @@ namespace dte_utils {
 
 
 	template<typename T, typename ...Args>
-	requires std::is_constructible_v<T, Args&&...>
 	inline void construct_range(T* begin, T* end, Args&&... args) {
 		while (begin != end) {
 			place_at(begin, std::forward<Args>(args)...);
 			++begin;
 		}
 	}
-	template<typename U, copy_constructible<U> T>
+	template<typename U, typename T>
 	inline void copy_range(const T* begin, const T* end, U* dest) {
 		while (begin != end) {
 			place_at(dest, static_cast<U>(*begin));
@@ -130,7 +124,7 @@ namespace dte_utils {
 			++begin;
 		}
 	}
-	template<typename U, move_constructible<U> T>
+	template<typename U, typename T>
 	inline void move_range(T* begin, T* end, U* dest) {
 		while (begin != end) {
 			place_at(dest, static_cast<U&&>(*begin));
@@ -139,7 +133,6 @@ namespace dte_utils {
 		}
 	}
 	template<typename T>
-	requires std::is_destructible_v<T>
 	inline void destruct_range(T* begin, T* end) {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		while (begin != end) {
@@ -155,7 +148,7 @@ namespace dte_utils {
 			(uintptr_t)dest % sizeof(CPU_WORD) ||
 			(uintptr_t)src % sizeof(CPU_WORD) ||
 			count % sizeof(CPU_WORD)
-			)) {
+		)) {
 			count /= sizeof(CPU_WORD);
 			while (count) {
 				((CPU_WORD*)dest)[count] = ((const CPU_WORD*)src)[--count];
@@ -167,10 +160,28 @@ namespace dte_utils {
 			}
 		}
 	}
+	//Copies memory by char/CPU_WORD (count = number of bytes)
+	inline void swap_memory(void* dest, void* src, size_t count) {
+		if (!(
+			(uintptr_t)dest % sizeof(CPU_WORD) ||
+			(uintptr_t)src % sizeof(CPU_WORD) ||
+			count % sizeof(CPU_WORD)
+		)) {
+			count /= sizeof(CPU_WORD);
+			while (count) {
+				std::swap(((CPU_WORD*)dest)[count], ((CPU_WORD*)src)[--count]);
+			}
+		}
+		else {
+			while (count) {
+				std::swap(((char*)dest)[count],((char*)src)[--count]);
+			}
+		}
+	}
 
 
 
-	template<typename U, copy_constructible<U> T>
+	template<typename U, typename T>
 	inline void array_to_array(U* dest, const T* src, size_t count) {
 		if constexpr (std::is_trivial_v<U> && std::is_same_v<T, U>) {
 			copy_memory(dest, src, count * sizeof(U));
@@ -179,12 +190,12 @@ namespace dte_utils {
 			copy_range(src, src + count, dest);
 		}
 	}
-	template<typename U, copy_or_move_constructible<U> T>
+	template<typename U, typename T>
 	inline void array_to_array(U* dest, T* src, size_t count) {
 		if constexpr (std::is_trivial_v<U> && std::is_same_v<T, U>) {
 			copy_memory(dest, src, count * sizeof(U));
 		}
-		else if constexpr (move_constructible<T, U>) {
+		else if constexpr (std::is_constructible_v<U, T&&>) {
 			move_range(src, src + count, dest);
 		}
 		else {

@@ -24,9 +24,6 @@
     <ClCompile Include="exceptions\memory_exception.hpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="memory\constraints.hpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="memory\allocator.hpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -83,7 +80,7 @@
     <ClInclude Include="memory\static_array.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="memory\mem_wrapper.hpp">
+    <ClInclude Include="memory\tmem_wrapper.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="memory\mem_handler.hpp">

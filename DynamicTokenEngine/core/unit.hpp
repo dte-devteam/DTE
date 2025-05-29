@@ -1,117 +1,99 @@
 #pragma once
 #include "memory/dynamic_string.hpp"
-#include "memory/mem_wrapper.hpp"
+#include "memory/static_array.hpp"
 #include "pointer/strong_ref.hpp"
 #include "types.hpp"
-using namespace dte_utils;
 struct function_stack;
 using func = size_t(*)(function_stack&, size_t);//TODO
 
+
 struct table;
 struct unit {
-	static const size_t char_num = sizeof(ptrdiff_t);
+	static const size_t type_mask = size_t(-1) >> (sizeof(size_t) * 8 - 16);
 	enum type : size_t {
 		NIL,
 		INT,
 		FP,
-		FUNC,
-		VOID,
 		CSTR,
-		TABLE
+		VOID,
+		TABLE,
+		UNIT
 	};
-	//MUST BE MANUALY CONTROLLED
 	union data {
 		data() {}
 		~data() {}
-		ptrdiff_t	int_val;				//integer
-		floatpoint	float_val;				//float point
-		func		func_val;				//function
-		mem_handler	mem_val;				//void block
-		tmem_wrapper<dynamic_cstring> cstr;	//cstring
-		tmem_wrapper<strong_ref<table>> t_val;	//table
+		dte_utils::static_array<ptrdiff_t, 3>			i_val;	//integer
+		dte_utils::static_array<floatpoint, 3>			f_val;	//float point
+		dte_utils::dynamic_cstring						c_str;	//cstring
+		dte_utils::strong_ref<dte_utils::mem_handler>	v_val;	//void block
+		dte_utils::strong_ref<table>					t_val;	//table
+		dte_utils::strong_ref<unit>						u_val;	//unit
 	};
 	protected:
-		type _type;
+		size_t _type;
 		data _data;
 
-		void _set_void();
-		void _set_void(mem_handler&& mem_val);
-
-		void _set_cstr();
-		void _set_cstr(const dynamic_cstring& cstr);
-		template<size_t N>
-		void _set_cstr(const char(&arr)[N]) {
-			new (&_data.cstr) mem_wrapper<dynamic_cstring>(arr);
-		}
-
-		void _set_table();
-		void _set_table(table&& t_val);
-		void _set_table(const weak_ref<table>& t_pointer);
-
-		void _release_void();
 		void _release_cstr();
+		void _release_void();
 		void _release_table();
+		void _release_unit();
 
 		void _release_type();
 	public:
 		unit();
-		unit(const ptrdiff_t& i_val);
-		unit(const floatpoint& fp_val);
-		unit(const func& f_val);
-		unit(mem_handler&& m_val);
-		unit(const dynamic_cstring& cstr);
+		unit(const dte_utils::static_array<ptrdiff_t, 3>& i_val);
+		unit(const dte_utils::static_array<floatpoint, 3>& f_val);
+		unit(const dte_utils::dynamic_cstring& c_str);
+		unit(const dte_utils::strong_ref<dte_utils::mem_handler>& v_val);
+		unit(const dte_utils::strong_ref<table>& t_val);
+		unit(const dte_utils::strong_ref<unit>& u_val);
 
 		unit(const unit& other);
 		unit(unit&& other) noexcept;
+
 		~unit();
 
 		unit& operator=(const unit& other);
 		unit& operator=(unit&& other) noexcept;
 
-
-		unit& operator=(const ptrdiff_t& int_val);
-		unit& operator=(const floatpoint& float_val);
-		unit& operator=(const func& func_val);
-		unit& operator=(mem_handler&& mem_val);
-		unit& operator=(const dynamic_cstring& cstr);
+		unit& operator=(const dte_utils::static_array<ptrdiff_t, 3>& i_val);
+		unit& operator=(const dte_utils::static_array<floatpoint, 3>& f_val);
+		unit& operator=(const dte_utils::dynamic_cstring& c_str);
 		template<size_t N>
-		unit& operator=(const char (&arr)[N]) {
+		unit& operator=(const char(&arr)[N]) {
 			if (_type == CSTR) {
-				get_cstr() = arr;
+				_data.c_str = arr;
 			}
 			else {
 				_release_type();
 				_type = CSTR;
-				_set_cstr(arr);
+				new (&_data.c_str) dte_utils::dynamic_cstring(arr);
 			}
 			return *this;
 		}
-		unit& operator=(table&& t_val);
-		unit& operator=(const weak_ref<table>& t_pointer);
+		unit& operator=(const dte_utils::strong_ref<dte_utils::mem_handler>& v_val);
+		unit& operator=(const dte_utils::strong_ref<table>& t_val);
+		unit& operator=(const dte_utils::strong_ref<unit>& u_val);
 
+		size_t get_type() const;
 
+		dte_utils::static_array<ptrdiff_t, 3>& get_int();
+		const dte_utils::static_array<ptrdiff_t, 3>& get_int() const;
 
-		ptrdiff_t& get_int();
-		const ptrdiff_t& get_int() const;
+		dte_utils::static_array<floatpoint, 3>& get_fp();
+		const dte_utils::static_array<floatpoint, 3>& get_fp() const;
 
-		floatpoint& get_fp();
-		const floatpoint& get_fp() const;
+		dte_utils::dynamic_cstring& get_cstr();
+		const dte_utils::dynamic_cstring& get_cstr() const;
 
-		func& get_func();
-		const func& get_func() const;
+		dte_utils::strong_ref<dte_utils::mem_handler>& get_void();
+		const dte_utils::strong_ref<dte_utils::mem_handler>& get_void() const;
 
-		mem_handler& get_void();
-		const mem_handler& get_void() const;
+		dte_utils::strong_ref<table>& get_table();
+		const dte_utils::strong_ref<table>& get_table() const;
 
-		dynamic_cstring& get_cstr();
-		const dynamic_cstring& get_cstr() const;
-
-		table& get_table();
-		const table& get_table() const;
-
-		strong_ref<table>& get_table_ref();
-		const strong_ref<table>& get_table_ref() const;
-
+		dte_utils::strong_ref<unit>& get_unit();
+		const dte_utils::strong_ref<unit>& get_unit() const;
 
 
 		void clr_value();

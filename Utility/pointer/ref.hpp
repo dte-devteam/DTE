@@ -1,5 +1,4 @@
 #pragma once
-#include "memory/constraints.hpp"
 #include "function_traits.hpp"
 namespace dte_utils {
 	template<typename T>

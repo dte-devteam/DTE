@@ -58,3 +58,22 @@ a = var_module["sin"](a)
 
 //c/c++ func: print
 print("hello world!")
+
+
+
+a = 5 //a is 5
+a = &a //a is int* and points to 5
+
+
+
+//a is [int, int, int] value
+a = 5		//reset type to int
+a[1] = 10	//now it`s [5, 10, int]
+//a = 5 will destroy table (if it is), a[0] = won`t
+
+//same with float & void
+//strings and pointers are large to store 
+//so they can fit only 1 time per instance
+
+a = 5
+a[3] = 5 //will turn [int, int, int] into table with 4 units

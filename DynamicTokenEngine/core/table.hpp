@@ -12,13 +12,13 @@ struct table {
 	dynamic_array<table_unit> _t_units;
 
 	table() : _index_offset(0) {}
-	table(const table&) = delete;	//VOID isn`t copible
+	table(const table& other);
 	table(table&& other) noexcept : _index_offset(other._index_offset), _t_units(std::move(other._t_units)) {
 		other._index_offset = 0;
 	}
 
 
-	table& operator=(const table&) = delete;	//VOID isn`t copible
+	table& operator=(const table& other);
 	table& operator=(table&& other) noexcept {
 		if (this == &other) {
 			return *this;

@@ -1,5 +1,6 @@
 #include "mem_handler.hpp"
 #include "memory.hpp"
+#include <utility>
 using namespace dte_utils;
 mem_handler::mem_handler(size_type size) : _ptr(xmalloc(size)) {}
 mem_handler::mem_handler(pointer ptr) : _ptr(ptr) {}
@@ -11,6 +12,14 @@ mem_handler::~mem_handler() {
 }
 void mem_handler::resize(size_type size) {
 	_ptr = xrealloc(_ptr, size);
+}
+mem_handler& mem_handler::operator=(pointer ptr) {
+	if (_ptr == ptr) {
+		return *this;
+	}
+	free(_ptr);
+	_ptr = ptr;
+	return *this;
 }
 mem_handler& mem_handler::operator=(mem_handler&& other) noexcept {
 	if (this == &other) {

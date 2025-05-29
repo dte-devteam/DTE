@@ -19,6 +19,8 @@
 #include <intrin.h>
 
 #include <vector>
+
+#include <array>
 using namespace dte_utils;
 
 
@@ -38,15 +40,8 @@ ull measure(F&& f, Args&&... args) {
 	return __rdtsc() - start_time;
 }
 */
-struct F
-{
-	~F() {
-		std::cout << "~F()\n";
-	}
-};
-void fd(void* f) {
-	static_cast<F*>(f)->~F();
-}
+struct F;
+void fd(void* f);
 int main(int argc, const char* argv[]) {
 	static_array<static_array<char, 2>, 3> abc { 
 		{L'A',L'B'},
@@ -64,16 +59,44 @@ int main(int argc, const char* argv[]) {
 	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
 	*/
 
-	//test_memory();
-	//test_pointer();
-
-
-
+	test_memory();
+	test_pointer();
 
 	xmem_wrapper v(cnew<F>(), fd);
-	
 
+
+	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
+	std::cout << uu0.get_int()[0] << " " 
+		<< uu0.get_int()[1] << " " 
+		<< uu0.get_int()[2] << std::endl;
+
+	unit uu1{ dynamic_cstring("ABC")};
+	std::cout << uu1.get_cstr().begin() << std::endl;
+
+	unit uu2{ uu1 };
+	std::cout << uu2.get_cstr().begin() << std::endl;
+
+	uu0 = "AAA";
+	std::cout << uu0.get_cstr().begin() << std::endl;
+
+	uu1 = static_array<ptrdiff_t, 3>({ 1,2,3 });
+	uu0 = std::move(uu1);
+	
+	std::cout << uu0.get_int()[0] << " "
+		<< uu0.get_int()[1] << " "
+		<< uu0.get_int()[2] << std::endl;
+
+	std::cout << uu1.get_cstr().begin() << std::endl;
 
 	std::cin.get();
 	return 0;
+}
+struct F
+{
+	~F() {
+		std::cout << "~F()\n";
+	}
+};
+void fd(void* f) {
+	static_cast<F*>(f)->~F();
 }
