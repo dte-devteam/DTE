@@ -4,23 +4,108 @@
 this is a very big comment
 
 */
-@this_is_macro = "str value"
-@macro_func(val) = val
-@complex_macro = {
-	"first value"
-	"secode value"
-	{ "value in braces" }
+
+
+/*
+unit:			contains information
+table:			put in order information
+
+value types:	nil, int[3], float[3], cstr, void*(shared), table*(shared), unit*(shared)
+
+value definition:
+val = nil				//simple, val is nil now
+val = 1					//simple, val is int[3] now:	[[1, 0, 0]]
+val = [[1, 2, 3]]		//more complex, val is int[3]:	[[1, 2, 3]]
+val = [[1, 2, 3, 4]]	//invalid, there is no int[4]! (warn and use first possible values)
+val = [[1, 2.0, "3"]]	//invalid, there is no [[int, float, cstr]] (error)
+val = 1.5				//simple, val is float[3] now:	[[1.5, 0.0, 0.0]]
+val = [[1.5, 3.0, 4.5]]	//more complex, val is float[3]:[[1.5, 3.0, 4.5]]
+val = "string"			//simple, val is cstr now
+
+table definition:
+val = {}				//empty table
+
+let`s create table with int[3] at index 0 and int float[3] at index 1
+val = {
+	[[1, 2, 3]], 
+	[[1.5, 3.0, 4.5]]
 }
-@complex_macro_func(val) = {
+
+we can also create table by simple definition
+same as previos, but init only first value in int[3]/float[3]
+val = {
+	1,
+	1.5
+}
+table is [[1, 0, 0]], [[1.5, 0.0, 0.0]]
+
+let`s create reference to val: now it`s unit*(shared)
+val = &val
+
+if we don`t set enough value they will be set to 0
+val = [[1, 2]] -> [[1, 2, 0]]
+*/
+
+
+/*
+access to data
+table["name"] or table[index]
+unit[index]	//allowed only for int[3], float[3]
+*/
+
+
+/*
+@this_is_macro = "str value"	//simple macro definition
+func(@this_is_macro) = {}		//it will unwrap to `func("str value")`
+
+@macro_func(val) = func(val)	//simple macro definition with args
+@macro_func(5) = {}				//it will unwrap to `func(5) = {}`
+
+@complex_macro = {				//complex macro definition
+	"first value",
+	"secode value"
+}
+func(@complex_macro) = {}		//it will unwrap to `func("first value", "secode value") = {}`
+
+@complex_macro_func(val) = {	//complex macro definition with args
 	other_val = val
 }
+func() = { @complex_macro_func(5) }	//it will unwrap to `func() = { other_val = 5 }`
+*/
+
+
+/*
+special symbols:
+	, - separate values
+	# - get size
+	@ - macro start
+	= - set definition
+	[[ - complex value start
+	]] - complex value end
+	{ - complex definition start
+	} - complex definition end
+	[ - getting access start
+	] - getting access end
+	& - get reference
+*/
+
+
+/*
+reserved words:
+	nil - no data
+*/
+
+
+
+
+//OTDATED
 other_val = nil
 @complex_macro_func(4) //will unwrap to "other_val = 4"
 
 my_int = 5		//unit
 my_float = 0.5	//unit
 my_array = {	//table with noname units
-	1 2.0f 3 4 5
+	1, 2.0f, 3, 4, 5
 }
 my_string = "ABC"	//unit
 my_string = @this_is_macro
@@ -77,3 +162,9 @@ a[1] = 10	//now it`s [5, 10, int]
 
 a = 5
 a[3] = 5 //will turn [int, int, int] into table with 4 units
+
+
+a = {
+	{ 1 2 3 }
+	1
+}	//a is now empty table

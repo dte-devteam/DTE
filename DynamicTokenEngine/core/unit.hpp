@@ -6,10 +6,10 @@
 struct function_stack;
 using func = size_t(*)(function_stack&, size_t);//TODO
 
-
+struct c_function;
+struct dte_function;
 struct table;
 struct unit {
-	static const size_t type_mask = size_t(-1) >> (sizeof(size_t) * 8 - 16);
 	enum type : size_t {
 		NIL,
 		INT,
@@ -17,7 +17,9 @@ struct unit {
 		CSTR,
 		VOID,
 		TABLE,
-		UNIT
+		UNIT,
+		CFUNC,
+		DFUNC
 	};
 	union data {
 		data() {}
@@ -28,15 +30,63 @@ struct unit {
 		dte_utils::strong_ref<dte_utils::mem_handler>	v_val;	//void block
 		dte_utils::strong_ref<table>					t_val;	//table
 		dte_utils::strong_ref<unit>						u_val;	//unit
+		dte_utils::strong_ref<dte_function>				dfunc;	//dte_function
+		dte_utils::weak_ref<c_function>					cfunc;	//c_function
+
 	};
+	typedef void(*creator)(data&, const data&);
+	typedef void(*assigner)(data&, const data&);
+	typedef void(*releaser)(data&);
 	protected:
 		size_t _type;
 		data _data;
 
-		void _release_cstr();
-		void _release_void();
-		void _release_table();
-		void _release_unit();
+		static void _create_int(data& dest, const data& src);
+		static void _create_fp(data& dest, const data& src);
+		static void _create_cstr(data& dest, const data& src);
+		static void _create_void(data& dest, const data& src);
+		static void _create_table(data& dest, const data& src);
+		static void _create_unit(data& dest, const data& src);
+		static inline const creator _creators[] = {
+			nullptr,		//NIL	(no data is constructed)
+			_create_int,	//INT
+			_create_fp,		//FP
+			_create_cstr,	//CSTR
+			_create_void,	//VOID
+			_create_table,	//TABLE
+			_create_unit	//UNIT
+		};
+
+
+		static void _assign_int(data& dest, const data& src);
+		static void _assign_fp(data& dest, const data& src);
+		static void _assign_cstr(data& dest, const data& src);
+		static void _assign_void(data& dest, const data& src);
+		static void _assign_table(data& dest, const data& src);
+		static void _assign_unit(data& dest, const data& src);
+		static inline const assigner _assigners[] = {
+			nullptr,		//NIL	(no data is assigned)
+			_assign_int,	//INT
+			_assign_fp,		//FP
+			_assign_cstr,	//CSTR
+			_assign_void,	//VOID
+			_assign_table,	//TABLE
+			_assign_unit	//UNIT
+		};
+
+		static void _release_cstr(data& dest);
+		static void _release_void(data& dest);
+		static void _release_table(data& dest);
+		static void _release_unit(data& dest);
+		static inline const releaser _releasers[] = {
+			nullptr,		//NIL	(no data was constructed)
+			nullptr,		//INT	(trivial: szie_t[3])
+			nullptr,		//FP	(trivial: floatpoint[3])
+			_release_cstr,	//CSTR
+			_release_void,	//VOID
+			_release_table,	//TABLE
+			_release_unit	//UNIT
+		};
 
 		void _release_type();
 	public:

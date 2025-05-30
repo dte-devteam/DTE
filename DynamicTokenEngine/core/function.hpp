@@ -1,27 +1,26 @@
 #pragma once
 #include "unit.hpp"
 struct c_function {
-	struct step {
-		func body;
-	};
-	//protected:
-		dynamic_array<step> steps;
+	protected:
+		func _body;
 		/*
 		later add metadata for complex function building
 		*/
 	public:
-		size_t execute(function_stack& stack, size_t frame_offset) {
-			size_t i = 0;
-			while (i < steps.get_used()) {
-				i += steps[i].body(stack, frame_offset);
-			}
-			return i - steps.get_used();
+		size_t operator()(function_stack& stack, size_t frame_offset) {
+			return _body(stack, frame_offset);
 		}
 };
 struct dte_function {
-	dynamic_array<dte_function*> steps;
+	dynamic_array<unit> steps;
 
 	dte_function* execute(function_stack& stack, size_t frame_offset) {
+		if (true) {//execute
+
+		}
+		else {	//add value to stack
+
+		}
 		return nullptr; //TODO
 	}
 };

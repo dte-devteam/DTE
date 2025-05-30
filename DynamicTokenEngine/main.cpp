@@ -77,6 +77,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << uu2.get_cstr().begin() << std::endl;
 
 	uu0 = "AAA";
+	uu0 = "AAA";
 	std::cout << uu0.get_cstr().begin() << std::endl;
 
 	uu1 = static_array<ptrdiff_t, 3>({ 1,2,3 });
@@ -87,6 +88,20 @@ int main(int argc, const char* argv[]) {
 		<< uu0.get_int()[2] << std::endl;
 
 	std::cout << uu1.get_cstr().begin() << std::endl;
+
+	uu1 = strong_ref<table>(cnew<table>());
+
+
+	table ttt;
+	ttt._t_units.emplace_back(uu0, "UU0");
+	ttt._t_units.emplace_back(dynamic_cstring(":)"), "UU1");
+	ttt._t_units.emplace_back(unit(), dynamic_cstring(":|"));
+	std::cout << ttt.get_by_index(0).u.get_int()[0] << std::endl;
+	std::cout << ttt.get_by_index(1).u.get_cstr().begin() << std::endl;
+	std::cout << ttt.get_by_index(2).u.get_type() << std::endl;
+	//std::cout << ttt[":("].u.get_type() << std::endl;
+	std::cout << ttt.get_as_target(":(").name.begin() << std::endl;
+
 
 	std::cin.get();
 	return 0;

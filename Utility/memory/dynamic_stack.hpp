@@ -102,8 +102,8 @@ namespace dte_utils {
 			}
 
 
-
-			pointer find(bool (*predicate)(type&)) {
+			template<typename P>
+			pointer find(P predicate) {
 				pointer i = end();
 				while (i != begin()) {
 					if (predicate(*--i)) {
@@ -112,7 +112,8 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			pointer find(bool (*predicate)(const_type&)) const {
+			template<typename P>
+			pointer find(P predicate) const {
 				const_pointer i = end();
 				while (i != begin()) {
 					if (predicate(*--i)) {
@@ -121,7 +122,8 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			pointer find_ranged(bool (*predicate)(type&), size_type from, size_type to) {
+			template<typename P>
+			pointer find_ranged(P predicate, size_type from, size_type to) {
 				if (from > to) {
 					throw invalid_range();
 				}
@@ -137,7 +139,8 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			const_pointer find_ranged(bool (*predicate)(const_type&), size_type from, size_type to) const {
+			template<typename P>
+			const_pointer find_ranged(P predicate, size_type from, size_type to) const {
 				if (from > to) {
 					throw invalid_range();
 				}
@@ -191,7 +194,7 @@ namespace dte_utils {
 
 			
 			template<typename U>
-			void push_back(U& value) {
+			void push_back(const U& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
