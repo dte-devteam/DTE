@@ -5,10 +5,11 @@ namespace dte_utils {
 	template<typename T>
 	struct unique_ref {
 		using type = T;
+		using pointer = type*;
 		protected:
-			ref_pointer<type> _instance;
+			pointer _instance;
 		public:
-			unique_ref(ref_pointer<type> instance = nullptr) : _instance(instance) {}
+			unique_ref(pointer instance = nullptr) : _instance(instance) {}
 			unique_ref(const unique_ref&) = delete;
 			unique_ref(unique_ref&& other) noexcept : _instance(other.instance) {
 				other._instance = nullptr;
@@ -33,14 +34,14 @@ namespace dte_utils {
 				}
 				return *_instance;
 			}
-			type* operator->() const 
+			pointer operator->() const 
 			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return _instance;
 			}
-			template<typename R = return_type_t<type>, typename ...Args>
+			template<typename R = return_type_t<pointer>, typename ...Args>
 			R operator()(Args&&... args) const {
 				if (!_instance) {
 					throw nullptr_access();

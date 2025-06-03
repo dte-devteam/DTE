@@ -6,6 +6,7 @@ namespace dte_utils {
 	struct unknown_ref : weak_ref<T> {
 		using size_type = weak_ref<T>::size_type;
 		using type = weak_ref<T>::type;
+		using pointer = weak_ref<T>::pointer;
 		protected:
 			bool _strength;
 			void _unknown_decrease() {
@@ -22,7 +23,7 @@ namespace dte_utils {
 				}
 			}
 		public:
-			unknown_ref(ref_pointer<type> instance = nullptr, bool strength = false) : weak_ref<T>(instance), _strength(strength) {
+			unknown_ref(pointer instance = nullptr, bool strength = false) : weak_ref<T>(instance), _strength(strength) {
 				if (get_strength()) {
 					++this->_counter->strong_owners;
 				}
@@ -56,7 +57,7 @@ namespace dte_utils {
 
 
 			
-			unknown_ref& operator=(ref_pointer<type> instance) {
+			unknown_ref& operator=(pointer instance) {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {

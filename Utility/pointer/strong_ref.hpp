@@ -6,8 +6,9 @@ namespace dte_utils {
 	struct strong_ref : weak_ref<T> {
 		using size_type = weak_ref<T>::size_type;
 		using type = weak_ref<T>::type;
+		using pointer = weak_ref<T>::pointer;
 		public:
-			strong_ref(ref_pointer<type> instance = nullptr) : weak_ref<T>(instance) {
+			strong_ref(pointer instance = nullptr) : weak_ref<T>(instance) {
 				++this->_counter->strong_owners;
 			}
 			strong_ref(const strong_ref& other) noexcept : weak_ref<T>(other) {
@@ -28,7 +29,7 @@ namespace dte_utils {
 			}
 
 
-			strong_ref& operator=(ref_pointer<type> instance) {
+			strong_ref& operator=(pointer instance) {
 				this->_strong_decrease();
 				this->_instance = instance;
 				if (--this->_counter->weak_owners) {

@@ -2,7 +2,7 @@
 #include <type_traits>
 namespace dte_utils {
 	//Return false if T is not function pointer.
-	template<typename T>
+	template<typename>
 	struct return_type : std::false_type {};
 	template<typename R, typename ...Args>
 	struct return_type<R(*)(Args&&...)> : std::true_type {

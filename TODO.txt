@@ -1,0 +1,1 @@
+forbid strong_ref & unknown_ref & unique_ref accept T = function

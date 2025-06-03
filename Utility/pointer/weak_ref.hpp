@@ -6,8 +6,9 @@ namespace dte_utils {
 	struct weak_ref {
 		using size_type = ref_counter::size_type;
 		using type = T;
+		using pointer = type*;
 		protected:
-			ref_pointer<type> _instance;
+			pointer _instance;
 			ref_counter* _counter;
 			void _weak_decrease() const {
 				if (!--_counter->weak_owners) {
@@ -20,7 +21,7 @@ namespace dte_utils {
 				}
 			}
 		public:
-			weak_ref(ref_pointer<type> instance = nullptr) : _instance(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
+			weak_ref(pointer instance = nullptr) : _instance(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
 			weak_ref(const weak_ref& other) : _instance(other._instance), _counter(other._counter)  {
 				++_counter->weak_owners;
 			}
@@ -41,11 +42,11 @@ namespace dte_utils {
 			bool expired() const {
 				return !get_counter()->strong_owners;
 			}
-			ref_pointer<type> get() const {
+			pointer get() const {
 				return _instance;
 			}
 
-			weak_ref& operator=(ref_pointer<type> instance) {
+			weak_ref& operator=(pointer instance) {
 				_instance = instance;
 				if (--_counter->weak_owners) {
 					_counter = cnew<ref_counter>(
@@ -89,14 +90,14 @@ namespace dte_utils {
 				}
 				return *_instance;
 			}
-			type* operator->() const
+			pointer operator->() const
 			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return _instance;
 			}
-			template<typename R = return_type_t<type>, typename ...Args>
+			template<typename R = return_type_t<pointer>, typename ...Args>
 			R operator()(Args&&... args) const {
 				return _instance(std::forward<Args>(args)...);
 			}
