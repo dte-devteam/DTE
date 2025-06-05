@@ -12,4 +12,13 @@ namespace dte_utils {
 	using return_type_t = typename return_type<T>::type;
 	template<typename T>
 	inline constexpr bool return_type_v = return_type<T>::value;
+
+
+
+	template<typename T, typename ...Args>
+	inline constexpr bool is_functor_v = requires(T t) {
+		t.operator()(std::declval<Args>()...);
+	};
+	template<typename T, typename ...Args>
+	using is_functor_t = decltype(std::declval<T>()(std::declval<Args>()...));
 }

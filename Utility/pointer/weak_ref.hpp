@@ -84,22 +84,28 @@ namespace dte_utils {
 
 
 			type& operator*() const
-			requires !return_type_v<type> {
+			requires !return_type_v<pointer> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return *_instance;
 			}
 			pointer operator->() const
-			requires !return_type_v<type> {
+			requires !return_type_v<pointer> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return _instance;
 			}
-			template<typename R = return_type_t<pointer>, typename ...Args>
-			R operator()(Args&&... args) const {
+			template<typename ...Args>
+			requires return_type_v<pointer>
+			return_type_t<pointer> operator()(Args&&... args) const {
 				return _instance(std::forward<Args>(args)...);
+			}
+			template<typename ...Args>
+			requires is_functor_v<type, Args&&...>
+			is_functor_t<type, Args&&...> operator()(Args&&... args) const {
+				return _instance->operator()(std::forward<Args>(args)...);
 			}
 	};
 }
