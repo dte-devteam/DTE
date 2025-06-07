@@ -57,10 +57,16 @@
     <ClInclude Include="core\table.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="core\function_stack.hpp">
+    <ClInclude Include="core\data_stack.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="core\function.hpp">
+    <ClInclude Include="core\c_function.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="core\stream.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="core\dte_function.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
@@ -84,7 +90,13 @@
     <ClCompile Include="core\table.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="core\function_stack.cpp">
+    <ClCompile Include="core\data_stack.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="core\c_function.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="core\dte_function.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

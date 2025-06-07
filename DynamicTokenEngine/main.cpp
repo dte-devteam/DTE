@@ -8,9 +8,13 @@
 #include "core/unit.hpp"
 #include "core/table.hpp"
 
-#include "core/function_stack.hpp"
+#include "core/data_stack.hpp"
 
-#include "core/function.hpp"
+#include "core/dte_function.hpp"
+
+
+#include "core/stream.hpp"
+
 
 #include <iostream>
 
@@ -21,6 +25,8 @@
 #include <vector>
 
 #include <array>
+
+#include <functional>
 using namespace dte_utils;
 
 
@@ -41,14 +47,28 @@ ull measure(F&& f, Args&&... args) {
 }
 */
 struct F;
-void fd(void* f);
+
+size_t adder(data_stack& ds, size_t offset) {
+	*static_cast<size_t*>(ds[offset]) += *static_cast<size_t*>(ds[ds.get_block_num() - 1]);
+	return 1;
+}
+size_t adder_u(data_stack& ds, size_t offset) {
+	static_cast<unit*>(ds[offset])->get_int()[0] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[0];
+	static_cast<unit*>(ds[offset])->get_int()[1] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[1];
+	static_cast<unit*>(ds[offset])->get_int()[2] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[2];
+	return 1;
+}
+
+void afk(data_stack& ds, size_t) {
+	std::cout << ds.get_memory_left() << std::endl;
+	std::cout << ds.get_block_num() << std::endl;
+	std::cout << *static_cast<size_t*>(ds[0]) << std::endl;
+}
+
+
+
+
 int main(int argc, const char* argv[]) {
-	static_array<static_array<char, 2>, 3> abc { 
-		{L'A',L'B'},
-		{'A','B'},
-		{'C','\0'}
-	};
-	std::cout << abc[0].begin() << std::endl;
 
 	/*
 	unit uuu3;
@@ -59,10 +79,10 @@ int main(int argc, const char* argv[]) {
 	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
 	*/
 
-	test_memory();
-	test_pointer();
+	//test_memory();
+	//test_pointer();
 
-	xmem_wrapper v(cnew<F>(), fd);
+
 
 
 	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
@@ -90,7 +110,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << uu1.get_cstr().begin() << std::endl;
 
 	uu1 = strong_ref<table>(cnew<table>());
-
+	
 
 	table ttt;
 	ttt._t_units.emplace_back(uu0, "UU0");
@@ -102,8 +122,56 @@ int main(int argc, const char* argv[]) {
 	//std::cout << ttt[":("].u.get_type() << std::endl;
 	std::cout << ttt.get_as_target(":(").name.begin() << std::endl;
 
+	data_stack ds0(4096);
+	*static_cast<size_t*>(ds0.push_real(sizeof(size_t))) = 10;
+	ds0.push_virt(nullptr);
+
+
+
+	std::thread thr(afk, std::move(ds0), 0);
+	thr.join();
+	//afk(ds, 0);
+
+
+	
+
+	
+
+
+	data_stack ds(1000);
+	*static_cast<size_t*>(ds.push_real(sizeof(size_t))) = 10;
+	*static_cast<size_t*>(ds.push_real(sizeof(size_t))) = 20;
+	adder(ds, 0);
+
+	std::cout << *static_cast<size_t*>(ds[0]) << std::endl;
+
+	std::cout << "-----------------" << std::endl;
+
+
+
+	stream str{ data_stack(100), {} };
+	dte_function dtef;
+	strong_ref<c_function> cfsr{ cnew<c_function>(adder_u) };
+
+
+	dtef.steps = {
+		{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false},
+		{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false},
+		{{cfsr}, 0, 0, true}
+	};
+	dtef(str, 0);
+	std::cout << str.stack.get_block_num() << std::endl;
+	std::cout << str.stack.get_memory_left() << std::endl;
+	for (const ptrdiff_t& i : static_cast<unit*>(str.stack[0])->get_int()) {
+		std::cout << i << std::endl;
+	}
 
 	std::cin.get();
+
+
+
+
+
 	return 0;
 }
 struct F
@@ -112,6 +180,3 @@ struct F
 		std::cout << "~F()\n";
 	}
 };
-void fd(void* f) {
-	static_cast<F*>(f)->~F();
-}

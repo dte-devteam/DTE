@@ -60,7 +60,7 @@ namespace dte_utils {
 		}
 	}
 
-
+	
 	template<typename T, typename U>
 	inline T* cnew(const U& value) {
 		T* ptr = tmalloc<T>(1);

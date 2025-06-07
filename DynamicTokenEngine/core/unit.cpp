@@ -1,6 +1,8 @@
 #include "unit.hpp"
-#include "table.hpp"
 #include "exceptions/pointer_exception.hpp"
+//members
+#include "table.hpp"
+#include "dte_function.hpp"
 using namespace dte_utils;
 void unit::_create_int(data& dest, const data& src) {
 	new (&dest.i_val) static_array<ptrdiff_t, 3>(src.i_val);
@@ -19,6 +21,12 @@ void unit::_create_table(data& dest, const data& src) {
 }
 void unit::_create_unit(data& dest, const data& src) {
 	new (&dest.u_val) strong_ref<unit>(src.u_val);
+}
+void unit::_create_dfunc(data& dest, const data& src) {
+	new (&dest.dfunc) strong_ref<dte_function>(src.dfunc);
+}
+void unit::_create_cfunc(data& dest, const data& src) {
+	new (&dest.cfunc) weak_ref<c_function>(src.cfunc);
 }
 
 
@@ -40,6 +48,12 @@ void unit::_assign_table(data& dest, const data& src) {
 void unit::_assign_unit(data& dest, const data& src) {
 	dest.u_val = src.u_val;
 }
+void unit::_assign_dfunc(data& dest, const data& src) {
+	dest.dfunc = src.dfunc;
+}
+void unit::_assign_cfunc(data& dest, const data& src) {
+	dest.cfunc = src.cfunc;
+}
 
 
 void unit::_release_cstr(data& dest) {
@@ -53,6 +67,12 @@ void unit::_release_table(data& dest) {
 }
 void unit::_release_unit(data& dest) {
 	dest.u_val.~strong_ref();
+}
+void unit::_release_dfunc(data& dest) {
+	dest.dfunc.~strong_ref();
+}
+void unit::_release_cfunc(data& dest) {
+	dest.cfunc.~weak_ref();
 }
 
 void unit::_release_type() {
@@ -82,6 +102,12 @@ unit::unit(const strong_ref<table>& t_val) : _type(TABLE) {
 }
 unit::unit(const strong_ref<unit>& u_val) : _type(TABLE) {
 	new (&_data.u_val) strong_ref<unit>(u_val);
+}
+unit::unit(const dte_utils::strong_ref<dte_function>& dfunc) : _type(DFUNC) {
+	new (&_data.dfunc) strong_ref<dte_function>(dfunc);
+}
+unit::unit(const dte_utils::weak_ref<c_function>& cfunc) : _type(CFUNC) {
+	new (&_data.cfunc) weak_ref<c_function>(cfunc);
 }
 
 unit::unit(const unit& other) : _type(other.get_type()) {
@@ -192,9 +218,41 @@ unit& unit::operator=(const strong_ref<unit>& u_val) {
 	}
 	return *this;
 }
+unit& unit::operator=(const dte_utils::strong_ref<dte_function>& dfunc) {
+	if (get_type() == DFUNC) {
+		_data.dfunc = dfunc;
+	}
+	else {
+		_release_type();
+		_type = DFUNC;
+		new (&_data.dfunc) strong_ref<dte_function>(dfunc);
+	}
+	return *this;
+}
+unit& unit::operator=(const dte_utils::weak_ref<c_function>& cfunc) {
+	if (get_type() == CFUNC) {
+		_data.cfunc = cfunc;
+	}
+	else {
+		_release_type();
+		_type = CFUNC;
+		new (&_data.cfunc) weak_ref<c_function>(cfunc);
+	}
+	return *this;
+}
+
 
 size_t unit::get_type() const {
+	return get_type_with_attr() & 0xFFFF;
+}
+size_t unit::get_type_with_attr() const {
 	return _type;
+}
+void unit::set_attr(size_t attr) {
+	_type = get_type() | (attr & ~0xFFFF);
+}
+void unit::clr_attr() {
+	_type = get_type();
 }
 
 static_array<ptrdiff_t, 3>& unit::get_int() {
@@ -271,6 +329,32 @@ strong_ref<unit>& unit::get_unit() {
 const strong_ref<unit>& unit::get_unit() const {
 	if (get_type() == UNIT) {
 		return _data.u_val;
+	}
+	throw exception(0, "wrong return type");
+}
+
+strong_ref<dte_function>& unit::get_dfunc() {
+	if (get_type() == DFUNC) {
+		return _data.dfunc;
+	}
+	throw exception(0, "wrong return type");
+}
+const strong_ref<dte_function>& unit::get_dfunc() const {
+	if (get_type() == DFUNC) {
+		return _data.dfunc;
+	}
+	throw exception(0, "wrong return type");
+}
+
+dte_utils::weak_ref<c_function>& unit::get_cfunc() {
+	if (get_type() == CFUNC) {
+		return _data.cfunc;
+	}
+	throw exception(0, "wrong return type");
+}
+const dte_utils::weak_ref<c_function>& unit::get_cfunc() const {
+	if (get_type() == CFUNC) {
+		return _data.cfunc;
 	}
 	throw exception(0, "wrong return type");
 }

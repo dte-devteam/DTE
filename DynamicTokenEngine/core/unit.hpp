@@ -3,8 +3,8 @@
 #include "memory/static_array.hpp"
 #include "pointer/strong_ref.hpp"
 #include "types.hpp"
-struct function_stack;
-using func = size_t(*)(function_stack&, size_t);//TODO
+
+
 
 struct c_function;
 struct dte_function;
@@ -18,8 +18,8 @@ struct unit {
 		VOID,
 		TABLE,
 		UNIT,
-		CFUNC,
-		DFUNC
+		DFUNC,
+		CFUNC
 	};
 	union data {
 		data() {}
@@ -47,6 +47,8 @@ struct unit {
 		static void _create_void(data& dest, const data& src);
 		static void _create_table(data& dest, const data& src);
 		static void _create_unit(data& dest, const data& src);
+		static void _create_dfunc(data& dest, const data& src);
+		static void _create_cfunc(data& dest, const data& src);
 		static inline const creator _creators[] = {
 			nullptr,		//NIL	(no data is constructed)
 			_create_int,	//INT
@@ -54,7 +56,9 @@ struct unit {
 			_create_cstr,	//CSTR
 			_create_void,	//VOID
 			_create_table,	//TABLE
-			_create_unit	//UNIT
+			_create_unit,	//UNIT
+			_create_dfunc,	//DFUNC
+			_create_cfunc	//CFUNC
 		};
 
 
@@ -64,6 +68,8 @@ struct unit {
 		static void _assign_void(data& dest, const data& src);
 		static void _assign_table(data& dest, const data& src);
 		static void _assign_unit(data& dest, const data& src);
+		static void _assign_dfunc(data& dest, const data& src);
+		static void _assign_cfunc(data& dest, const data& src);
 		static inline const assigner _assigners[] = {
 			nullptr,		//NIL	(no data is assigned)
 			_assign_int,	//INT
@@ -71,22 +77,31 @@ struct unit {
 			_assign_cstr,	//CSTR
 			_assign_void,	//VOID
 			_assign_table,	//TABLE
-			_assign_unit	//UNIT
+			_assign_unit,	//UNIT
+			_assign_dfunc,	//DFUNC
+			_assign_cfunc	//CFUNC
 		};
 
 		static void _release_cstr(data& dest);
 		static void _release_void(data& dest);
 		static void _release_table(data& dest);
 		static void _release_unit(data& dest);
+		static void _release_dfunc(data& dest);
+		static void _release_cfunc(data& dest);
 		static inline const releaser _releasers[] = {
 			nullptr,		//NIL	(no data was constructed)
-			nullptr,		//INT	(trivial: szie_t[3])
+			nullptr,		//INT	(trivial: ptrdiff_t[3])
 			nullptr,		//FP	(trivial: floatpoint[3])
 			_release_cstr,	//CSTR
 			_release_void,	//VOID
 			_release_table,	//TABLE
-			_release_unit	//UNIT
+			_release_unit,	//UNIT
+			_release_dfunc,	//DFUNC
+			_release_cfunc	//CFUNC
 		};
+
+		//should be protected?
+		static constexpr size_t type_mask = 0xFFFF;
 
 		void _release_type();
 	public:
@@ -97,6 +112,8 @@ struct unit {
 		unit(const dte_utils::strong_ref<dte_utils::mem_handler>& v_val);
 		unit(const dte_utils::strong_ref<table>& t_val);
 		unit(const dte_utils::strong_ref<unit>& u_val);
+		unit(const dte_utils::strong_ref<dte_function>& dfunc);
+		unit(const dte_utils::weak_ref<c_function>& cfunc);
 
 		unit(const unit& other);
 		unit(unit&& other) noexcept;
@@ -124,8 +141,13 @@ struct unit {
 		unit& operator=(const dte_utils::strong_ref<dte_utils::mem_handler>& v_val);
 		unit& operator=(const dte_utils::strong_ref<table>& t_val);
 		unit& operator=(const dte_utils::strong_ref<unit>& u_val);
+		unit& operator=(const dte_utils::strong_ref<dte_function>& dfunc);
+		unit& operator=(const dte_utils::weak_ref<c_function>& cfunc);
 
 		size_t get_type() const;
+		size_t get_type_with_attr() const;
+		void set_attr(size_t attr);
+		void clr_attr();
 
 		dte_utils::static_array<ptrdiff_t, 3>& get_int();
 		const dte_utils::static_array<ptrdiff_t, 3>& get_int() const;
@@ -144,6 +166,12 @@ struct unit {
 
 		dte_utils::strong_ref<unit>& get_unit();
 		const dte_utils::strong_ref<unit>& get_unit() const;
+
+		dte_utils::strong_ref<dte_function>& get_dfunc();
+		const dte_utils::strong_ref<dte_function>& get_dfunc() const;
+
+		dte_utils::weak_ref<c_function>& get_cfunc();
+		const dte_utils::weak_ref<c_function>& get_cfunc() const;
 
 
 		void clr_value();
