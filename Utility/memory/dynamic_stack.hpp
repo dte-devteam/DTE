@@ -193,8 +193,7 @@ namespace dte_utils {
 			}
 
 			
-			template<typename U>
-			void push_back(const U& value) {
+			void push_back(const T& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
@@ -211,8 +210,7 @@ namespace dte_utils {
 				}
 				++_used;
 			}
-			template<typename U>
-			void push_back(U&& value) {
+			void push_back(T&& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();

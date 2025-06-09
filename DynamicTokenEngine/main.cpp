@@ -151,7 +151,7 @@ int main(int argc, const char* argv[]) {
 
 	stream str{ data_stack(100), {} };
 	dte_function dtef;
-	strong_ref<c_function> cfsr{ cnew<c_function>(adder_u) };
+	strong_ref<c_function> cfsr{ cnew<c_function>(c_function(adder_u)) };
 
 
 	dtef.steps = {

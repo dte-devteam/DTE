@@ -32,24 +32,6 @@ namespace dte_utils {
 	}
 	
 
-	template<typename T, typename U>
-	inline void place_at(T* at, const U& value) {
-		if constexpr (std::is_trivially_constructible_v<T, const U&>) {
-			*at = static_cast<T>(value);
-		}
-		else {
-			new (at) T(static_cast<T>(value));
-		}
-	}
-	template<typename T, typename U>
-	inline void place_at(T* at, U&& value) {
-		if constexpr (std::is_trivially_constructible_v<T, U&&>) {
-			*at = static_cast<T&&>(value);
-		}
-		else {
-			new (at) T(static_cast<T&&>(value));
-		}
-	}
 	template<typename T, typename ...Args>
 	inline void place_at(T* at, Args&&... args) {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
@@ -61,18 +43,6 @@ namespace dte_utils {
 	}
 
 	
-	template<typename T, typename U>
-	inline T* cnew(const U& value) {
-		T* ptr = tmalloc<T>(1);
-		place_at(ptr, value);
-		return ptr;
-	}
-	template<typename T, typename U>
-	inline T* cnew(U&& value) {
-		T* ptr = tmalloc<T>(1);
-		place_at(ptr, std::move(value));
-		return ptr;
-	}
 	template<typename T, typename ...Args>
 	inline T* cnew(Args&&... args) {
 		T* ptr = tmalloc<T>(1);
