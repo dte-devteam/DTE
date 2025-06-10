@@ -1,4 +1,5 @@
 #pragma once
+#include "memory/memory.hpp"
 #include "alloc_handler.hpp"
 #include "exceptions/logic_exception.hpp"
 #include <initializer_list>
@@ -31,7 +32,7 @@ namespace dte_utils {
 			}
 			dynamic_stack(std::initializer_list<type> il, size_type reserved_size = 0) : dynamic_stack(il.begin(), il.size(), reserved_size) {}
 			dynamic_stack(const dynamic_stack& other) : _used(other.get_used()), alloc_handler<T, A>(other.get_allocated()) {
-				array_to_array(begin(), other.begin(), get_used());
+				dte_utils::array_to_array(begin(), other.begin(), get_used());
 			}
 			dynamic_stack(dynamic_stack&& other) noexcept : _used(other.get_used()), alloc_handler<T, A>(std::move(other)) {
 				other._used = 0;
