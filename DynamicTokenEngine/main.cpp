@@ -16,6 +16,8 @@
 #include "core/stream.hpp"
 
 
+#include "core/c_function.hpp"
+
 #include <iostream>
 
 #include <chrono>
@@ -58,6 +60,16 @@ size_t adder_u(data_stack& ds, size_t offset) {
 	static_cast<unit*>(ds[offset])->get_int()[2] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[2];
 	return 1;
 }
+
+size_t push_virt(data_stack& ds, size_t offset) {
+	ds.push_virt(ds[offset]);
+	return 1;
+}
+size_t pop(data_stack& ds, size_t offset) {
+	ds.pop(ds.get_block_num() - offset);
+	return 1;
+}
+
 
 void afk(data_stack& ds, size_t) {
 	std::cout << ds.get_memory_left() << std::endl;
@@ -135,7 +147,7 @@ int main(int argc, const char* argv[]) {
 
 	
 
-	
+
 
 
 	data_stack ds(1000);
@@ -147,14 +159,17 @@ int main(int argc, const char* argv[]) {
 
 	std::cout << "-----------------" << std::endl;
 
-
+	
 
 	stream str{ data_stack(100), {} };
 	dte_function dtef;
-	strong_ref<c_function> cfsr{ cnew<c_function>(c_function(adder_u)) };
+	strong_ref<c_function> cfsr{ 
+		cnew<c_function>(adder_u, c_function::metadata{})
+	};
 
 
-	dtef.steps = {
+
+	dtef._steps = {
 		{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false},
 		{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false},
 		{{cfsr}, 0, 0, true}

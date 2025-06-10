@@ -1,6 +1,5 @@
 #pragma once
 #include "data_stack.hpp"
-#include "pointer/strong_ref.hpp"
 struct dte_function;
 struct stream {
 	data_stack stack;

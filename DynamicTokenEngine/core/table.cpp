@@ -2,9 +2,6 @@
 using namespace dte_utils;
 table::table(const table& other) : _t_units(other._t_units) {}
 table::table(table&& other) noexcept : _t_units(std::move(other._t_units)) {}
-table::~table() {
-	std::cout << "RELEASED" << std::endl;
-}
 
 table& table::operator=(const table& other) {
 	_t_units.clear();

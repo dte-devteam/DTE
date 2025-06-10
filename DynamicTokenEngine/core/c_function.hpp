@@ -1,6 +1,6 @@
 #pragma once
 #include "memory/dynamic_string.hpp"
-#include "data_stack.hpp"
+struct data_stack;
 struct c_function {
 	struct metadata {
 		dte_utils::dynamic_cstring name;
@@ -9,11 +9,11 @@ struct c_function {
 		*/
 	};
 	typedef size_t(*func)(data_stack&, size_t);//TODO
-	//protected:
+	protected:
 		func _body;
 		metadata _meta;
 	public:
-		//c_function(func body, const metadata& meta);
+		c_function(const func& body, const metadata& meta);
 		const metadata& get_meta() const;
 		size_t operator()(data_stack& stack, size_t frame_offset) const;
 };

@@ -1,7 +1,5 @@
 #pragma once
 #include "unit.hpp"
-
-#include <iostream>
 using namespace dte_utils;
 struct table_unit {
 	unit u;
@@ -13,7 +11,6 @@ struct table {
 	table() = default;
 	table(const table& other);
 	table(table&& other) noexcept;
-	~table();
 
 	table& operator=(const table& other);
 	table& operator=(table&& other) noexcept;

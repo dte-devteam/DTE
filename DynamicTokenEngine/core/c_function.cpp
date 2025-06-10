@@ -1,6 +1,7 @@
 #include "c_function.hpp"
+#include "data_stack.hpp"
 using namespace dte_utils;
-//c_function::c_function(func body, const metadata& meta) : _body(body), _meta(meta) {}
+c_function::c_function(const func& body, const metadata& meta) : _body(body), _meta(meta) {}
 const c_function::metadata& c_function::get_meta() const {
 	return _meta;
 }
