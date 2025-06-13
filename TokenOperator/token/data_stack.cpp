@@ -1,6 +1,7 @@
 #include "data_stack.hpp"
 #include "memory/memory.hpp"
 using namespace dte_utils;
+using namespace dte_token;
 data_stack::data_stack(size_t stack_size) {
 	char* begin = tmalloc<char>(stack_size);
 	blocks.emplace_back(begin + stack_size, begin);

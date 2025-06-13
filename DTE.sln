@@ -5,6 +5,7 @@ VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicTokenEngine", "DynamicTokenEngine\DynamicTokenEngine.vcxproj", "{4E1881FE-9DDF-4EAB-BD68-3991E85AC30D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{6B509E45-6782-4271-9427-8B603374528E} = {6B509E45-6782-4271-9427-8B603374528E}
 		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D} = {A0AF1108-71A5-4D61-BEE3-217A4FC8427D}
 	EndProjectSection
 EndProject
@@ -14,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 	ProjectSection(SolutionItems) = preProject
 		example.dte = example.dte
 		TODO.txt = TODO.txt
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TokenOperator", "TokenOperator\TokenOperator.vcxproj", "{6B509E45-6782-4271-9427-8B603374528E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D} = {A0AF1108-71A5-4D61-BEE3-217A4FC8427D}
 	EndProjectSection
 EndProject
 Global
@@ -40,6 +46,14 @@ Global
 		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x64.Build.0 = Release|x64
 		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x86.ActiveCfg = Release|Win32
 		{A0AF1108-71A5-4D61-BEE3-217A4FC8427D}.Release|x86.Build.0 = Release|Win32
+		{6B509E45-6782-4271-9427-8B603374528E}.Debug|x64.ActiveCfg = Debug|x64
+		{6B509E45-6782-4271-9427-8B603374528E}.Debug|x64.Build.0 = Debug|x64
+		{6B509E45-6782-4271-9427-8B603374528E}.Debug|x86.ActiveCfg = Debug|Win32
+		{6B509E45-6782-4271-9427-8B603374528E}.Debug|x86.Build.0 = Debug|Win32
+		{6B509E45-6782-4271-9427-8B603374528E}.Release|x64.ActiveCfg = Release|x64
+		{6B509E45-6782-4271-9427-8B603374528E}.Release|x64.Build.0 = Release|x64
+		{6B509E45-6782-4271-9427-8B603374528E}.Release|x86.ActiveCfg = Release|Win32
+		{6B509E45-6782-4271-9427-8B603374528E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

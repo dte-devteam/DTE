@@ -4,6 +4,7 @@
 #include "table.hpp"
 #include "dte_function.hpp"
 using namespace dte_utils;
+using namespace dte_token;
 void unit::_create_int(data& dest, const data& src) {
 	new (&dest.i_val) static_array<ptrdiff_t, 3>(src.i_val);
 }

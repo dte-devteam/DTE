@@ -5,18 +5,18 @@
 
 #include "memory/xmem_wrapper.hpp"
 
-#include "core/unit.hpp"
-#include "core/table.hpp"
+#include "token/unit.hpp"
+#include "token/table.hpp"
 
-#include "core/data_stack.hpp"
+#include "token/data_stack.hpp"
 
-#include "core/dte_function.hpp"
-
-
-#include "core/stream.hpp"
+#include "token/dte_function.hpp"
 
 
-#include "core/c_function.hpp"
+#include "token/stream.hpp"
+
+
+#include "token/c_function.hpp"
 
 #include <iostream>
 
@@ -30,7 +30,7 @@
 
 #include <functional>
 using namespace dte_utils;
-
+using namespace dte_token;
 
 /*
 template<typename F, typename ...Args>

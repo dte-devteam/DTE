@@ -1,5 +1,6 @@
 #include "table.hpp"
 using namespace dte_utils;
+using namespace dte_token;
 table::table(const table& other) : _t_units(other._t_units) {}
 table::table(table&& other) noexcept : _t_units(std::move(other._t_units)) {}
 

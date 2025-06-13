@@ -2,6 +2,7 @@
 #include "stream.hpp"
 #include "c_function.hpp"
 using namespace dte_utils;
+using namespace dte_token;
 size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	s.call_stack.push_back(this);
 	size_t i = 0;
