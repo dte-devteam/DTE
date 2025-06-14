@@ -82,7 +82,7 @@ namespace dte_utils {
 	template<typename T, typename ...Args>
 	inline void construct_range(T* begin, T* end, Args&&... args) {
 		while (begin != end) {
-			place_at(begin, std::forward<Args>(args)...);
+			place_at(begin, args...);
 			++begin;
 		}
 	}

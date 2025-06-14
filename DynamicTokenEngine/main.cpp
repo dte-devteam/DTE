@@ -61,14 +61,7 @@ size_t adder_u(data_stack& ds, size_t offset) {
 	return 1;
 }
 
-size_t push_virt(data_stack& ds, size_t offset) {
-	ds.push_virt(ds[offset]);
-	return 1;
-}
-size_t pop(data_stack& ds, size_t offset) {
-	ds.pop(ds.get_block_num() - offset);
-	return 1;
-}
+
 
 
 void afk(data_stack& ds, size_t) {
@@ -125,9 +118,9 @@ int main(int argc, const char* argv[]) {
 	
 
 	table ttt;
-	ttt._t_units.emplace_back(uu0, "UU0");
-	ttt._t_units.emplace_back(dynamic_cstring(":)"), "UU1");
-	ttt._t_units.emplace_back(unit(), dynamic_cstring(":|"));
+	ttt.get_table_units().emplace_back(uu0, "UU0");
+	ttt.get_table_units().emplace_back(dynamic_cstring(":)"), "UU1");
+	ttt.get_table_units().emplace_back(unit(), dynamic_cstring(":|"));
 	std::cout << ttt.get_by_index(0).u.get_int()[0] << std::endl;
 	std::cout << ttt.get_by_index(1).u.get_cstr().begin() << std::endl;
 	std::cout << ttt.get_by_index(2).u.get_type() << std::endl;
@@ -162,18 +155,22 @@ int main(int argc, const char* argv[]) {
 	
 
 	stream str{ data_stack(100), {} };
-	dte_function dtef;
 	strong_ref<c_function> cfsr{ 
 		cnew<c_function>(adder_u, c_function::metadata{})
 	};
+	dte_function dtef({"ABC"},
+		{
+			{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false},
+			{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false},
+			{{cfsr}, 0, 0, true}
+		}
+	);
 
 
+	c_function a1(adder_u, c_function::metadata{});
+	c_function a2(std::move(a1));
 
-	dtef._steps = {
-		{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false},
-		{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false},
-		{{cfsr}, 0, 0, true}
-	};
+	
 	dtef(str, 0);
 	std::cout << str.stack.get_block_num() << std::endl;
 	std::cout << str.stack.get_memory_left() << std::endl;

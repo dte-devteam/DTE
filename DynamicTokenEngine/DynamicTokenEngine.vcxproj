@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core\c_functions.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="tests\data.hpp" />
     <ClInclude Include="tests\memory\test_dynamic_array.h" />

@@ -22,7 +22,7 @@ namespace dte_token {
 			CFUNC
 		};
 		union data {
-			data() {}
+			data() { std::memset(this, 0, sizeof(data)); }
 			~data() {}
 			dte_utils::static_array<ptrdiff_t, 3>			i_val;	//integer
 			dte_utils::static_array<floatpoint, 3>			f_val;	//float point

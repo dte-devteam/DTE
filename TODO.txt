@@ -1,1 +1,8 @@
 forbid strong_ref & unknown_ref & unique_ref accept T = function
+
+c_function+
+data_stack+
+dte_function-
+stream-
+table+
+unit?

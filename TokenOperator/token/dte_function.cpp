@@ -3,6 +3,42 @@
 #include "c_function.hpp"
 using namespace dte_utils;
 using namespace dte_token;
+dte_function::metadata& dte_function::metadata::operator=(const metadata& other) {
+	if (this == &other) {
+		return *this;
+	}
+	_name = other._name;
+	return *this;
+}
+dte_function::metadata& dte_function::metadata::operator=(metadata&& other) noexcept {
+	if (this == &other) {
+		return *this;
+	}
+	_name = std::move(other._name);
+	return *this;
+}
+
+//dte_function::dte_function(metadata meta, dte_utils::dynamic_array<step> steps) : _meta(meta),
+//dte_function::dte_function(const dte_function& other);
+//dte_function::dte_function(dte_function&& other);
+const dte_function::metadata& dte_function::get_meta() const {
+	return _meta;
+}
+dte_function& dte_function::operator=(const dte_function& other) {
+	if (this == &other) {
+		return *this;
+	}
+
+	return *this;
+}
+dte_function& dte_function::operator=(dte_function&& other) noexcept {
+	if (this == &other) {
+		return *this;
+	}
+	_steps = std::move(other._steps);
+	_meta = std::move(other._meta);
+	return *this;
+}
 size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	s.call_stack.push_back(this);
 	size_t i = 0;
