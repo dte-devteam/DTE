@@ -89,6 +89,9 @@
     <ClInclude Include="memory\xmem_wrapper.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="atomic\atomic_wrapper.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

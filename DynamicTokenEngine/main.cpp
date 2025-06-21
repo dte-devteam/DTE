@@ -62,6 +62,33 @@ size_t adder_u(data_stack& ds, size_t offset) {
 }
 
 
+void set_step(dte_function& f) {
+	while (f._steps[1].accessors.value.load()) {
+		f._steps[1].accessors.value.wait(f._steps[1].accessors.value.load());
+	}
+	f._steps[1].accessors.value.fetch_add(1);
+	f._steps[1].data = static_array<ptrdiff_t, 3>{ 1, 2, 3 };
+	f._steps[1].accessors.value.fetch_sub(1);
+	f._steps[1].accessors.value.notify_all();
+}
+
+
+std::atomic<size_t> aaaa{ size_t(1) };
+void run(int r) {
+	std::cout << "run start " << r << std::endl;
+	size_t iii = 0;
+	while (aaaa.load()) {
+		aaaa.wait(aaaa.load());
+	}
+	++aaaa;
+	std::cout << "run do " << r << std::endl;
+	--aaaa;
+	std::cout << "run done " << r << std::endl;
+	aaaa.notify_one();
+}
+void run_dte(stream* s, dte_function* f) {
+	(*f)(*s, 0);
+}
 
 
 void afk(data_stack& ds, size_t) {
@@ -91,11 +118,11 @@ int main(int argc, const char* argv[]) {
 
 
 	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
-	std::cout << uu0.get_int()[0] << " " 
-		<< uu0.get_int()[1] << " " 
+	std::cout << uu0.get_int()[0] << " "
+		<< uu0.get_int()[1] << " "
 		<< uu0.get_int()[2] << std::endl;
 
-	unit uu1{ dynamic_cstring("ABC")};
+	unit uu1{ dynamic_cstring("ABC") };
 	std::cout << uu1.get_cstr().begin() << std::endl;
 
 	unit uu2{ uu1 };
@@ -107,7 +134,7 @@ int main(int argc, const char* argv[]) {
 
 	uu1 = static_array<ptrdiff_t, 3>({ 1,2,3 });
 	uu0 = std::move(uu1);
-	
+
 	std::cout << uu0.get_int()[0] << " "
 		<< uu0.get_int()[1] << " "
 		<< uu0.get_int()[2] << std::endl;
@@ -115,7 +142,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << uu1.get_cstr().begin() << std::endl;
 
 	uu1 = strong_ref<table>(cnew<table>());
-	
+
 
 	table ttt;
 	ttt.get_table_units().emplace_back(uu0, "UU0");
@@ -138,7 +165,7 @@ int main(int argc, const char* argv[]) {
 	//afk(ds, 0);
 
 
-	
+
 
 
 
@@ -152,26 +179,31 @@ int main(int argc, const char* argv[]) {
 
 	std::cout << "-----------------" << std::endl;
 
-	
+
 
 	stream str{ data_stack(100), {} };
-	strong_ref<c_function> cfsr{ 
+	strong_ref<c_function> cfsr{
 		cnew<c_function>(adder_u, c_function::metadata{})
 	};
-	dte_function dtef({"ABC"},
+	//strong_ref<c_function> cfsr2{
+	//	cnew<c_function>(muler_u, c_function::metadata{})
+	//};
+	dte_function dtef({"ABC", 0},
 		{
-			{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false},
-			{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false},
-			{{cfsr}, 0, 0, true}
+			{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false, size_t(0)},
+			{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false, size_t(0)},
+			{unit{cfsr}, 0, 0, true, 0}
 		}
 	);
+	//dte_function::step r{ {cfsr2}, 0, 0, true, size_t(0) };
 
 
-	c_function a1(adder_u, c_function::metadata{});
-	c_function a2(std::move(a1));
 
-	
-	dtef(str, 0);
+	std::thread th(run_dte, &str, &dtef);
+	set_step(dtef);
+	th.join();
+
+	//dtef(str, 0);
 	std::cout << str.stack.get_block_num() << std::endl;
 	std::cout << str.stack.get_memory_left() << std::endl;
 	for (const ptrdiff_t& i : static_cast<unit*>(str.stack[0])->get_int()) {
@@ -180,9 +212,18 @@ int main(int argc, const char* argv[]) {
 
 	std::cin.get();
 
+	std::thread t1(run, 1);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::thread t2(run, 2);
+	std::this_thread::sleep_for(std::chrono::seconds(1));
+	std::thread t3(run, 3);
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	--aaaa;
+	aaaa.notify_one();
 
-
-
+	t1.join();
+	t2.join();
+	t3.join();
 
 	return 0;
 }

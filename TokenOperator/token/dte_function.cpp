@@ -1,22 +1,11 @@
 #include "dte_function.hpp"
 #include "stream.hpp"
 #include "c_function.hpp"
+
+
+#include <iostream>
 using namespace dte_utils;
 using namespace dte_token;
-dte_function::metadata& dte_function::metadata::operator=(const metadata& other) {
-	if (this == &other) {
-		return *this;
-	}
-	_name = other._name;
-	return *this;
-}
-dte_function::metadata& dte_function::metadata::operator=(metadata&& other) noexcept {
-	if (this == &other) {
-		return *this;
-	}
-	_name = std::move(other._name);
-	return *this;
-}
 
 //dte_function::dte_function(metadata meta, dte_utils::dynamic_array<step> steps) : _meta(meta),
 //dte_function::dte_function(const dte_function& other);
@@ -43,23 +32,25 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	s.call_stack.push_back(this);
 	size_t i = 0;
 	while (i < _steps.get_used()) {
-		const step& action = _steps[i];
+		step& action = _steps[i];
+		action.accessors.value.wait(-1);
+		action.accessors.value.fetch_add(1);
 		if (action.is_executable) {
-			frame_offset += action.delta_frame;
 			if (action.data.get_type() == unit::DFUNC) {
-				i += action.data.get_dfunc()(s, frame_offset);
+				i += action.data.get_dfunc()(s, frame_offset + action.delta_frame);
 			}
 			else if (action.data.get_cfunc().expired()) {
 				throw exception(0, "function is unloaded");
 			}
 			else {
-				i += action.data.get_cfunc()(s.stack, frame_offset);
+				i += action.data.get_cfunc()(s.stack, frame_offset + action.delta_frame);
 			}
 		}
 		else {
-			s.stack.pop(action.delta_frame);
 			new (s.stack.push_real(sizeof(unit))) unit(action.data);
 		}
+		action.accessors.value.fetch_sub(1);
+		action.accessors.value.notify_one();
 		i += action.delta_jump;
 	}
 	s.call_stack.pop_back();

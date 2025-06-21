@@ -1,7 +1,6 @@
 #pragma once
 #include "unit.hpp"
-
-#include <iostream>
+#include "atomic/atomic_wrapper.hpp"
 namespace dte_token {
 	struct stream;
 	struct dte_function {
@@ -10,8 +9,7 @@ namespace dte_token {
 			/*
 			later add metadata for complex function building
 			*/
-			metadata& operator=(const metadata& other);
-			metadata& operator=(metadata&& other) noexcept;
+			dte_utils::atomic_wrapper<size_t> accessors;
 		};
 		struct step {
 			//some data can be compressed to unit attributes (but its slower) 
@@ -19,6 +17,7 @@ namespace dte_token {
 			size_t delta_frame;
 			size_t delta_jump;
 			bool is_executable;
+			dte_utils::atomic_wrapper<size_t> accessors;
 		};
 		//protected:
 			metadata _meta;

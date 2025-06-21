@@ -30,6 +30,7 @@
     <ClCompile Include="memory\xmem_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="atomic\atomic_wrapper.hpp" />
     <ClInclude Include="exceptions\logic_exception.hpp" />
     <ClInclude Include="exceptions\pointer_exception.hpp" />
     <ClInclude Include="memory\dynamic_array.hpp" />
