@@ -23,6 +23,12 @@ namespace dte_utils {
 			return !str_len();
 		}
 
+		void clear() {
+			for (type& i : *this) {
+				i = 0;
+			}
+			dynamic_stack<T>::clear();
+		}
 
 		dynamic_string substr(size_type from, size_type to) {
 			if (from > to) {

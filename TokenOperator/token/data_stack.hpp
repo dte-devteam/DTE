@@ -25,5 +25,6 @@ namespace dte_token {
 			size_t get_memory_left() const;
 			size_t get_allocated() const;
 			void* operator[](size_t index) const;
+			void* back();
 	};
 }

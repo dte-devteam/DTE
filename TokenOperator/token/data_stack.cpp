@@ -64,3 +64,6 @@ size_t data_stack::get_allocated() const {
 void* data_stack::operator[](size_t index) const {
 	return blocks[index + 1].virtual_begin;	//+ 1 because [0] is stack heap
 }
+void* data_stack::back() {
+	return blocks.back().virtual_begin;
+}

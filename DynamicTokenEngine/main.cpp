@@ -18,6 +18,8 @@
 
 #include "token/c_function.hpp"
 
+#include "core/c_functions.hpp"
+
 #include <iostream>
 
 #include <chrono>
@@ -31,7 +33,7 @@
 #include <functional>
 using namespace dte_utils;
 using namespace dte_token;
-
+using namespace dte_core;
 /*
 template<typename F, typename ...Args>
 ull measure(F&& f, Args&&... args) {
@@ -169,14 +171,37 @@ int main(int argc, const char* argv[]) {
 
 
 
-
-	data_stack ds(1000);
-	*static_cast<size_t*>(ds.push_real(sizeof(size_t))) = 10;
-	*static_cast<size_t*>(ds.push_real(sizeof(size_t))) = 20;
-	adder(ds, 0);
-
-	std::cout << *static_cast<size_t*>(ds[0]) << std::endl;
-
+	std::cout << "-----------------" << std::endl;
+	stream strf{ data_stack(200), {} };
+	strong_ref<c_function> cfssr{
+		cnew<c_function>(create_ifstream, c_function::metadata{})
+	};
+	strong_ref<c_function> ofsr{
+		cnew<c_function>(open_file, c_function::metadata{})
+	};
+	strong_ref<c_function> rlsr{
+		cnew<c_function>(read_line, c_function::metadata{})
+	};
+	strong_ref<c_function> cffsr{
+		cnew<c_function>(close_file, c_function::metadata{})
+	};
+	strong_ref<c_function> rfssr{
+		cnew<c_function>(release_ifstream, c_function::metadata{})
+	};
+	dte_function dteff({ "FILE", 0 },
+		{
+			{unit{cfssr}, 0, 0, true, 0},
+			{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 0, 1, false, 0},
+			{unit{ofsr}, 0, 0, true, 0},
+			{unit{rlsr}, 0, 0, true, 0},
+			{unit{cffsr}, 0, 0, true, 0},
+			{unit{rfssr}, 0, 0, true, 0}
+		}
+	);
+	dteff(strf, 0);
+	std::cout << strf.stack.get_block_num() << std::endl;
+	std::cout << strf.stack.get_memory_left() << std::endl;
+	std::cout << get_unit_cstr(strf.stack, 1).begin() << std::endl;
 	std::cout << "-----------------" << std::endl;
 
 
@@ -185,9 +210,6 @@ int main(int argc, const char* argv[]) {
 	strong_ref<c_function> cfsr{
 		cnew<c_function>(adder_u, c_function::metadata{})
 	};
-	//strong_ref<c_function> cfsr2{
-	//	cnew<c_function>(muler_u, c_function::metadata{})
-	//};
 	dte_function dtef({"ABC", 0},
 		{
 			{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false, size_t(0)},
@@ -195,10 +217,6 @@ int main(int argc, const char* argv[]) {
 			{unit{cfsr}, 0, 0, true, 0}
 		}
 	);
-	//dte_function::step r{ {cfsr2}, 0, 0, true, size_t(0) };
-
-
-
 	std::thread th(run_dte, &str, &dtef);
 	set_step(dtef);
 	th.join();
