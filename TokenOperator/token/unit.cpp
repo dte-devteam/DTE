@@ -365,3 +365,8 @@ void unit::clr_value() {
 	_release_type();
 	_type = NIL;
 }
+
+
+void unit::unit_destructor(void* block) {
+	static_cast<unit*>(block)->~unit();
+}

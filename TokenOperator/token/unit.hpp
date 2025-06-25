@@ -175,5 +175,8 @@ namespace dte_token {
 
 
 			void clr_value();
+
+
+			static void unit_destructor(void* block);
 	};
 }

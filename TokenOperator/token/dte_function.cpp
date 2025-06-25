@@ -32,6 +32,7 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	s.call_stack.push_back(this);
 	size_t i = 0;
 	while (i < _steps.get_used()) {
+		std::cout << i << std::endl;
 		step& action = _steps[i];
 		action.accessors.value.wait(-1);
 		action.accessors.value.fetch_add(1);
@@ -47,7 +48,7 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 			}
 		}
 		else {
-			new (s.stack.push_real(sizeof(unit))) unit(action.data);
+			new (s.stack.push_real(sizeof(unit), unit::unit_destructor)) unit(action.data);
 		}
 		action.accessors.value.fetch_sub(1);
 		action.accessors.value.notify_one();

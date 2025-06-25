@@ -4,12 +4,17 @@ using namespace dte_utils;
 using namespace dte_token;
 data_stack::data_stack(size_t stack_size) {
 	char* begin = tmalloc<char>(stack_size);
-	blocks.emplace_back(begin + stack_size, begin);
+	blocks.emplace_back(begin + stack_size, begin, nullptr);
 }
 data_stack::data_stack(data_stack&& other) noexcept : blocks(std::move(other.blocks)) {
-	other.blocks.emplace_back(nullptr, nullptr);	//other now frees nothing
+	other.blocks.emplace_back(nullptr, nullptr, nullptr);	//other now frees nothing
 }
 data_stack::~data_stack() {
+	for (size_t i = 1; i < blocks.get_used(); ++i) {
+		if (blocks[i].destr) {
+			blocks[i].destr(blocks[i].virtual_begin);
+		}
+	}
 	free(blocks[0].physical_end);
 }
 
@@ -21,24 +26,30 @@ data_stack& data_stack::operator=(data_stack&& other) noexcept {
 	return *this;
 }
 
-void* data_stack::push_real(size_t block_size) {
+void* data_stack::push_real(size_t block_size, destructor destr) {
 	if (block_size > get_memory_left()) {
 		throw exception(0, "stack overflow");
 	}
 	blocks.emplace_back(
 		blocks.back().physical_end,
-		blocks.back().physical_end + block_size
+		blocks.back().physical_end + block_size,
+		destr
 	);
 	return blocks.back().virtual_begin;
 }
 void data_stack::push_virt(void* virt_block) {
 	blocks.emplace_back(
 		static_cast<char*>(virt_block),
-		blocks.back().physical_end
+		blocks.back().physical_end,
+		nullptr
 	);
 }
 void data_stack::pop() {
-	blocks.pop_back();
+	if (get_block_num()) {
+		blocks.pop_back();
+		return;
+	}
+	throw exception(0, "stack heap is untouchable");
 }
 void data_stack::pop(size_t block_num) {
 	if (block_num > get_block_num()) {

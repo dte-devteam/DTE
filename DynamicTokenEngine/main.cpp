@@ -93,12 +93,16 @@ void run_dte(stream* s, dte_function* f) {
 }
 
 
-void afk(data_stack& ds, size_t) {
-	std::cout << ds.get_memory_left() << std::endl;
-	std::cout << ds.get_block_num() << std::endl;
-	std::cout << *static_cast<size_t*>(ds[0]) << std::endl;
-}
 
+struct R
+{
+	static void destr(void* block) {
+		static_cast<R*>(block)->~R();
+	}
+	~R() {
+		std::cout << "~R()\n";
+	}
+};
 
 
 
@@ -156,15 +160,7 @@ int main(int argc, const char* argv[]) {
 	//std::cout << ttt[":("].u.get_type() << std::endl;
 	std::cout << ttt.get_as_target(":(").name.begin() << std::endl;
 
-	data_stack ds0(4096);
-	*static_cast<size_t*>(ds0.push_real(sizeof(size_t))) = 10;
-	ds0.push_virt(nullptr);
-
-
-
-	std::thread thr(afk, std::move(ds0), 0);
-	thr.join();
-	//afk(ds, 0);
+	
 
 
 
@@ -172,7 +168,7 @@ int main(int argc, const char* argv[]) {
 
 
 	std::cout << "-----------------" << std::endl;
-	stream strf{ data_stack(200), {} };
+	stream* strf = new stream{ {10000}, {} };
 	strong_ref<c_function> cfssr{
 		cnew<c_function>(create_ifstream, c_function::metadata{})
 	};
@@ -185,28 +181,31 @@ int main(int argc, const char* argv[]) {
 	strong_ref<c_function> cffsr{
 		cnew<c_function>(close_file, c_function::metadata{})
 	};
-	strong_ref<c_function> rfssr{
-		cnew<c_function>(release_ifstream, c_function::metadata{})
-	};
 	dte_function dteff({ "FILE", 0 },
 		{
 			{unit{cfssr}, 0, 0, true, 0},
 			{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 0, 1, false, 0},
 			{unit{ofsr}, 0, 0, true, 0},
 			{unit{rlsr}, 0, 0, true, 0},
-			{unit{cffsr}, 0, 0, true, 0},
-			{unit{rfssr}, 0, 0, true, 0}
+			{unit{cffsr}, 0, 0, true, 0}
 		}
 	);
-	dteff(strf, 0);
-	std::cout << strf.stack.get_block_num() << std::endl;
-	std::cout << strf.stack.get_memory_left() << std::endl;
-	std::cout << get_unit_cstr(strf.stack, 1).begin() << std::endl;
+	std::cout << "-----------------" << std::endl;
+	dteff(*strf, 0);
+	std::cout << "-----------------" << std::endl;
+	std::cout << strf->stack.get_block_num() << std::endl;
+	std::cout << strf->stack.get_memory_left() << std::endl;
+	std::cout << static_cast<dte_token::unit*>(strf->stack[1])->get_cstr().begin() << std::endl;
+	delete strf;
 	std::cout << "-----------------" << std::endl;
 
 
 
-	stream str{ data_stack(100), {} };
+
+
+
+	/*
+	stream str{ {100}, {} };
 	strong_ref<c_function> cfsr{
 		cnew<c_function>(adder_u, c_function::metadata{})
 	};
@@ -227,9 +226,9 @@ int main(int argc, const char* argv[]) {
 	for (const ptrdiff_t& i : static_cast<unit*>(str.stack[0])->get_int()) {
 		std::cout << i << std::endl;
 	}
-
+	*/
 	std::cin.get();
-
+	/*
 	std::thread t1(run, 1);
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	std::thread t2(run, 2);
@@ -242,7 +241,16 @@ int main(int argc, const char* argv[]) {
 	t1.join();
 	t2.join();
 	t3.join();
+	*/
 
+	data_stack ggg(500);
+	ggg.push_real(sizeof(R), R::destr);
+	ggg.push_real(sizeof(R), R::destr);
+	ggg.push_real(sizeof(R), R::destr);
+	ggg.push_real(sizeof(R), R::destr);
+
+
+	data_stack ggg2 = data_stack(std::move(data_stack(500)));
 	return 0;
 }
 struct F
