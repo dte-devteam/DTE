@@ -30,7 +30,7 @@ namespace dte_utils {
 	inline T* trealloc(T* block, size_t num) {
 		return static_cast<T*>(xrealloc(block, num * sizeof(T)));
 	}
-	
+
 
 	template<typename T, typename ...Args>
 	inline void place_at(T* at, Args&&... args) {
@@ -42,7 +42,7 @@ namespace dte_utils {
 		}
 	}
 
-	
+
 	template<typename T, typename ...Args>
 	inline T* cnew(Args&&... args) {
 		T* ptr = tmalloc<T>(1);
@@ -109,7 +109,7 @@ namespace dte_utils {
 			destuct_at(--end);
 		}
 	}
-	
+
 
 
 	//Copies memory by char/CPU_WORD (count = number of bytes)
@@ -118,7 +118,7 @@ namespace dte_utils {
 			(uintptr_t)dest % sizeof(CPU_WORD) ||
 			(uintptr_t)src % sizeof(CPU_WORD) ||
 			count % sizeof(CPU_WORD)
-		)) {
+			)) {
 			count /= sizeof(CPU_WORD);
 			while (count) {
 				((CPU_WORD*)dest)[count] = ((const CPU_WORD*)src)[--count];
@@ -136,7 +136,7 @@ namespace dte_utils {
 			(uintptr_t)dest % sizeof(CPU_WORD) ||
 			(uintptr_t)src % sizeof(CPU_WORD) ||
 			count % sizeof(CPU_WORD)
-		)) {
+			)) {
 			count /= sizeof(CPU_WORD);
 			while (count) {
 				std::swap(((CPU_WORD*)dest)[count], ((CPU_WORD*)src)[--count]);
@@ -144,7 +144,7 @@ namespace dte_utils {
 		}
 		else {
 			while (count) {
-				std::swap(((char*)dest)[count],((char*)src)[--count]);
+				std::swap(((char*)dest)[count], ((char*)src)[--count]);
 			}
 		}
 	}

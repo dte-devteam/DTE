@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -26,22 +26,25 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="memory\alloc_handler.hpp" />
-    <ClCompile Include="exceptions\exception.hpp" />
-    <ClCompile Include="exceptions\memory_exception.hpp" />
-    <ClCompile Include="memory\memory.hpp" />
-    <ClCompile Include="memory\allocator.hpp" />
-    <ClCompile Include="memory\dynamic_stack.hpp" />
+    <ClCompile Include="exceptions\logic_exception.cpp" />
+    <ClCompile Include="exceptions\memory_exception.cpp" />
+    <ClCompile Include="exceptions\pointer_exception.cpp" />
     <ClCompile Include="memory\mem_handler.cpp" />
     <ClCompile Include="memory\xmem_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="atomic\atomic_wrapper.hpp" />
+    <ClInclude Include="exceptions\exception.hpp" />
     <ClInclude Include="exceptions\logic_exception.hpp" />
+    <ClInclude Include="exceptions\memory_exception.hpp" />
     <ClInclude Include="exceptions\pointer_exception.hpp" />
+    <ClInclude Include="memory\allocator.hpp" />
+    <ClInclude Include="memory\alloc_handler.hpp" />
     <ClInclude Include="memory\dynamic_array.hpp" />
+    <ClInclude Include="memory\dynamic_stack.hpp" />
     <ClInclude Include="memory\dynamic_string.hpp" />
     <ClInclude Include="function_traits.hpp" />
+    <ClInclude Include="memory\memory.hpp" />
     <ClInclude Include="memory\mem_handler.hpp" />
     <ClInclude Include="memory\tmem_wrapper.hpp" />
     <ClInclude Include="memory\static_array.hpp" />

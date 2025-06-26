@@ -19,27 +19,27 @@ namespace dte_utils {
 		using const_type = const type;
 		using pointer = type*;
 		using const_pointer = const_type*;
-		public:
-			allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
-			allocator(const allocator&) = delete;
-			allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
-			void resize(size_type num) {
-				static_assert(std::is_trivial_v<type>, "do not try reallocating nontrivial data");
-				mem_handler::resize(num * sizeof(type));
-			}
-			allocator& operator=(const allocator&) = delete;
-			allocator& operator=(allocator&& other) noexcept {
-				if (this == &other) {
-					return *this;
-				}
-				std::swap(_ptr, other._ptr);
+	public:
+		allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
+		allocator(const allocator&) = delete;
+		allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
+		void resize(size_type num) {
+			static_assert(std::is_trivial_v<type>, "do not try reallocating nontrivial data");
+			mem_handler::resize(num * sizeof(type));
+		}
+		allocator& operator=(const allocator&) = delete;
+		allocator& operator=(allocator&& other) noexcept {
+			if (this == &other) {
 				return *this;
 			}
-			operator pointer() {
-				return static_cast<pointer>(_ptr);
-			}
-			operator const_pointer() const {
-				return static_cast<const_pointer>(_ptr);
-			}
+			std::swap(_ptr, other._ptr);
+			return *this;
+		}
+		operator pointer() {
+			return static_cast<pointer>(_ptr);
+		}
+		operator const_pointer() const {
+			return static_cast<const_pointer>(_ptr);
+		}
 	};
 }
