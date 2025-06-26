@@ -18,7 +18,7 @@
 
 #include "token/c_function.hpp"
 
-#include "core/c_functions.hpp"
+#include "core/functions/file_functions.hpp"
 
 #include <iostream>
 
@@ -190,7 +190,6 @@ int main(int argc, const char* argv[]) {
 			{unit{cffsr}, 0, 0, true, 0}
 		}
 	);
-	std::cout << "-----------------" << std::endl;
 	dteff(*strf, 0);
 	std::cout << "-----------------" << std::endl;
 	std::cout << strf->stack.get_block_num() << std::endl;

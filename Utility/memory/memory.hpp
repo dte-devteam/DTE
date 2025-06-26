@@ -11,7 +11,7 @@ namespace dte_utils {
 			if (mem) {
 				return mem;
 			}
-			throw bad_malloc();
+			//throw bad_malloc();
 		}
 		return nullptr;
 	}

@@ -39,6 +39,9 @@
     <ClCompile Include="memory\xmem_wrapper.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="exceptions\exception.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="target_architecture.hpp">
