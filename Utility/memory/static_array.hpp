@@ -27,7 +27,7 @@ namespace dte_utils {
 				++iter;
 			}
 		}
-		static_array(std::initializer_list<type> il) noexcept(std::is_nothrow_copy_constructible_v<type>)
+		static_array(std::initializer_list<type> il)
 		requires std::is_copy_constructible_v<type> {
 			if (il.size() != N) {
 				throw invalid_range();
