@@ -2,7 +2,7 @@
 #include "allocator.hpp"
 namespace dte_utils {
 	template<typename T, template<typename> typename A = allocator>
-		requires is_allocator_v<A, T>
+	requires is_allocator_v<A, T>
 	struct alloc_handler {
 		using size_type = A<T>::size_type;
 		using type = A<T>::type;
@@ -20,7 +20,7 @@ namespace dte_utils {
 		}
 		template<typename U, template<typename> typename A = allocator>
 		alloc_handler(const alloc_handler<U, A>& other) : alloc_handler(other.get_allocated()) {}
-		size_type get_allocated() const {
+		size_type get_allocated() const noexcept {
 			return _allocated;
 		}
 		alloc_handler& operator=(const alloc_handler&) = delete;

@@ -35,10 +35,10 @@ namespace dte_utils {
 			std::swap(_ptr, other._ptr);
 			return *this;
 		}
-		operator pointer() {
+		operator pointer() noexcept {
 			return static_cast<pointer>(_ptr);
 		}
-		operator const_pointer() const {
+		operator const_pointer() const noexcept {
 			return static_cast<const_pointer>(_ptr);
 		}
 	};

@@ -16,10 +16,10 @@ namespace dte_utils {
 			this->push_back(0);
 		}
 
-		size_type str_len() const {
+		size_type str_len() const noexcept {
 			return this->get_used() - 1;
 		}
-		bool empty_str() const {
+		bool empty_str() const noexcept {
 			return !str_len();
 		}
 

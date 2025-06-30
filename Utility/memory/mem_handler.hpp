@@ -10,15 +10,15 @@ namespace dte_utils {
 			pointer _ptr;
 		public:
 			mem_handler(size_type size = 0);
-			mem_handler(pointer ptr);
+			mem_handler(pointer ptr) noexcept;
 			mem_handler(const mem_handler&) = delete;
 			mem_handler(mem_handler&& other) noexcept;
 			~mem_handler();
 			void resize(size_type size);
-			mem_handler& operator=(pointer ptr);
+			mem_handler& operator=(pointer ptr) noexcept;
 			mem_handler& operator=(const mem_handler&) = delete;
 			mem_handler& operator=(mem_handler&& other) noexcept;
-			operator pointer();
-			operator const_pointer() const;
+			operator pointer() noexcept;
+			operator const_pointer() const noexcept;
 	};
 }
