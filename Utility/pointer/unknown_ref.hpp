@@ -42,7 +42,7 @@ namespace dte_utils {
 				_unknown_decrease();
 			}
 
-			bool get_strength() {
+			bool get_strength() const noexcept {
 				return _strength;
 			}
 			void set_strength(bool strength) {
@@ -83,7 +83,7 @@ namespace dte_utils {
 				return *this;
 			}
 
-			unknown_ref& operator=(unknown_ref&& other) {
+			unknown_ref& operator=(unknown_ref&& other) noexcept {
 				if (this == &other) {
 					return *this;
 				}

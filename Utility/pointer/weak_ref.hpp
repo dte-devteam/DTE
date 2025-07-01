@@ -1,6 +1,7 @@
 #pragma once
 #include "ref.hpp"
 #include "memory/memory.hpp"
+#include "pointer_base.hpp"
 namespace dte_utils {
 	template<typename T>
 	struct weak_ref {
@@ -10,7 +11,7 @@ namespace dte_utils {
 		protected:
 			pointer _instance;
 			ref_counter* _counter;
-			void _weak_decrease() const {
+			void _weak_decrease() const noexcept {
 				if (!--_counter->weak_owners) {
 					cdelete(_counter);
 				}
@@ -36,13 +37,13 @@ namespace dte_utils {
 				_weak_decrease();
 			}
 
-			const ref_counter* get_counter() const {
+			const ref_counter* get_counter() const noexcept {
 				return _counter;
 			}
-			bool expired() const {
+			bool expired() const noexcept {
 				return !get_counter()->strong_owners;
 			}
-			pointer get() const {
+			pointer get() const noexcept {
 				return _instance;
 			}
 
@@ -57,7 +58,7 @@ namespace dte_utils {
 				return *this;
 			}
 
-			weak_ref& operator=(const weak_ref& other) {
+			weak_ref& operator=(const weak_ref& other) noexcept {
 				if (this == &other) {
 					return *this;
 				}
@@ -84,27 +85,33 @@ namespace dte_utils {
 
 
 			type& operator*() const
-			requires !return_type_v<pointer> {
+			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return *_instance;
 			}
 			pointer operator->() const
-			requires !return_type_v<pointer> {
+			requires !return_type_v<type> {
 				if (!_instance) {
 					throw nullptr_access();
 				}
 				return _instance;
 			}
 			template<typename ...Args>
-			requires return_type_v<pointer>
-			return_type_t<pointer> operator()(Args&&... args) const {
+			requires return_type_v<type>
+			return_type_t<type> operator()(Args&&... args) const {
+				if (!_instance) {
+					throw nullptr_access();
+				}
 				return _instance(std::forward<Args>(args)...);
 			}
 			template<typename ...Args>
-			requires is_functor_v<type, Args&&...>
-			is_functor_t<type, Args&&...> operator()(Args&&... args) const {
+			requires is_functor_v<type, Args...>
+			is_functor_t<type, Args...> operator()(Args&&... args) const {
+				if (!_instance) {
+					throw nullptr_access();
+				}
 				return _instance->operator()(std::forward<Args>(args)...);
 			}
 	};

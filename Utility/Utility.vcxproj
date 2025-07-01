@@ -49,6 +49,7 @@
     <ClInclude Include="memory\tmem_wrapper.hpp" />
     <ClInclude Include="memory\static_array.hpp" />
     <ClInclude Include="memory\xmem_wrapper.hpp" />
+    <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />
     <ClInclude Include="pointer\unigue_ref.hpp" />
