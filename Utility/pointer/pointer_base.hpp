@@ -4,13 +4,12 @@
 namespace dte_utils {
 	template<typename T>
 	struct pointer_base {
-		using size_type = size_t;
 		using type = T;
 		using pointer = type*;
 		protected:
 			pointer _instance;
 		public:
-			pointer_base(pointer _instance) : _instance(instance) {}
+			pointer_base(pointer instance) noexcept : _instance(instance) {}
 
 			type& operator*() const
 				requires !return_type_v<type> {

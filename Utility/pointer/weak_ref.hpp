@@ -4,12 +4,11 @@
 #include "pointer_base.hpp"
 namespace dte_utils {
 	template<typename T>
-	struct weak_ref {
+	struct weak_ref : pointer_base<T> {
 		using size_type = ref_counter::size_type;
-		using type = T;
-		using pointer = type*;
+		using type = pointer_base<T>::type;
+		using pointer = pointer_base<T>::pointer;
 		protected:
-			pointer _instance;
 			ref_counter* _counter;
 			void _weak_decrease() const noexcept {
 				if (!--_counter->weak_owners) {
@@ -22,14 +21,14 @@ namespace dte_utils {
 				}
 			}
 		public:
-			weak_ref(pointer instance = nullptr) : _instance(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
-			weak_ref(const weak_ref& other) : _instance(other._instance), _counter(other._counter)  {
+			weak_ref(pointer instance = nullptr) : pointer_base<T>(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
+			weak_ref(const weak_ref& other) noexcept : pointer_base<T>(other._instance), _counter(other._counter) {
 				++_counter->weak_owners;
 			}
 
 			template<typename U>
 			requires std::is_base_of_v<type, U>
-			weak_ref(const weak_ref<U>& other) : _instance(other.get()), _counter(const_cast<ref_counter*>(other.get_counter())) {
+			weak_ref(const weak_ref<U>& other) noexcept : pointer_base<T>(other.operator->()), _counter(const_cast<ref_counter*>(other.get_counter())) {
 				++_counter->weak_owners;
 			}
 
@@ -42,9 +41,6 @@ namespace dte_utils {
 			}
 			bool expired() const noexcept {
 				return !get_counter()->strong_owners;
-			}
-			pointer get() const noexcept {
-				return _instance;
 			}
 
 			weak_ref& operator=(pointer instance) {
@@ -62,7 +58,7 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				_instance = other.get();
+				_instance = other._instance;
 				_weak_decrease();
 				_counter = const_cast<ref_counter*>(other.get_counter());
 				++_counter->weak_owners;
@@ -81,38 +77,6 @@ namespace dte_utils {
 				std::swap(_instance, other._instance);
 				std::swap(_counter, other._counter);
 				return *this;
-			}
-
-
-			type& operator*() const
-			requires !return_type_v<type> {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return *_instance;
-			}
-			pointer operator->() const
-			requires !return_type_v<type> {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance;
-			}
-			template<typename ...Args>
-			requires return_type_v<type>
-			return_type_t<type> operator()(Args&&... args) const {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance(std::forward<Args>(args)...);
-			}
-			template<typename ...Args>
-			requires is_functor_v<type, Args...>
-			is_functor_t<type, Args...> operator()(Args&&... args) const {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance->operator()(std::forward<Args>(args)...);
 			}
 	};
 }

@@ -1,17 +1,15 @@
 #pragma once
 #include "memory/memory.hpp"
-#include "ref.hpp"
+#include "pointer_base.hpp"
 namespace dte_utils {
 	template<typename T>
-	struct unique_ref {
-		using type = T;
-		using pointer = type*;
-		protected:
-			pointer _instance;
+	struct unique_ref : pointer_base<T> {
+		using type = pointer_base<T>::type;
+		using pointer = pointer_base<T>::pointer;
 		public:
-			unique_ref(pointer instance = nullptr) noexcept : _instance(instance) {}
+			unique_ref(pointer instance = nullptr) noexcept : pointer_base<T>(instance) {}
 			unique_ref(const unique_ref&) = delete;
-			unique_ref(unique_ref&& other) noexcept : _instance(other.instance) {
+			unique_ref(unique_ref&& other) noexcept : pointer_base<T>(other._instance) {
 				other._instance = nullptr;
 			}
 			~unique_ref() {
@@ -25,37 +23,6 @@ namespace dte_utils {
 				}
 				std::swap(_instance, other._instance);
 				return *this;
-			}
-
-			type& operator*() const 
-			requires !return_type_v<type> {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return *_instance;
-			}
-			pointer operator->() const 
-			requires !return_type_v<type> {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance;
-			}
-			template<typename ...Args>
-			requires return_type_v<type>
-			return_type_t<type> operator()(Args&&... args) const {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance(std::forward<Args>(args)...);
-			}
-			template<typename ...Args>
-			requires is_functor_v<type, Args...>
-			is_functor_t<type, Args...> operator()(Args&&... args) const {
-				if (!_instance) {
-					throw nullptr_access();
-				}
-				return _instance->operator()(std::forward<Args>(args)...);
 			}
 	};
 }
