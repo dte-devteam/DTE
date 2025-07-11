@@ -5,19 +5,18 @@ namespace dte_token {
 	struct stream;
 	struct dte_function {
 		struct metadata {
-			dte_utils::dynamic_cstring _name;
+			dte_utils::dynamic_cstring name;
+			size_t max_jump;
 			/*
 			later add metadata for complex function building
 			*/
-			dte_utils::atomic_wrapper<size_t> accessors;
 		};
 		struct step {
 			//some data can be compressed to unit attributes (but its slower) 
 			unit data;
 			size_t delta_frame;
-			size_t delta_jump;
 			bool is_executable;
-			dte_utils::atomic_wrapper<size_t> accessors;
+			dte_utils::dynamic_array<size_t> jumps;
 		};
 		//protected:
 			metadata _meta;

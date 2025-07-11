@@ -5,6 +5,7 @@ namespace dte_token {
 	struct c_function {
 		struct metadata {
 			dte_utils::dynamic_cstring name;
+			size_t max_jump;
 			/*
 			later add metadata for complex function building
 			*/

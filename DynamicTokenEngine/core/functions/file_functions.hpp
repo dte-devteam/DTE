@@ -11,7 +11,7 @@ namespace dte_core {
 
 	inline size_t create_ifstream(dte_token::data_stack& ds, size_t offset) {
 		new (ds.push_real(sizeof(std::ifstream), ifstream_destructor)) std::ifstream();
-		return 1;
+		return 0;
 	}
 	inline size_t open_file(dte_token::data_stack& ds, size_t offset) {
 		ptrdiff_t open_mode = std::ios_base::in;
@@ -19,11 +19,11 @@ namespace dte_core {
 			open_mode = get<dte_token::unit>(ds, offset + 2)->get_int()[0];
 		}
 		get<std::ifstream>(ds, offset)->open(get<dte_token::unit>(ds, offset + 1)->get_cstr().begin(), open_mode);
-		return 1;
+		return 0;
 	}
 	inline size_t close_file(dte_token::data_stack& ds, size_t offset) {
 		get<std::ifstream>(ds, offset)->close();
-		return 1;
+		return 0;
 	}
 	inline size_t read_line(dte_token::data_stack& ds, size_t offset) {
 		std::ifstream* ifstr = get<std::ifstream>(ds, offset);
@@ -35,6 +35,6 @@ namespace dte_core {
 		if (ifstr->eof() && str.get_used()) {
 			ifstr->clear();
 		}
-		return 1;
+		return 0;
 	}
 }

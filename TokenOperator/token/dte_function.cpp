@@ -1,9 +1,6 @@
 #include "dte_function.hpp"
 #include "stream.hpp"
 #include "c_function.hpp"
-
-
-#include <iostream>
 using namespace dte_utils;
 using namespace dte_token;
 
@@ -32,27 +29,27 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	s.call_stack.push_back(this);
 	size_t i = 0;
 	while (i < _steps.get_used()) {
-		std::cout << i << std::endl;
-		step& action = _steps[i];
-		action.accessors.value.wait(-1);
-		action.accessors.value.fetch_add(1);
+		const step& action = _steps[i];
 		if (action.is_executable) {
+			size_t jump;
 			if (action.data.get_type() == unit::DFUNC) {
-				i += action.data.get_dfunc()(s, frame_offset + action.delta_frame);
+				jump = action.data.get_dfunc()(s, frame_offset + action.delta_frame);
 			}
 			else if (action.data.get_cfunc().expired()) {
 				throw exception(0, "function is unloaded");
 			}
 			else {
-				i += action.data.get_cfunc()(s.stack, frame_offset + action.delta_frame);
+				jump = action.data.get_cfunc()(s.stack, frame_offset + action.delta_frame);
 			}
+			if (!(jump < action.jumps.get_used())) {
+				throw exception(0, "dte_function is poorly designed");
+			}
+			i += action.jumps[jump];
 		}
 		else {
 			new (s.stack.push_real(sizeof(unit), unit::unit_destructor)) unit(action.data);
+			++i;
 		}
-		action.accessors.value.fetch_sub(1);
-		action.accessors.value.notify_one();
-		i += action.delta_jump;
 	}
 	s.call_stack.pop_back();
 	return i - _steps.get_used();

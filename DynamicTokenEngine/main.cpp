@@ -64,15 +64,6 @@ size_t adder_u(data_stack& ds, size_t offset) {
 }
 
 
-void set_step(dte_function& f) {
-	while (f._steps[1].accessors.value.load()) {
-		f._steps[1].accessors.value.wait(f._steps[1].accessors.value.load());
-	}
-	f._steps[1].accessors.value.fetch_add(1);
-	f._steps[1].data = static_array<ptrdiff_t, 3>{ 1, 2, 3 };
-	f._steps[1].accessors.value.fetch_sub(1);
-	f._steps[1].accessors.value.notify_all();
-}
 
 
 std::atomic<size_t> aaaa{ size_t(1) };
@@ -94,20 +85,10 @@ void run_dte(stream* s, dte_function* f) {
 
 
 
-struct R
-{
-	static void destr(void* block) {
-		static_cast<R*>(block)->~R();
-	}
-	~R() {
-		std::cout << "~R()\n";
-	}
-};
-
 
 
 int main(int argc, const char* argv[]) {
-
+	std::chrono::steady_clock::time_point t1, t2;
 	/*
 	unit uuu3;
 	strong_ref<table>* ttt = new strong_ref<table>(cnew<table>());
@@ -181,16 +162,19 @@ int main(int argc, const char* argv[]) {
 	strong_ref<c_function> cffsr{
 		cnew<c_function>(close_file, c_function::metadata{})
 	};
-	dte_function dteff({ "FILE", 0 },
+	dte_function dteff({ "FILE" },
 		{
-			{unit{cfssr}, 0, 0, true, 0},
-			{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 0, 1, false, 0},
-			{unit{ofsr}, 0, 0, true, 0},
-			{unit{rlsr}, 0, 0, true, 0},
-			{unit{cffsr}, 0, 0, true, 0}
+			{unit{cfssr}, 0, true, {1}},
+			{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
+			{unit{ofsr}, 0, true, {1}},
+			{unit{rlsr}, 0, true, {1}},
+			{unit{cffsr}, 0, true, {1}}
 		}
 	);
+	t1 = std::chrono::high_resolution_clock::now();
 	dteff(*strf, 0);
+	t2 = std::chrono::high_resolution_clock::now();
+	std::cout << "time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\n";
 	std::cout << "-----------------" << std::endl;
 	std::cout << strf->stack.get_block_num() << std::endl;
 	std::cout << strf->stack.get_memory_left() << std::endl;
@@ -201,52 +185,52 @@ int main(int argc, const char* argv[]) {
 
 
 
+	std::cin.get();
 
 
 	/*
-	stream str{ {100}, {} };
-	strong_ref<c_function> cfsr{
-		cnew<c_function>(adder_u, c_function::metadata{})
+	stream strd{ {100}, {} };
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 100;
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 10;
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
+	strong_ref<c_function> datcf{
+		cnew<c_function>(push_da_virtual, c_function::metadata{})
 	};
-	dte_function dtef({"ABC", 0},
+	dte_function datf({ "FILE", 0 },
 		{
-			{unit{static_array<ptrdiff_t, 3>{1, 2, 3}}, 0, 1, false, size_t(0)},
-			{unit{static_array<ptrdiff_t, 3>{10, 20, 30}}, 0, 1, false, size_t(0)},
-			{unit{cfsr}, 0, 0, true, 0}
+			{unit{datcf}, 0, 0, true, 0}
 		}
 	);
-	std::thread th(run_dte, &str, &dtef);
-	set_step(dtef);
-	th.join();
-
-	//dtef(str, 0);
-	std::cout << str.stack.get_block_num() << std::endl;
-	std::cout << str.stack.get_memory_left() << std::endl;
-	for (const ptrdiff_t& i : static_cast<unit*>(str.stack[0])->get_int()) {
-		std::cout << i << std::endl;
-	}
-	*/
-	std::cin.get();
-	/*
-	std::thread t1(run, 1);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	std::thread t2(run, 2);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	std::thread t3(run, 3);
-	std::this_thread::sleep_for(std::chrono::seconds(5));
-	--aaaa;
-	aaaa.notify_one();
-
-	t1.join();
-	t2.join();
-	t3.join();
+	datf(strd, 2);
+	std::cout << strd.stack.get_block_num() << std::endl;
+	std::cout << *static_cast<size_t*>(strd.stack.back()) << std::endl;
 	*/
 
-	data_stack ggg(500);
-	ggg.push_real(sizeof(R), R::destr);
-	ggg.push_real(sizeof(R), R::destr);
-	ggg.push_real(sizeof(R), R::destr);
-	ggg.push_real(sizeof(R), R::destr);
+	stream strd{ {100}, {} };
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 100;
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 10;
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
+	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
+	strong_ref<c_function> datcf{
+		cnew<c_function>(push_da_virtual, c_function::metadata{})
+	};
+	strong_ref<c_function> datcd{
+		cnew<c_function>(cond_dec, c_function::metadata{})
+	};
+	dte_function datf({ "VA_ARGS" },
+		{
+			{unit{datcf}, 0, true, {1}},
+			{unit{datcd}, 0, true, {size_t(-1),1}}
+		}
+	);
+	t1 = std::chrono::high_resolution_clock::now();
+	datf(strd, 2);
+	t2 = std::chrono::high_resolution_clock::now();
+	std::cout << "time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\n";
+	std::cout << strd.stack.get_block_num() << std::endl;
+	std::cout << *static_cast<size_t*>(strd.stack[4]) << std::endl;
+	std::cout << *static_cast<size_t*>(strd.stack[5]) << std::endl;
+
 
 
 	data_stack ggg2 = data_stack(std::move(data_stack(500)));
