@@ -3,50 +3,51 @@
 #include "memory/memory.hpp"
 #include "pointer_base.hpp"
 namespace dte_utils {
-	template<typename T>
+	template<typename T, typename RC = ref_counter>
+	requires is_ref_counter_v<RC>
 	struct weak_ref : pointer_base<T> {
-		using size_type = ref_counter::size_type;
+		using size_type = RC::size_type;
 		using type = pointer_base<T>::type;
 		using pointer = pointer_base<T>::pointer;
 		protected:
-			ref_counter* _counter;
+			RC* _counter;
 			void _weak_decrease() const noexcept {
-				if (!--_counter->weak_owners) {
+				if (!_counter->sub_weak()) {
 					cdelete(_counter);
 				}
 			}
 			void _strong_decrease() {
-				if (!--_counter->strong_owners) {
+				if (!_counter->sub_strong()) {
 					cdelete(_instance);
 				}
 			}
 		public:
-			weak_ref(pointer instance = nullptr) : pointer_base<T>(instance), _counter(cnew<ref_counter>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
+			weak_ref(pointer instance = nullptr) : pointer_base<T>(instance), _counter(cnew<RC>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
 			weak_ref(const weak_ref& other) noexcept : pointer_base<T>(other._instance), _counter(other._counter) {
-				++_counter->weak_owners;
+				_counter->add_weak();
 			}
 
 			template<typename U>
 			requires std::is_base_of_v<type, U>
-			weak_ref(const weak_ref<U>& other) noexcept : pointer_base<T>(other.operator->()), _counter(const_cast<ref_counter*>(other.get_counter())) {
-				++_counter->weak_owners;
+			weak_ref(const weak_ref<U, RC>& other) noexcept : pointer_base<T>(other.operator->()), _counter(const_cast<RC*>(other.get_counter())) {
+				_counter->add_weak();
 			}
 
 			~weak_ref() {
 				_weak_decrease();
 			}
 
-			const ref_counter* get_counter() const noexcept {
+			const RC* get_counter() const noexcept {
 				return _counter;
 			}
 			bool expired() const noexcept {
-				return !get_counter()->strong_owners;
+				return !get_counter()->get_strong();
 			}
 
 			weak_ref& operator=(pointer instance) {
 				_instance = instance;
-				if (--_counter->weak_owners) {
-					_counter = cnew<ref_counter>(
+				if (_counter->sub_weak()) {
+					_counter = cnew<RC>(
 						static_cast<size_type>(1),
 						static_cast<size_type>(0)
 					);
@@ -60,8 +61,8 @@ namespace dte_utils {
 				}
 				_instance = other._instance;
 				_weak_decrease();
-				_counter = const_cast<ref_counter*>(other.get_counter());
-				++_counter->weak_owners;
+				_counter = other._counter;
+				_counter->add_weak();
 				return *this;
 			}
 

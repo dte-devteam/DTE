@@ -2,11 +2,11 @@
 #include "weak_ref.hpp"
 #include "exceptions/pointer_exception.hpp"
 namespace dte_utils {
-	template<typename T>
-	struct unknown_ref : weak_ref<T> {
-		using size_type = weak_ref<T>::size_type;
-		using type = weak_ref<T>::type;
-		using pointer = weak_ref<T>::pointer;
+	template<typename T, typename RC = ref_counter>
+	struct unknown_ref : weak_ref<T, RC> {
+		using size_type = weak_ref<T, RC>::size_type;
+		using type = weak_ref<T, RC>::type;
+		using pointer = weak_ref<T, RC>::pointer;
 		protected:
 			bool _strength;
 			void _unknown_decrease() {
@@ -19,22 +19,22 @@ namespace dte_utils {
 					if (this->expired()) {
 						throw bad_weak_ptr();
 					}
-					++this->_counter->strong_owners;
+					this->_counter->add_strong();
 				}
 			}
 		public:
-			unknown_ref(pointer instance = nullptr, bool strength = false) : weak_ref<T>(instance), _strength(strength) {
+			unknown_ref(pointer instance = nullptr, bool strength = false) : weak_ref<T, RC>(instance), _strength(strength) {
 				if (get_strength()) {
-					++this->_counter->strong_owners;
+					this->_counter->add_strong();
 				}
 			}
-			unknown_ref(const unknown_ref& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
+			unknown_ref(const unknown_ref& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
 				_unknown_increase();
 			}
 
 			template<typename U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref(const weak_ref<U>& other, bool strength = false) : weak_ref<T>(other), _strength(strength) {
+			unknown_ref(const weak_ref<U, RC>& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
 				_unknown_increase();
 			}
 
@@ -60,7 +60,7 @@ namespace dte_utils {
 			unknown_ref& operator=(pointer instance) {
 				_unknown_decrease();
 				this->_instance = instance;
-				if (--this->_counter->weak_owners) {
+				if (this->_counter->sub_weak()) {
 					this->_counter = cnew<ref_counter>(
 						static_cast<size_type>(1),
 						static_cast<size_type>(get_strength() ? 1 : 0)
@@ -77,8 +77,8 @@ namespace dte_utils {
 				}
 				_unknown_decrease();
 				this->_weak_decrease();
-				this->_instance = other.get();
-				++this->_counter->weak_owners;
+				this->_instance = other._instance;
+				this->_counter->add_weak();
 				_unknown_increase();
 				return *this;
 			}
@@ -94,14 +94,14 @@ namespace dte_utils {
 
 			template<typename U>
 			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref& operator=(const weak_ref<U>& other) {
-				if (reinterpret_cast<weak_ref<U>*>(this) == &other) {
+			unknown_ref& operator=(const weak_ref<U, RC>& other) {
+				if (reinterpret_cast<weak_ref<U, RC>*>(this) == &other) {
 					return *this;
 				}
 				_unknown_decrease();
 				this->_weak_decrease();
-				this->_instance = other.get();
-				++this->_counter->weak_owners;
+				this->_instance = other.operator->();
+				this->_counter->add_weak();
 				_unknown_increase();
 				return *this;
 			}

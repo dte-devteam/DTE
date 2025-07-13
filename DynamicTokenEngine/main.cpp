@@ -18,6 +18,8 @@
 
 #include "token/c_function.hpp"
 
+#include "atomic/locker.hpp"
+
 #include "core/functions/file_functions.hpp"
 
 #include <iostream>
@@ -50,7 +52,7 @@ ull measure(F&& f, Args&&... args) {
 	return __rdtsc() - start_time;
 }
 */
-struct F;
+
 
 size_t adder(data_stack& ds, size_t offset) {
 	*static_cast<size_t*>(ds[offset]) += *static_cast<size_t*>(ds[ds.get_block_num() - 1]);
@@ -66,44 +68,30 @@ size_t adder_u(data_stack& ds, size_t offset) {
 
 
 
-std::atomic<size_t> aaaa{ size_t(1) };
-void run(int r) {
-	std::cout << "run start " << r << std::endl;
-	size_t iii = 0;
-	while (aaaa.load()) {
-		aaaa.wait(aaaa.load());
+void run_ptr(strong_ref<int, atomic_ref_counter>* ptr) {
+	size_t i = 1000000;
+	while (--i) {
+		strong_ref<int, atomic_ref_counter> temp(*ptr);
 	}
-	++aaaa;
-	std::cout << "run do " << r << std::endl;
-	--aaaa;
-	std::cout << "run done " << r << std::endl;
-	aaaa.notify_one();
 }
-void run_dte(stream* s, dte_function* f) {
-	(*f)(*s, 0);
-}
-
 
 
 
 
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
-	/*
-	unit uuu3;
-	strong_ref<table>* ttt = new strong_ref<table>(cnew<table>());
-	uuu3 = *ttt;
-	delete ttt;
-	std::cout << uuu3.get_table_ref().get_counter()->weak_owners << std::endl;
-	std::cout << uuu3.get_table_ref().get_counter()->strong_owners << std::endl;
-	*/
 
 	//test_memory();
 	//test_pointer();
 
+	strong_ref<int, atomic_ref_counter> abc(cnew<int>(0));
+	std::thread th1(run_ptr, &abc);
+	std::thread th2(run_ptr, &abc);
+	th1.join();
+	th2.join();
+	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong();
 
-
-
+	/*
 	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
 	std::cout << uu0.get_int()[0] << " "
 		<< uu0.get_int()[1] << " "
@@ -188,23 +176,7 @@ int main(int argc, const char* argv[]) {
 	std::cin.get();
 
 
-	/*
-	stream strd{ {100}, {} };
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 100;
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 10;
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
-	strong_ref<c_function> datcf{
-		cnew<c_function>(push_da_virtual, c_function::metadata{})
-	};
-	dte_function datf({ "FILE", 0 },
-		{
-			{unit{datcf}, 0, 0, true, 0}
-		}
-	);
-	datf(strd, 2);
-	std::cout << strd.stack.get_block_num() << std::endl;
-	std::cout << *static_cast<size_t*>(strd.stack.back()) << std::endl;
-	*/
+
 
 	stream strd{ {100}, {} };
 	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 100;
@@ -232,13 +204,6 @@ int main(int argc, const char* argv[]) {
 	std::cout << *static_cast<size_t*>(strd.stack[5]) << std::endl;
 
 
-
-	data_stack ggg2 = data_stack(std::move(data_stack(500)));
+	*/
 	return 0;
 }
-struct F
-{
-	~F() {
-		std::cout << "~F()\n";
-	}
-};
