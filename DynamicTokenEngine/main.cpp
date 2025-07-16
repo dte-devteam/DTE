@@ -91,7 +91,7 @@ int main(int argc, const char* argv[]) {
 	th2.join();
 	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong();
 
-	/*
+
 	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
 	std::cout << uu0.get_int()[0] << " "
 		<< uu0.get_int()[1] << " "
@@ -204,6 +204,6 @@ int main(int argc, const char* argv[]) {
 	std::cout << *static_cast<size_t*>(strd.stack[5]) << std::endl;
 
 
-	*/
+
 	return 0;
 }
