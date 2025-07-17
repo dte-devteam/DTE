@@ -47,7 +47,8 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 			i += action.jumps[jump];
 		}
 		else {
-			new (s.stack.push_real(sizeof(unit), unit::unit_destructor)) unit(action.data);
+			//new (s.stack.push_real(sizeof(unit), unit::unit_destructor)) unit(action.data);
+			action.act.constr(s.stack.push_real(action.act.size, action.act.destr), action.act.data);
 			++i;
 		}
 	}

@@ -77,9 +77,41 @@ void run_ptr(strong_ref<int, atomic_ref_counter>* ptr) {
 
 
 
+void c_str_copy(void* target, const void* arg) {
+	new (target) dynamic_cstring(*static_cast<const dynamic_cstring*>(arg));
+}
+void c_str_destr(void* block) {
+	static_cast<dynamic_cstring*>(block)->~dynamic_cstring();
+}
+
+
+struct ifstr_args {
+	const char* _Filename;
+	std::ios_base::openmode _Mode = std::ios_base::in;
+	int _Prot = std::ios_base::_Default_open_prot;
+};
+ifstr_args* ifstr_args_i = new ifstr_args(
+	"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
+);
+void ifstr_create(void* target, const void* arg) {
+	if (arg) {
+		const ifstr_args& args = *static_cast<const ifstr_args*>(arg);
+		new (target) std::ifstream(args._Filename, args._Mode, args._Prot);
+	}
+	else {
+		new (target) std::ifstream();
+	}
+}
+void ifstr_destr(void* block) {
+	static_cast<std::ifstream*>(block)->~basic_ifstream();
+}
+
+
+
 
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
+
 
 	//test_memory();
 	//test_pointer();
@@ -152,9 +184,12 @@ int main(int argc, const char* argv[]) {
 	};
 	dte_function dteff({ "FILE" },
 		{
-			{unit{cfssr}, 0, true, {1}},
-			{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
-			{unit{ofsr}, 0, true, {1}},
+			//{unit{cfssr}, 0, true, {1}},
+			{unit{}, 0, false, {1}, {ifstr_create, ifstr_destr, sizeof(std::ifstream), ifstr_args_i}},
+			//{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
+			{unit{}, 1, false, {1}, {c_str_copy, c_str_destr, sizeof(dynamic_cstring), new dynamic_cstring()}},
+			//{unit{ofsr}, 0, true, {1}},
+			{unit{rlsr}, 0, true, {1}},
 			{unit{rlsr}, 0, true, {1}},
 			{unit{cffsr}, 0, true, {1}}
 		}
@@ -166,7 +201,8 @@ int main(int argc, const char* argv[]) {
 	std::cout << "-----------------" << std::endl;
 	std::cout << strf->stack.get_block_num() << std::endl;
 	std::cout << strf->stack.get_memory_left() << std::endl;
-	std::cout << static_cast<dte_token::unit*>(strf->stack[1])->get_cstr().begin() << std::endl;
+	//std::cout << static_cast<dte_token::unit*>(strf->stack[1])->get_cstr().begin() << std::endl;
+	std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin() << std::endl;
 	delete strf;
 	std::cout << "-----------------" << std::endl;
 

@@ -6,3 +6,4 @@ typedef double floatpoint;
 typedef float floatpoint;
 #endif
 typedef void(*destructor)(void*);
+typedef void(*copy_constructor)(void*, const void*);

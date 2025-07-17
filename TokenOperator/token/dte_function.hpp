@@ -1,7 +1,14 @@
 #pragma once
 #include "unit.hpp"
+#include "types.hpp"
 namespace dte_token {
 	struct stream;
+	struct d_action {
+		copy_constructor constr;
+		destructor destr;
+		size_t size;
+		void* data;
+	};
 	struct dte_function {
 		struct metadata {
 			dte_utils::dynamic_cstring name;
@@ -16,6 +23,8 @@ namespace dte_token {
 			size_t delta_frame;
 			bool is_executable;
 			dte_utils::dynamic_array<size_t> jumps;
+
+			d_action act;
 		};
 		//protected:
 			metadata _meta;

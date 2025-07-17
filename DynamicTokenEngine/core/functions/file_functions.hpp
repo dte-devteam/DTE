@@ -15,10 +15,10 @@ namespace dte_core {
 	}
 	inline size_t open_file(dte_token::data_stack& ds, size_t offset) {
 		ptrdiff_t open_mode = std::ios_base::in;
-		if (get_frame_size(ds, offset) > 2) {
-			open_mode = get<dte_token::unit>(ds, offset + 2)->get_int()[0];
-		}
-		get<std::ifstream>(ds, offset)->open(get<dte_token::unit>(ds, offset + 1)->get_cstr().begin(), open_mode);
+		//if (get_frame_size(ds, offset) > 2) {
+		//	open_mode = get<dte_token::unit>(ds, offset + 2)->get_int()[0];
+		//}
+		get<std::ifstream>(ds, offset)->open(get<dte_utils::dynamic_cstring>(ds, offset + 1)->begin(), open_mode);
 		return 0;
 	}
 	inline size_t close_file(dte_token::data_stack& ds, size_t offset) {
@@ -27,7 +27,7 @@ namespace dte_core {
 	}
 	inline size_t read_line(dte_token::data_stack& ds, size_t offset) {
 		std::ifstream* ifstr = get<std::ifstream>(ds, offset);
-		dte_utils::dynamic_cstring& str = get<dte_token::unit>(ds, offset + 1)->get_cstr();
+		dte_utils::dynamic_cstring& str = *get<dte_utils::dynamic_cstring>(ds, offset + 1);
 		str.clear();
 		for (char c = 0; ifstr->get(c) && c != '\n';) {
 			str.push_back(c);
@@ -35,6 +35,7 @@ namespace dte_core {
 		if (ifstr->eof() && str.get_used()) {
 			ifstr->clear();
 		}
+		str.push_back(0);
 		return 0;
 	}
 }
