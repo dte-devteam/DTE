@@ -77,4 +77,6 @@ namespace dte_utils {
 				return *this;
 			}
 	};
+	template<typename T>
+	using atomic_strong_ref = strong_ref<T, atomic_ref_counter>;
 }

@@ -5,5 +5,7 @@ typedef double floatpoint;
 #else
 typedef float floatpoint;
 #endif
-typedef void(*destructor)(void*);
-typedef void(*copy_constructor)(void*, const void*);
+//typedef void(*destructor)(void*);
+using destructor = void(void*);
+//typedef void(*constructor)(void*, const void*);
+using constructor = void(void*, const void*);

@@ -4,8 +4,8 @@
 namespace dte_token {
 	struct stream;
 	struct d_action {
-		copy_constructor constr;
-		destructor destr;
+		constructor* constr;
+		destructor* destr;
 		size_t size;
 		void* data;
 	};

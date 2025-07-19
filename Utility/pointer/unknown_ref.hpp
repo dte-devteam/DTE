@@ -106,4 +106,6 @@ namespace dte_utils {
 				return *this;
 			}
 	};
+	template<typename T>
+	using atomic_unknown_ref = unknown_ref<T, atomic_ref_counter>;
 }

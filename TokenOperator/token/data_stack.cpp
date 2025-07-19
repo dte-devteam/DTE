@@ -2,7 +2,7 @@
 #include "memory/memory.hpp"
 using namespace dte_utils;
 using namespace dte_token;
-data_stack::data_stack(size_t stack_size) {
+data_stack::data_stack(size_type stack_size) {
 	char* begin = tmalloc<char>(stack_size);
 	blocks.emplace_back(begin + stack_size, begin, nullptr);
 }
@@ -10,7 +10,7 @@ data_stack::data_stack(data_stack&& other) noexcept : blocks(std::move(other.blo
 	other.blocks.emplace_back(nullptr, nullptr, nullptr);	//other now frees nothing
 }
 data_stack::~data_stack() {
-	for (size_t i = 1; i < blocks.get_used(); ++i) {
+	for (size_type i = 1; i < blocks.get_used(); ++i) {
 		if (blocks[i].destr) {
 			blocks[i].destr(blocks[i].virtual_begin);
 		}
@@ -26,7 +26,7 @@ data_stack& data_stack::operator=(data_stack&& other) noexcept {
 	return *this;
 }
 
-void* data_stack::push_real(size_t block_size, destructor destr) {
+data_stack::pointer data_stack::push_real(size_type block_size, destructor* destr) {
 	if (block_size > get_memory_left()) {
 		throw exception(0, "stack overflow");
 	}
@@ -37,7 +37,7 @@ void* data_stack::push_real(size_t block_size, destructor destr) {
 	);
 	return blocks.back().virtual_begin;
 }
-void data_stack::push_virt(void* virt_block) {
+void data_stack::push_virt(pointer virt_block) {
 	blocks.emplace_back(
 		static_cast<char*>(virt_block),
 		blocks.back().physical_end,
@@ -51,7 +51,7 @@ void data_stack::pop() {
 	}
 	throw exception(0, "stack heap is untouchable");
 }
-void data_stack::pop(size_t block_num) {
+void data_stack::pop(size_type block_num) {
 	if (block_num > get_block_num()) {
 		throw exception(0, "stack heap is untouchable");
 	}
@@ -60,21 +60,21 @@ void data_stack::pop(size_t block_num) {
 void data_stack::clear() {
 	pop(get_block_num());
 }
-size_t data_stack::get_block_num() const {
+data_stack::size_type data_stack::get_block_num() const {
 	return blocks.get_used() - 1; //- 1 because [0] is stack heap
 }
-size_t data_stack::get_block_size(size_t index) const {
+data_stack::size_type data_stack::get_block_size(size_type index) const {
 	return blocks[index + 1].physical_end - blocks[index].physical_end;
 }
-size_t data_stack::get_memory_left() const {
+data_stack::size_type data_stack::get_memory_left() const {
 	return blocks[0].virtual_begin - blocks.back().physical_end;
 }
-size_t data_stack::get_allocated() const {
+data_stack::size_type data_stack::get_allocated() const {
 	return blocks[0].virtual_begin - blocks[0].physical_end;
 }
-void* data_stack::operator[](size_t index) const {
+data_stack::pointer data_stack::operator[](size_type index) const {
 	return blocks[index + 1].virtual_begin;	//+ 1 because [0] is stack heap
 }
-void* data_stack::back() {
+data_stack::pointer data_stack::back() const {
 	return blocks.back().virtual_begin;
 }

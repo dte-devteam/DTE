@@ -80,4 +80,6 @@ namespace dte_utils {
 				return *this;
 			}
 	};
+	template<typename T>
+	using atomic_weak_ref = weak_ref<T, atomic_ref_counter>;
 }

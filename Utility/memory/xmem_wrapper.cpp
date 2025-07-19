@@ -6,17 +6,17 @@ void xmem_wrapper::kill_value() {
 		_destructor(_ptr);
 	}
 }
-xmem_wrapper::xmem_wrapper(pointer ptr, destructor destr_func) : _destructor(destr_func), mem_handler(ptr) {}
+xmem_wrapper::xmem_wrapper(pointer ptr, destructor* destr_func) : _destructor(destr_func), mem_handler(ptr) {}
 xmem_wrapper::~xmem_wrapper() {
 	kill_value();
 }
 
 xmem_wrapper::xmem_wrapper(xmem_wrapper&& other) noexcept : _destructor(other._destructor), mem_handler(std::move(other)) {}
 
-destructor xmem_wrapper::get_destructor() {
+destructor* xmem_wrapper::get_destructor() {
 	return _destructor;
 }
-void xmem_wrapper::set_new_value(pointer ptr, destructor destr_func) {
+void xmem_wrapper::set_new_value(pointer ptr, destructor* destr_func) {
 	if (_ptr == ptr) {
 		return;
 	}

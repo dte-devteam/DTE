@@ -189,9 +189,9 @@ int main(int argc, const char* argv[]) {
 			//{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
 			{unit{}, 1, false, {1}, {c_str_copy, c_str_destr, sizeof(dynamic_cstring), new dynamic_cstring()}},
 			//{unit{ofsr}, 0, true, {1}},
-			{unit{rlsr}, 0, true, {1}},
-			{unit{rlsr}, 0, true, {1}},
-			{unit{cffsr}, 0, true, {1}}
+			{unit{rlsr}, 0, true, {1}, {}},
+			{unit{rlsr}, 0, true, {1}, {}},
+			{unit{cffsr}, 0, true, {1}, {}}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();

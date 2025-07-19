@@ -167,6 +167,7 @@
     <ClInclude Include="token\c_function.hpp" />
     <ClInclude Include="token\data_stack.hpp" />
     <ClInclude Include="token\dte_function.hpp" />
+    <ClInclude Include="token\immutable.hpp" />
     <ClInclude Include="token\stream.hpp" />
     <ClInclude Include="token\table.hpp" />
     <ClInclude Include="token\unit.hpp" />

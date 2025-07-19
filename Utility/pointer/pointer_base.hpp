@@ -18,8 +18,7 @@ namespace dte_utils {
 				}
 				return *_instance;
 			}
-			pointer operator->() const
-				requires !return_type_v<type> {
+			pointer operator->() const {
 				if (!_instance) {
 					throw nullptr_access();
 				}

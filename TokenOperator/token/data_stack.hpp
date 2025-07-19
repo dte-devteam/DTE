@@ -3,32 +3,32 @@
 #include "types.hpp"
 namespace dte_token {
 	struct data_stack {
+		using size_type = size_t;
+		using pointer = void*;
 		struct block {
 			char* virtual_begin;
 			char* physical_end;
-			destructor destr;
+			destructor* destr;
 		};
 		protected:
 			dte_utils::dynamic_stack<block> blocks;
 		public:
-			data_stack(size_t stack_size);
+			data_stack(size_type stack_size);
 			data_stack(const data_stack& other) = delete;
 			data_stack(data_stack&& other) noexcept;
 			data_stack& operator=(const data_stack& other) = delete;
 			data_stack& operator=(data_stack&& other) noexcept;
 			~data_stack();
-			void* push_real(size_t block_size, destructor destr);
-			void push_virt(void* virt_block);
+			pointer push_real(size_type block_size, destructor* destr);
+			void push_virt(pointer virt_block);
 			void pop();
-			void pop(size_t block_num);
+			void pop(size_type block_num);
 			void clear();
-			size_t get_block_num() const;
-			size_t get_block_size(size_t index) const;
-			size_t get_memory_left() const;
-			size_t get_allocated() const;
-			void* operator[](size_t index) const;
-			void* begin();
-			void* end();
-			void* back();
+			size_type get_block_num() const;
+			size_type get_block_size(size_type index) const;
+			size_type get_memory_left() const;
+			size_type get_allocated() const;
+			pointer operator[](size_type index) const;
+			pointer back() const;
 	};
 }
