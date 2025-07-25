@@ -13,7 +13,8 @@ namespace dte_utils {
 		
 
 		dynamic_string(size_t alocate_extra_size = 0) : dynamic_array<T, A>(alocate_extra_size + 1) {
-			this->push_back(0);
+			place_at(end(), static_cast<type>(0));
+			++this->_used;
 		}
 
 		size_type str_len() const noexcept {
@@ -24,10 +25,62 @@ namespace dte_utils {
 		}
 
 		void clear() {
-			for (type& i : *this) {
-				i = 0;
+			if constexpr (!std::is_trivially_destructible_v<type>) {
+				destruct_range(begin() + 1, end());
 			}
-			dynamic_stack<T>::clear();
+			this->_used = 1;
+			this->back() = 0;
+		}
+
+		void push_back(const_type& value) {
+			if (value) {
+				this->back() = value;
+				dynamic_stack<T, A>::push_back(0);
+			}
+		}
+		void push_back(type&& value) {
+			if (value) {
+				this->back() = std::move(value);
+				dynamic_stack<T, A>::push_back(0);
+			}
+		}
+		//don`t forget - string must end by 0!
+		void native_push(const_type& value) {
+			dynamic_stack<T, A>::push_back(value);
+		}
+		//don`t forget - string must end by 0!
+		void native_push(type&& value) {
+			dynamic_stack<T, A>::push_back(std::move(value));
+		}
+		template<typename ...Args>
+		void emplace_back(Args&&... args) = delete;
+		void pop_back() {
+			if (empty_str()) {
+				throw zero_size_access();
+			}
+			*(end() - 2) = 0;
+			--this->_used;
+			if constexpr (!std::is_trivially_destructible_v<type>) {
+				destuct_at(end());
+			}
+		}
+		void pop_back(size_type num) {
+			if (num > str_len()) {
+				throw out_of_range();
+			}
+			*(end() - num - 1) = 0;
+			if constexpr (!std::is_trivially_destructible_v<type>) {
+				destruct_range(end() - num, end())
+			}
+			this->_used -= num;
+		}
+		//don`t forget - string must end by 0!
+		void native_pop() {
+			dynamic_stack<T, A>::pop_back();
+		}
+		//don`t forget - string must end by 0!
+		void native_pop(size_type num) {
+			dynamic_stack<T, A>::pop_back(num);
 		}
 
 		dynamic_string substr(size_type from, size_type to) {
@@ -38,24 +91,25 @@ namespace dte_utils {
 				throw out_of_range();
 			}
 			dynamic_string new_str(this->begin() + from, to - from, 1);
-			new_str.push_back(0);
+			place_at(new_str.end(), static_cast<type>(0));
+			++new_str._used;
 			return new_str;
 		}
 
 
 		template<typename U, template<typename> typename UA>
 		dynamic_string& operator +=(const dynamic_string<U, UA>& other) {
-			this->pop_back();
-			dynamic_array<T, A>::operator+=(other);
+			native_pop();
+			dynamic_stack<T, A>::operator+=(other);
 			if (&other == reinterpret_cast<dynamic_string<U, UA>*>(this)) {
-				this->push_back(0);
+				native_push(0);
 			}
 			return *this;
 		}
 		template<typename U, size_t N>
 		dynamic_string& operator +=(const U(&arr)[N]) {
-			this->pop_back();
-			dynamic_array<T, A>::operator+=(arr);
+			native_pop();
+			dynamic_stack<T, A>::operator+=(arr);
 			return *this;
 		}
 

@@ -28,14 +28,14 @@ namespace dte_core {
 	inline size_t read_line(dte_token::data_stack& ds, size_t offset) {
 		std::ifstream* ifstr = get<std::ifstream>(ds, offset);
 		dte_utils::dynamic_cstring& str = *get<dte_utils::dynamic_cstring>(ds, offset + 1);
-		str.clear();
+		str.native_pop(str.get_used());
 		for (char c = 0; ifstr->get(c) && c != '\n';) {
-			str.push_back(c);
+			str.native_push(c);
 		}
 		if (ifstr->eof() && str.get_used()) {
 			ifstr->clear();
 		}
-		str.push_back(0);
+		str.native_push(0);
 		return 0;
 	}
 }

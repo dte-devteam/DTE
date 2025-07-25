@@ -23,6 +23,64 @@ namespace dte_utils {
 				array_to_array(static_cast<pointer>(new_allocator), begin(), get_used());
 				return new_allocator;
 			}
+
+			//Functions requires error handling by the user himself
+
+			type& _front() noexcept {
+				return *begin();
+			}
+			const_type& _front() const noexcept {
+				return *begin();
+			}
+			type& _back() noexcept {
+				return *(end() - 1);
+			}
+			const_type& _back() const noexcept {
+				return *(end() - 1);
+			}
+
+			type& _get_by_index(size_type index) noexcept {
+				return this->_allocator[index];
+			}
+			const_type& _get_by_index(size_type index) const noexcept {
+				return this->_allocator[index];
+			}
+
+			template<typename P>
+			pointer _find_ranged(P predicate, pointer from, pointer to) 
+			noexcept(noexcept(predicate(std::declval<type&>()))) {
+				while (from != to) {
+					if (predicate(*from)) {
+						return from;
+					}
+					++from;
+				}
+				return nullptr;
+			}
+			template<typename P>
+			const_pointer _find_ranged(P predicate, const_pointer from, const_pointer to) const
+			noexcept(noexcept(predicate(std::declval<const_type&>()))) {
+				while (from != to) {
+					if (predicate(*from)) {
+						return from;
+					}
+					++from;
+				}
+				return nullptr;
+			}
+
+			void _pop_back() noexcept(std::is_nothrow_destructible_v<type>) {
+				--_used;
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					destuct_at(end());
+				}
+			}
+			void _pop_back(size_type num) noexcept(std::is_nothrow_destructible_v<type>) {
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					destruct_range(end() - num, end());
+				}
+				_used -= num;
+			}
 		public:
 			dynamic_stack(size_type alocate_size = 0) : _used(0), alloc_handler<T, A>(alocate_size) {}
 			template<typename U, size_type N>
@@ -68,25 +126,25 @@ namespace dte_utils {
 				if (!get_used()) {
 					throw zero_size_access();
 				}
-				return *begin();
+				return _front();
 			}
 			const_type& front() const {
 				if (!get_used()) {
 					throw zero_size_access();
 				}
-				return *begin();
+				return _front();
 			}
 			type& back() {
 				if (!get_used()) {
 					throw zero_size_access();
 				}
-				return *(end() - 1);
+				return _back();
 			}
 			const_type& back() const {
 				if (!get_used()) {
 					throw zero_size_access();
 				}
-				return *(end() - 1);
+				return _back();
 			}
 
 
@@ -94,71 +152,47 @@ namespace dte_utils {
 				if (!(index < get_used())) {
 					throw out_of_range();
 				}
-				return this->_allocator[index];
+				return _get_by_index(index);
 			}
 			const_type& operator[](size_type index) const {
 				if (!(index < get_used())) {
 					throw out_of_range();
 				}
-				return this->_allocator[index];
+				return _get_by_index(index);
 			}
 
 
 			template<typename P>
-			pointer find(P predicate) noexcept(noexcept(predicate(std::declval<type&>()))) {
-				pointer i = begin();
-				while (i != end()) {
-					if (predicate(*i)) {
-						return i;
-					}
-					++i;
-				}
-				return nullptr;
+			pointer find(P predicate) 
+			noexcept(noexcept(_find_ranged(predicate, begin(), end()))) {
+				//we guarantee the correct range by begin() & end()
+				return _find_ranged(predicate, begin(), end());
 			}
 			template<typename P>
-			pointer find(P predicate) const noexcept(noexcept(predicate(std::declval<const_type&>()))) {
-				const_pointer i = begin();
-				while (i != end()) {
-					if (predicate(*i)) {
-						return i;
-					}
-					++i;
-				}
-				return nullptr;
+			const_pointer find(P predicate) const 
+			noexcept(noexcept(_find_ranged(predicate, begin(), end()))) {
+				//we guarantee the correct range by begin() & end()
+				return _find_ranged(predicate, begin(), end());
 			}
 			template<typename P>
-			pointer find_ranged(P predicate, size_type from, size_type to) {
+			pointer find_ranged(P predicate, pointer from, pointer to) {
 				if (from > to) {
 					throw invalid_range();
 				}
-				if (to > get_used()) {
+				if (from < begin() || to > end()) {
 					throw out_of_range();
 				}
-				pointer i = begin() + to;
-				pointer s = begin() + from;
-				while (i != s) {
-					if (predicate(*--i)) {
-						return i;
-					}
-				}
-				return nullptr;
+				return _find_ranged(predicate, from, to);
 			}
 			template<typename P>
-			const_pointer find_ranged(P predicate, size_type from, size_type to) const {
+			const_pointer find_ranged(P predicate, const_pointer from, const_pointer to) const {
 				if (from > to) {
 					throw invalid_range();
 				}
-				if (to > get_used()) {
+				if (from < begin() || to > end()) {
 					throw out_of_range();
 				}
-				const_pointer i = begin() + to;
-				const_pointer s = begin() + from;
-				while (i != s) {
-					if (predicate(*--i)) {
-						return i;
-					}
-				}
-				return nullptr;
+				return _find_ranged(predicate, from, to);
 			}
 
 
@@ -182,7 +216,7 @@ namespace dte_utils {
 					}
 					else {
 						A<T> new_allocator = _provide_buffer();
-						if constexpr (!std::is_trivially_destructible_v<T>) {
+						if constexpr (!std::is_trivially_destructible_v<type>) {
 							destruct_range(begin(), end());
 						}
 						this->_allocator = std::move(new_allocator);
@@ -197,7 +231,7 @@ namespace dte_utils {
 			}
 
 
-			void push_back(const T& value) {
+			void push_back(const_type& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
@@ -214,7 +248,7 @@ namespace dte_utils {
 				}
 				++_used;
 			}
-			void push_back(T&& value) {
+			void push_back(type&& value) {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
@@ -253,22 +287,17 @@ namespace dte_utils {
 				if (!get_used()) {
 					throw zero_size_access();
 				}
-				--_used;
-				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destuct_at(end());
-				}
+				_pop_back();
 			}
 			void pop_back(size_type num) {
 				if (num > get_used()) {
 					throw out_of_range();
 				}
-				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destruct_range(end() - num, end());
-				}
-				_used -= num;
+				_pop_back(num);
 			}
 
-			bool operator==(const dynamic_stack& other) const noexcept(is_nothrow_not_equal_to_v<const_type&>)
+			bool operator==(const dynamic_stack& other) const 
+			noexcept(is_nothrow_not_equal_to_v<const_type&>)
 			requires has_not_equal_to_operator_v<const_type&> {
 				if (get_used() != other.get_used()) {
 					return false;
@@ -282,7 +311,8 @@ namespace dte_utils {
 				}
 				return true;
 			}
-			bool operator!=(const dynamic_stack& other) const noexcept(is_nothrow_not_equal_to_v<const_type&>)
+			bool operator!=(const dynamic_stack& other) const 
+			noexcept(is_nothrow_not_equal_to_v<const_type&>)
 			requires has_not_equal_to_operator_v<const_type&> {
 				return !(*this == other);
 			}

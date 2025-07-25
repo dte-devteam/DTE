@@ -26,6 +26,68 @@ namespace dte_utils {
 				);
 				return new_allocator;
 			}
+
+			//Functions requires error handling by the user himself
+
+			void _erase(pointer pos) noexcept(
+				std::is_nothrow_destructible_v<type> &&
+				std::is_nothrow_swappable_v<type>
+			) {
+				--this->_used;
+				while (pos != this->end()) {
+					std::swap(*++pos, *pos);
+				}
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					destuct_at(this->end());
+				}
+			}
+			void _erase(pointer first, pointer last) noexcept(
+				std::is_nothrow_destructible_v<type>&&
+				std::is_nothrow_swappable_v<type>
+			) {
+				size_type size = last - first;
+				while (last != this->end()) {
+					std::swap(*first, *last);
+					++first;
+					++last;
+				}
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					destruct_range(this->end() - size, this->end());
+				}
+				this->_used -= size;
+			}
+
+			void _remove(pointer pos) noexcept(
+				std::is_nothrow_destructible_v<type> && 
+				std::is_nothrow_swappable_v<type>
+			) {
+				--this->_used;
+				std::swap(*pos, *(this->end()));
+				if constexpr (!std::is_trivially_destructible_v<type>) {
+					destuct_at(this->end());
+				}
+			}
+			void _remove(pointer first, pointer last) noexcept(
+				std::is_nothrow_destructible_v<type>&&
+				std::is_nothrow_swappable_v<type>
+			) {
+				if (last == this->end()) {
+					if constexpr (!std::is_trivially_destructible_v<type>) {
+						destruct_range(first, this->end());
+					}
+					this->_used -= last - first;
+				}
+				else {
+					pointer over_pos = this->end();
+					this->_used -= last - first;
+					while (last != first) {
+						std::swap(*--last, *--over_pos);
+						if constexpr (!std::is_trivially_destructible_v<type>) {
+							destuct_at(over_pos);
+						}
+					}
+				}
+			}
 		public:
 			template<typename U>
 			void insert(pointer pos, const U& value) {
@@ -179,13 +241,7 @@ namespace dte_utils {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
-				--this->_used;
-				while (pos != this->end()) {
-					std::swap(*++pos, *pos);
-				}
-				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destuct_at(this->end());
-				}
+				_erase(pos);
 			}
 			void erase(pointer first, pointer last) {
 				if (first > last) {
@@ -194,16 +250,7 @@ namespace dte_utils {
 				if (first < this->begin() || last > this->end()) {
 					throw out_of_range();
 				}
-				size_type size = last - first;
-				while (last != this->end()) {
-					std::swap(*first, *last);
-					++first;
-					++last;
-				}
-				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destruct_range(this->end() - size, this->end());
-				}
-				this->_used -= size;
+				_erase(first, last);
 			}
 
 			//unordered removal (faster, but order breaks)
@@ -211,11 +258,7 @@ namespace dte_utils {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
-				--this->_used;
-				std::swap(*pos, *(this->end()));
-				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destuct_at(this->end());
-				}
+				_remove(pos);
 			}
 			//is effective in larger arrays and smaller removal
 			void remove(pointer first, pointer last) {
@@ -225,22 +268,7 @@ namespace dte_utils {
 				if (first < this->begin() || last > this->end()) {
 					throw out_of_range();
 				}
-				if (last == this->end()) {
-					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(first, this->end());
-					}
-					this->_used -= last - first;
-				}
-				else {
-					pointer over_pos = this->end();
-					this->_used -= last - first;
-					while (last != first) {
-						std::swap(*--last, *--over_pos);
-						if constexpr (!std::is_trivially_destructible_v<type>) {
-							destuct_at(over_pos);
-						}
-					}
-				}
+				_remove(first, last);;
 			}
 	};
 }

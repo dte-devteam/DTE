@@ -112,6 +112,12 @@ void ifstr_destr(void* block) {
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
 
+	dynamic_cstring cs;
+	cs.push_back('A');
+	cs.push_back('B');
+	cs.push_back('C');
+	cs.push_back('D');
+	std::cout << cs.substr(0, 2).begin() << std::endl;
 
 	//test_memory();
 	//test_pointer();
@@ -121,7 +127,7 @@ int main(int argc, const char* argv[]) {
 	std::thread th2(run_ptr, &abc);
 	th1.join();
 	th2.join();
-	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong();
+	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong() << std::endl;
 
 
 	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };

@@ -20,11 +20,15 @@ namespace dte_utils {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
 	}
 	inline void* xrealloc(void* block, size_t size) {
-		void* mem = realloc(block, size);
-		if (mem) {
-			return mem;
+		if (size) {
+			void* mem = realloc(block, size);
+			if (mem) {
+				return mem;
+			}
+			throw bad_realloc();
 		}
-		throw bad_realloc();
+		free(block);
+		return nullptr;
 	}
 	template<typename T>
 	inline T* trealloc(T* block, size_t num) {
