@@ -1,5 +1,7 @@
 #include "data_stack.hpp"
 #include "memory/memory.hpp"
+
+#include <iostream>
 using namespace dte_utils;
 using namespace dte_token;
 data_stack::data_stack(size_type stack_size) {

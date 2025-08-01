@@ -5,8 +5,6 @@
 
 #include "memory/xmem_wrapper.hpp"
 
-#include "token/unit.hpp"
-#include "token/table.hpp"
 
 #include "token/data_stack.hpp"
 
@@ -54,16 +52,7 @@ ull measure(F&& f, Args&&... args) {
 */
 
 
-size_t adder(data_stack& ds, size_t offset) {
-	*static_cast<size_t*>(ds[offset]) += *static_cast<size_t*>(ds[ds.get_block_num() - 1]);
-	return 1;
-}
-size_t adder_u(data_stack& ds, size_t offset) {
-	static_cast<unit*>(ds[offset])->get_int()[0] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[0];
-	static_cast<unit*>(ds[offset])->get_int()[1] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[1];
-	static_cast<unit*>(ds[offset])->get_int()[2] += static_cast<unit*>(ds[ds.get_block_num() - 1])->get_int()[2];
-	return 1;
-}
+
 
 
 
@@ -85,26 +74,10 @@ void c_str_destr(void* block) {
 }
 
 
-struct ifstr_args {
-	const char* _Filename;
-	std::ios_base::openmode _Mode = std::ios_base::in;
-	int _Prot = std::ios_base::_Default_open_prot;
-};
+
 ifstr_args* ifstr_args_i = new ifstr_args(
 	"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
 );
-void ifstr_create(void* target, const void* arg) {
-	if (arg) {
-		const ifstr_args& args = *static_cast<const ifstr_args*>(arg);
-		new (target) std::ifstream(args._Filename, args._Mode, args._Prot);
-	}
-	else {
-		new (target) std::ifstream();
-	}
-}
-void ifstr_destr(void* block) {
-	static_cast<std::ifstream*>(block)->~basic_ifstream();
-}
 
 
 
@@ -138,45 +111,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong() << std::endl;
 
 
-	unit uu0{ static_array<ptrdiff_t, 3>{1,2,3} };
-	std::cout << uu0.get_int()[0] << " "
-		<< uu0.get_int()[1] << " "
-		<< uu0.get_int()[2] << std::endl;
 
-	unit uu1{ dynamic_cstring("ABC") };
-	std::cout << uu1.get_cstr().begin() << std::endl;
-
-	unit uu2{ uu1 };
-	std::cout << uu2.get_cstr().begin() << std::endl;
-
-	uu0 = "AAA";
-	uu0 = "AAA";
-	std::cout << uu0.get_cstr().begin() << std::endl;
-
-	uu1 = static_array<ptrdiff_t, 3>({ 1,2,3 });
-	uu0 = std::move(uu1);
-
-	std::cout << uu0.get_int()[0] << " "
-		<< uu0.get_int()[1] << " "
-		<< uu0.get_int()[2] << std::endl;
-
-	std::cout << uu1.get_cstr().begin() << std::endl;
-
-	uu1 = strong_ref<table>(cnew<table>());
-
-
-	table ttt;
-	ttt.get_table_units().emplace_back(uu0, "UU0");
-	ttt.get_table_units().emplace_back(dynamic_cstring(":)"), "UU1");
-	ttt.get_table_units().emplace_back(unit(), dynamic_cstring(":|"));
-	std::cout << ttt.get_by_index(0).u.get_int()[0] << std::endl;
-	std::cout << ttt.get_by_index(1).u.get_cstr().begin() << std::endl;
-	std::cout << ttt.get_by_index(2).u.get_type() << std::endl;
-	//std::cout << ttt[":("].u.get_type() << std::endl;
-	std::cout << ttt.get_as_target(":(").name.begin() << std::endl;
-
-	
-	
 
 
 
@@ -187,6 +122,9 @@ int main(int argc, const char* argv[]) {
 	strong_ref<c_function> cfssr{
 		cnew<c_function>(create_ifstream, c_function::metadata{})
 	};
+	strong_ref<c_function> ccstrsr{
+		cnew<c_function>(create_cstr, c_function::metadata{})
+	};
 	strong_ref<c_function> ofsr{
 		cnew<c_function>(open_file, c_function::metadata{})
 	};
@@ -196,16 +134,25 @@ int main(int argc, const char* argv[]) {
 	strong_ref<c_function> cffsr{
 		cnew<c_function>(close_file, c_function::metadata{})
 	};
+	/*
 	dte_function dteff({ "FILE" },
 		{
 			//{unit{cfssr}, 0, true, {1}},
-			{unit{}, 0, false, {1}, {ifstr_create, ifstr_destr, sizeof(std::ifstream), ifstr_args_i}},
+			{unit{}, 0, true, {1}, {ifstr_create, ifstr_destr, sizeof(std::ifstream), ifstr_args_i}, {1}},
 			//{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
-			{unit{}, 1, false, {1}, {c_str_copy, c_str_destr, sizeof(dynamic_cstring), new dynamic_cstring()}},
+			{unit{}, 1, true, {1}, {c_str_copy, c_str_destr, sizeof(dynamic_cstring), new dynamic_cstring()}, {1}},
 			//{unit{ofsr}, 0, true, {1}},
-			{unit{rlsr}, 0, true, {1}, {}},
-			{unit{rlsr}, 0, true, {1}, {}},
-			{unit{cffsr}, 0, true, {1}, {}}
+			{unit{rlsr}, 0, true, {1}, {}, {1}},
+			{unit{rlsr}, 0, true, {1}, {}, {1}},
+			{unit{cffsr}, 0, true, {1}, {}, {1}}
+		}
+	);*/
+	dte_function dteff({ "FILE", 0 },
+		{
+			{cfssr, {1}, {ifstr_args_i}},
+			{ccstrsr, {1}, {size_t(0)}},
+			{rlsr, {1}, {size_t(0)}},
+			{cffsr, {1}, {size_t(0)}}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();
@@ -228,30 +175,7 @@ int main(int argc, const char* argv[]) {
 
 
 
-	stream strd{ {100}, {} };
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 100;
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 10;
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
-	*static_cast<size_t*>(strd.stack.push_real(sizeof(size_t), nullptr)) = 2;
-	strong_ref<c_function> datcf{
-		cnew<c_function>(push_da_virtual, c_function::metadata{})
-	};
-	strong_ref<c_function> datcd{
-		cnew<c_function>(cond_dec, c_function::metadata{})
-	};
-	dte_function datf({ "VA_ARGS" },
-		{
-			{unit{datcf}, 0, true, {1}},
-			{unit{datcd}, 0, true, {size_t(-1),1}}
-		}
-	);
-	t1 = std::chrono::high_resolution_clock::now();
-	datf(strd, 2);
-	t2 = std::chrono::high_resolution_clock::now();
-	std::cout << "time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\n";
-	std::cout << strd.stack.get_block_num() << std::endl;
-	std::cout << *static_cast<size_t*>(strd.stack[4]) << std::endl;
-	std::cout << *static_cast<size_t*>(strd.stack[5]) << std::endl;
+
 
 
 

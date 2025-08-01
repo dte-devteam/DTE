@@ -11,6 +11,6 @@ const c_function::metadata& c_function::get_meta() const {
 const c_function::func c_function::get_body() const {
 	return _body;
 }
-size_t c_function::operator()(data_stack& stack, size_t frame_offset) const {
-	return _body(stack, frame_offset);
+size_t c_function::operator()(data_stack& stack, const semi_pointer::data& spd) const {
+	return _body(stack, spd);
 }

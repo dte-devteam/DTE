@@ -1,14 +1,12 @@
 #pragma once
-#include "unit.hpp"
+//#include "unit.hpp"
+#include "memory/dynamic_string.hpp"
+#include "pointer/strong_ref.hpp"
+#include "c_function.hpp"
 #include "types.hpp"
+#include "semi_pointer.hpp"
 namespace dte_token {
 	struct stream;
-	struct d_action {
-		constructor* constr;
-		destructor* destr;
-		size_t size;
-		void* data;
-	};
 	struct dte_function {
 		struct metadata {
 			dte_utils::dynamic_cstring name;
@@ -19,12 +17,39 @@ namespace dte_token {
 		};
 		struct step {
 			//some data can be compressed to unit attributes (but its slower) 
-			unit data;
-			size_t delta_frame;
-			bool is_executable;
+			union G {
+				G() {}
+				~G() {}
+				dte_utils::strong_ref<c_function> cf;
+				dte_utils::strong_ref<dte_function> df;
+			} fu;
+			bool is_dynamic;
 			dte_utils::dynamic_array<size_t> jumps;
-
-			d_action act;
+			semi_pointer sp;
+			step(const dte_utils::strong_ref<c_function>& cf, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp) :
+				is_dynamic(false), jumps(jumps), sp(sp) {
+				new (&fu.cf) dte_utils::strong_ref<c_function>(cf);
+			}
+			step(const dte_utils::strong_ref<dte_function>& df, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp) :
+				is_dynamic(true), jumps(jumps), sp(sp) {
+				new (&fu.df) dte_utils::strong_ref<dte_function>(df);
+			}
+			step(const step& other) : is_dynamic(other.is_dynamic), sp(other.sp), jumps(other.jumps) {
+				if (is_dynamic) {
+					new (&fu.df) dte_utils::strong_ref<dte_function>(other.fu.df);
+				}
+				else {
+					new (&fu.cf) dte_utils::strong_ref<c_function>(other.fu.cf);
+				}
+			}
+			~step() {
+				if (is_dynamic) {
+					fu.df.~strong_ref();
+				}
+				else {
+					fu.cf.~strong_ref();
+				}
+			}
 		};
 		//protected:
 			metadata _meta;

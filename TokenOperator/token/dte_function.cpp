@@ -30,27 +30,22 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 	size_t i = 0;
 	while (i < _steps.get_used()) {
 		const step& action = _steps[i];
-		if (action.is_executable) {
-			size_t jump;
-			if (action.data.get_type() == unit::DFUNC) {
-				jump = action.data.get_dfunc()(s, frame_offset + action.delta_frame);
-			}
-			else if (action.data.get_cfunc().expired()) {
-				throw exception(0, "function is unloaded");
-			}
-			else {
-				jump = action.data.get_cfunc()(s.stack, frame_offset + action.delta_frame);
-			}
-			if (!(jump < action.jumps.get_used())) {
-				throw exception(0, "dte_function is poorly designed");
-			}
-			i += action.jumps[jump];
+		size_t jump;
+		if (action.is_dynamic) {
+			jump = action.fu.df(s, frame_offset + action.sp.get_spu().offset);
 		}
 		else {
-			//new (s.stack.push_real(sizeof(unit), unit::unit_destructor)) unit(action.data);
-			action.act.constr(s.stack.push_real(action.act.size, action.act.destr), action.act.data);
-			++i;
+			jump = action.fu.cf(
+				s.stack,
+				action.sp.is_real_ptr() ?
+				action.sp.get_spu() :
+				semi_pointer::data(action.sp.get_spu().offset + frame_offset)
+			);
 		}
+		if (jump >= action.jumps.get_used()) {
+			throw exception();
+		}
+		i += action.jumps[jump];
 	}
 	s.call_stack.pop_back();
 	return i - _steps.get_used();

@@ -159,8 +159,7 @@
     <ClCompile Include="token\c_function.cpp" />
     <ClCompile Include="token\data_stack.cpp" />
     <ClCompile Include="token\dte_function.cpp" />
-    <ClCompile Include="token\table.cpp" />
-    <ClCompile Include="token\unit.cpp" />
+    <ClCompile Include="token\semi_pointer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="module\version.hpp" />
@@ -168,9 +167,8 @@
     <ClInclude Include="token\data_stack.hpp" />
     <ClInclude Include="token\dte_function.hpp" />
     <ClInclude Include="token\immutable.hpp" />
+    <ClInclude Include="token\semi_pointer.hpp" />
     <ClInclude Include="token\stream.hpp" />
-    <ClInclude Include="token\table.hpp" />
-    <ClInclude Include="token\unit.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
