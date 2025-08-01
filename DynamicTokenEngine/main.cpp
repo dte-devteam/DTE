@@ -112,6 +112,14 @@ void ifstr_destr(void* block) {
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
 
+	int* const qqq = cnew<int>(1000);
+	int* const qq = cnew<int>(100);
+	weak_ref<int> ptr = weak_ref<int>{ qqq };
+	ptr = qq;
+	std::cout << ptr.get_counter()->get_weak();
+	cdelete(qqq);
+	cdelete(qq);
+
 	dynamic_cstring cs;
 	cs.push_back('A');
 	cs.push_back('B');
@@ -168,7 +176,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << ttt.get_as_target(":(").name.begin() << std::endl;
 
 	
-
+	
 
 
 

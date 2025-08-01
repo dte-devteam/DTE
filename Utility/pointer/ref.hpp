@@ -4,19 +4,19 @@
 #include <atomic>
 namespace dte_utils {
 	template<typename T>
-	inline constexpr bool is_ref_counter_v = requires(T t) {
+	inline constexpr bool is_ref_counter_v = requires(T t, const T ct) {
 		T(
 			std::declval<typename T::size_type>(), 
 			std::declval<typename T::size_type>()
 		);
 
-		{ t.get_weak()		} -> std::same_as<typename T::size_type>;
-		{ t.get_strong()	} -> std::same_as<typename T::size_type>;
+		{ ct.get_weak()		} noexcept -> std::same_as<typename T::size_type>;
+		{ ct.get_strong()	} noexcept -> std::same_as<typename T::size_type>;
 
-		{ t.add_weak()		} -> std::same_as<typename T::size_type>;
-		{ t.add_strong()	} -> std::same_as<typename T::size_type>;
-		{ t.sub_weak()		} -> std::same_as<typename T::size_type>;
-		{ t.sub_strong()	} -> std::same_as<typename T::size_type>;
+		{ t.add_weak()		} noexcept -> std::same_as<typename T::size_type>;
+		{ t.add_strong()	} noexcept -> std::same_as<typename T::size_type>;
+		{ t.sub_weak()		} noexcept -> std::same_as<typename T::size_type>;
+		{ t.sub_strong()	} noexcept -> std::same_as<typename T::size_type>;
 	};
 	struct ref_counter {
 		using size_type = size_t;

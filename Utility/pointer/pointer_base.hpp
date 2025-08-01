@@ -6,10 +6,11 @@ namespace dte_utils {
 	struct pointer_base {
 		using type = T;
 		using pointer = type*;
+		using const_pointer = const pointer;
 		protected:
 			pointer _instance;
 		public:
-			pointer_base(pointer instance) noexcept : _instance(instance) {}
+			pointer_base(const_pointer instance) noexcept : _instance(instance) {}
 
 			type& operator*() const
 				requires !return_type_v<type> {

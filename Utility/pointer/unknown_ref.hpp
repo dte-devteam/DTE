@@ -3,10 +3,12 @@
 #include "exceptions/pointer_exception.hpp"
 namespace dte_utils {
 	template<typename T, typename RC = ref_counter>
+	requires is_ref_counter_v<RC>
 	struct unknown_ref : weak_ref<T, RC> {
 		using size_type = weak_ref<T, RC>::size_type;
 		using type = weak_ref<T, RC>::type;
 		using pointer = weak_ref<T, RC>::pointer;
+		using const_pointer = weak_ref<T, RC>::const_pointer;
 		protected:
 			bool _strength;
 			void _unknown_decrease() {
@@ -23,7 +25,7 @@ namespace dte_utils {
 				}
 			}
 		public:
-			unknown_ref(pointer instance = nullptr, bool strength = false) : weak_ref<T, RC>(instance), _strength(strength) {
+			unknown_ref(const_pointer instance = nullptr, bool strength = false) : weak_ref<T, RC>(instance), _strength(strength) {
 				if (get_strength()) {
 					this->_counter->add_strong();
 				}
@@ -57,7 +59,7 @@ namespace dte_utils {
 
 
 			
-			unknown_ref& operator=(pointer instance) {
+			unknown_ref& operator=(const_pointer instance) {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (this->_counter->sub_weak()) {
