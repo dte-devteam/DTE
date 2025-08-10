@@ -11,6 +11,9 @@ namespace dte_core {
 
 
 	//destructors
+	inline void ifstr_args_destructor(void* block) {
+		static_cast<ifstr_args*>(block)->~ifstr_args();
+	}
 	inline void ifstream_destructor(void* block) {
 		static_cast<std::ifstream*>(block)->~basic_ifstream();
 	}

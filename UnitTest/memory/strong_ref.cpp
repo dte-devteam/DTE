@@ -1,5 +1,6 @@
 #include "CppUnitTest.h"
 #include "pointer/strong_ref.hpp"
+#include <thread>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace dte_utils;
 namespace dte_test::memory::strong_reference {
@@ -65,6 +66,21 @@ namespace dte_test::memory::strong_reference {
 				Assert::AreEqual(B_constructed, B_destructed);
 			}
 	};
+	//outside of class - because causes strange "&" error
+	void test_atomic(atomic_strong_ref<A>* ptr) {
+		size_t i = 100001;
+		while (--i) {
+			atomic_strong_ref<A> a{ *ptr };
+		}
+	}
+	void test_atom_thread() {
+		atomic_strong_ref<A> asra{ cnew<A>() };
+		std::thread t1(test_atomic, &asra);
+		std::thread t2(test_atomic, &asra);
+		t1.join();
+		t2.join();
+	}
+	//-----------------------------------------------------
 	TEST_CLASS(STRONG_REF_OPERATOR) {
 		private:
 			void ptr_operator() {
@@ -141,6 +157,11 @@ namespace dte_test::memory::strong_reference {
 				weak_operator();
 				Assert::AreEqual(A_constructed, A_destructed);
 				Assert::AreEqual(B_constructed, B_destructed);
+			}
+			TEST_METHOD(TEST_ATOM) {
+				reset_A();
+				test_atom_thread();
+				Assert::AreEqual(A_constructed, A_destructed);
 			}
 	};
 }

@@ -75,7 +75,7 @@ void c_str_destr(void* block) {
 
 
 
-ifstr_args* ifstr_args_i = new ifstr_args(
+ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 	"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
 );
 
@@ -149,10 +149,10 @@ int main(int argc, const char* argv[]) {
 	);*/
 	dte_function dteff({ "FILE", 0 },
 		{
-			{cfssr, {1}, {ifstr_args_i}},
-			{ccstrsr, {1}, {size_t(0)}},
-			{rlsr, {1}, {size_t(0)}},
-			{cffsr, {1}, {size_t(0)}}
+			{cfssr, {1}, {ifstr_args_i}, ifstr_args_destructor },
+			{ccstrsr, {1}, {size_t(0)}, nullptr},
+			{rlsr, {1}, {size_t(0)}, nullptr},
+			{cffsr, {1}, {size_t(0)}, nullptr}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();

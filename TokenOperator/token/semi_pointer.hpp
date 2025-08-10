@@ -1,5 +1,6 @@
 #pragma once
 namespace dte_token {
+	//delegates a pointer or offset
 	struct semi_pointer {
 		union data {
 			data() {}
