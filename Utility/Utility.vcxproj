@@ -20,7 +20,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="atomic\locker.cpp" />
     <ClCompile Include="exceptions\exception.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
@@ -31,11 +30,9 @@
     <ClCompile Include="exceptions\memory_exception.cpp" />
     <ClCompile Include="exceptions\pointer_exception.cpp" />
     <ClCompile Include="memory\mem_handler.cpp" />
-    <ClCompile Include="memory\xmem_wrapper.cpp" />
     <ClCompile Include="pointer\ref.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="atomic\locker.hpp" />
     <ClInclude Include="exceptions\exception.hpp" />
     <ClInclude Include="exceptions\logic_exception.hpp" />
     <ClInclude Include="exceptions\memory_exception.hpp" />
@@ -48,9 +45,7 @@
     <ClInclude Include="function_traits.hpp" />
     <ClInclude Include="memory\memory.hpp" />
     <ClInclude Include="memory\mem_handler.hpp" />
-    <ClInclude Include="memory\tmem_wrapper.hpp" />
     <ClInclude Include="memory\static_array.hpp" />
-    <ClInclude Include="memory\xmem_wrapper.hpp" />
     <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />

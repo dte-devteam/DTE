@@ -40,10 +40,10 @@ namespace dte_utils {
 			}
 
 			type& _get_by_index(size_type index) noexcept {
-				return this->_allocator[index];
+				return begin()[index];
 			}
 			const_type& _get_by_index(size_type index) const noexcept {
-				return this->_allocator[index];
+				return begin()[index];
 			}
 
 			template<typename P>
@@ -115,10 +115,10 @@ namespace dte_utils {
 				return static_cast<const_pointer>(this->_allocator);
 			}
 			pointer end() noexcept {
-				return static_cast<pointer>(this->_allocator) + get_used();
+				return begin() + get_used();
 			}
 			const_pointer end() const noexcept {
-				return static_cast<const_pointer>(this->_allocator) + get_used();
+				return begin() + get_used();
 			}
 
 

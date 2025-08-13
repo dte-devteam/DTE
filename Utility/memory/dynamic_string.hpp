@@ -130,6 +130,6 @@ namespace dte_utils {
 		}		
 	};
 
-	typedef dynamic_string<char> dynamic_cstring;
-	typedef dynamic_string<wchar_t> dynamic_wstring;
+	using dynamic_cstring = dynamic_string<char>;
+	using dynamic_wstring = dynamic_string<wchar_t>;
 }

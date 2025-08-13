@@ -3,7 +3,6 @@
 
 #include "memory/static_array.hpp"
 
-#include "memory/xmem_wrapper.hpp"
 
 
 #include "token/data_stack.hpp"
@@ -16,9 +15,10 @@
 
 #include "token/c_function.hpp"
 
-#include "atomic/locker.hpp"
-
 #include "core/functions/file_functions.hpp"
+#include "core/functions/algebra.hpp"
+
+#include "module/module_instance.hpp"
 
 #include <iostream>
 
@@ -34,6 +34,7 @@
 using namespace dte_utils;
 using namespace dte_token;
 using namespace dte_core;
+using namespace dte_module;
 /*
 template<typename F, typename ...Args>
 ull measure(F&& f, Args&&... args) {
@@ -54,84 +55,24 @@ ull measure(F&& f, Args&&... args) {
 
 
 
-
-
-
-void run_ptr(strong_ref<int, atomic_ref_counter>* ptr) {
-	size_t i = 1000000;
-	while (--i) {
-		strong_ref<int, atomic_ref_counter> temp(*ptr);
-	}
-}
-
-
-
-void c_str_copy(void* target, const void* arg) {
-	new (target) dynamic_cstring(*static_cast<const dynamic_cstring*>(arg));
-}
-void c_str_destr(void* block) {
-	static_cast<dynamic_cstring*>(block)->~dynamic_cstring();
-}
-
-
-
-ifstr_args* ifstr_args_i = cnew<ifstr_args>(
-	"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
-);
-
-
-
-
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
 
-	int* const qqq = cnew<int>(1000);
-	int* const qq = cnew<int>(100);
-	weak_ref<int> ptr = weak_ref<int>{ qqq };
-	ptr = qq;
-	std::cout << ptr.get_counter()->get_weak();
-	cdelete(qqq);
-	cdelete(qq);
-
-	dynamic_cstring cs;
-	cs.push_back('A');
-	cs.push_back('B');
-	cs.push_back('C');
-	cs.push_back('D');
-	std::cout << cs.substr(0, 2).begin() << std::endl;
-
-	//test_memory();
-	//test_pointer();
-
-	strong_ref<int, atomic_ref_counter> abc(cnew<int>(0));
-	std::thread th1(run_ptr, &abc);
-	std::thread th2(run_ptr, &abc);
-	th1.join();
-	th2.join();
-	std::cout << abc.get_counter()->get_weak() << ":" << abc.get_counter()->get_strong() << std::endl;
-
-
-
-
-
-
-
-
+	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
+		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
+	);
 	std::cout << "-----------------" << std::endl;
 	stream* strf = new stream{ {10000}, {} };
-	strong_ref<c_function> cfssr{
-		cnew<c_function>(create_ifstream, c_function::metadata{})
+	atomic_strong_ref<c_function> cfssr{
+		cnew<c_function>(create_ifstream, c_function::metadata{}, ifstr_args_destructor)
 	};
-	strong_ref<c_function> ccstrsr{
-		cnew<c_function>(create_cstr, c_function::metadata{})
+	atomic_strong_ref<c_function> ccstrsr{
+		cnew<c_function>(create_cstr, c_function::metadata{}, dynamic_cstring_destructor)
 	};
-	strong_ref<c_function> ofsr{
-		cnew<c_function>(open_file, c_function::metadata{})
-	};
-	strong_ref<c_function> rlsr{
+	atomic_strong_ref<c_function> rlsr{
 		cnew<c_function>(read_line, c_function::metadata{})
 	};
-	strong_ref<c_function> cffsr{
+	atomic_strong_ref<c_function> cffsr{
 		cnew<c_function>(close_file, c_function::metadata{})
 	};
 	/*
@@ -149,10 +90,10 @@ int main(int argc, const char* argv[]) {
 	);*/
 	dte_function dteff({ "FILE", 0 },
 		{
-			{cfssr, {1}, {ifstr_args_i}, ifstr_args_destructor },
-			{ccstrsr, {1}, {size_t(0)}, nullptr},
-			{rlsr, {1}, {size_t(0)}, nullptr},
-			{cffsr, {1}, {size_t(0)}, nullptr}
+			{cfssr, {1}, {ifstr_args_i}},
+			{ccstrsr, {1}, {size_t(0)}},
+			{rlsr, {1}, {size_t(0)}},
+			{cffsr, {1}, {size_t(0)}}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();
@@ -166,18 +107,21 @@ int main(int argc, const char* argv[]) {
 	std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin() << std::endl;
 	delete strf;
 	std::cout << "-----------------" << std::endl;
-
-
-
-
+	strf = new stream{ {10000}, {} };
+	*static_cast<int*>(strf->stack.push_real(sizeof(int), nullptr)) = 100;
+	*static_cast<int*>(strf->stack.push_real(sizeof(int), nullptr)) = 10;
+	atomic_strong_ref<c_function> adder{
+		cnew<c_function>(add<int>, c_function::metadata{})
+	};
+	dte_function dteaf({ "FILE", 0 },
+		{
+			{adder, {1}, {size_t(0)}}
+		}
+	);
+	dteaf(*strf, 0);
+	std::cout << strf->stack.get_block_num() << std::endl;
+	std::cout << strf->stack.get_memory_left() << std::endl;
+	std::cout << *static_cast<int*>(strf->stack[0]) << std::endl;
 	std::cin.get();
-
-
-
-
-
-
-
-
 	return 0;
 }

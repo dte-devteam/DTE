@@ -10,12 +10,22 @@ namespace dte_utils {
 		using const_type = const type;
 		using pointer = type*;
 		using const_pointer = const_type*;
-		type arr[N];
+		alignas(type) char arr[sizeof(type) * N];
 		static_array() noexcept(std::is_nothrow_default_constructible_v<type>)
 		requires std::is_default_constructible_v<type> {
-			pointer iter = end();
-			while (iter != begin()) {
-				place_at(--iter);
+			pointer iter = begin();
+			while (iter != end()) {
+				place_at(iter);
+				++iter;
+			}
+		}
+		template<typename U>
+		requires std::is_constructible_v<type, const U&>
+		static_array(const U& instance) noexcept(std::is_nothrow_constructible_v<type, const U&>) {
+			pointer iter = begin();
+			while (iter != end()) {
+				place_at(iter, instance);
+				++iter;
 			}
 		}
 		template<typename U>
@@ -58,16 +68,16 @@ namespace dte_utils {
 
 
 		pointer begin() noexcept {
-			return arr;
+			return reinterpret_cast<pointer>(arr);
 		}
 		const_pointer begin() const noexcept {
-			return arr;
+			return reinterpret_cast<const_pointer>(arr);
 		}
 		pointer end() noexcept {
-			return arr + N;
+			return begin() + N;
 		}
 		const_pointer end() const noexcept {
-			return arr + N;
+			return begin() + N;
 		}
 
 
@@ -86,9 +96,6 @@ namespace dte_utils {
 		template<typename U>
 		requires std::is_assignable_v<type, const U&>
 		static_array& operator=(const static_array<U, N>& other) noexcept(std::is_nothrow_assignable_v<type, const U&>) {
-			if (this == &other) {
-				return *this;
-			}
 			pointer iter = begin();
 			for (const U& val : other) {
 				*iter = val;
@@ -96,7 +103,7 @@ namespace dte_utils {
 			}
 			return *this;
 		}
-		static_array& operator=(static_array&& other) noexcept
+		static_array& operator=(static_array&& other) noexcept(std::is_nothrow_swappable_v<type>)
 		requires std::is_swappable_v<type> {
 			if (this == &other) {
 				return *this;
@@ -111,16 +118,16 @@ namespace dte_utils {
 
 
 		type& operator[](size_t index) {
-			if (!(index < N)) {
-				throw out_of_range();
+			if (index < N) {
+				return begin()[index];
 			}
-			return arr[index];
+			throw out_of_range();
 		}
 		const_type& operator[](size_t index) const {
-			if (!(index < N)) {
-				throw out_of_range();
+			if (index < N) {
+				return begin()[index];
 			}
-			return arr[index];
+			throw out_of_range();
 		}
 	};
 }

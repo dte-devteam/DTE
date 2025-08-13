@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="core\functions\algebra.hpp" />
     <ClInclude Include="core\functions\file_functions.hpp" />
     <ClInclude Include="core\functions\stack_functions.hpp" />
     <ClInclude Include="resource.h" />

@@ -1,11 +1,9 @@
 #pragma once
 //common float point
 #ifdef _WIN64
-typedef double floatpoint;
+using floatpoint = double;
 #else
-typedef float floatpoint;
+using floatpoint = float;
 #endif
-//typedef void(*destructor)(void*);
 using destructor = void(void*);
-//typedef void(*constructor)(void*, const void*);
 using constructor = void(void*, const void*);

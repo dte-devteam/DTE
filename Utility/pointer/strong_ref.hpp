@@ -35,10 +35,7 @@ namespace dte_utils {
 				this->_strong_decrease();
 				this->_instance = instance;
 				if (this->_counter->sub_weak()) {
-					this->_counter = cnew<RC>(
-						static_cast<size_type>(1),
-						static_cast<size_type>(1)
-					);
+					this->_counter = cnew<RC>(1, 1);
 				}
 				else {
 					this->_counter->add_strong();

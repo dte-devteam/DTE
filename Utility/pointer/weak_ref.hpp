@@ -48,10 +48,7 @@ namespace dte_utils {
 			weak_ref& operator=(const_pointer instance) {
 				this->_instance = instance;
 				if (_counter->sub_weak()) {
-					_counter = cnew<RC>(
-						static_cast<size_type>(1),
-						static_cast<size_type>(0)
-					);
+					_counter = cnew<RC>(1, 0);
 				}
 				else {
 					_counter->add_weak();

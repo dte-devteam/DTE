@@ -39,7 +39,7 @@ namespace dte_utils {
 	template<typename T, typename ...Args>
 	inline void place_at(T* at, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args>) {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
-			*at = { std::forward<Args>(args)... };
+			*at = T(std::forward<Args>(args)...);
 		}
 		else {
 			new (at) T(std::forward<Args>(args)...);
@@ -96,9 +96,9 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename U, typename T>
-	inline void copy_range(const T* begin, const T* end, U* dest) noexcept(std::is_nothrow_copy_constructible_v<U>) {
+	inline void copy_range(const T* begin, const T* end, U* dest) noexcept(std::is_nothrow_constructible_v<U, const T&>) {
 		while (begin != end) {
-			place_at(dest, static_cast<U>(*begin));
+			place_at(dest, *begin);
 			++dest;
 			++begin;
 		}
@@ -106,9 +106,9 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename U, typename T>
-	inline void move_range(T* begin, T* end, U* dest) noexcept(std::is_nothrow_move_constructible_v<U>) {
+	inline void move_range(T* begin, T* end, U* dest) noexcept(std::is_nothrow_constructible_v<U, T&&>) {
 		while (begin != end) {
-			place_at(dest, static_cast<U&&>(*begin));
+			place_at(dest, std::move(*begin));
 			++dest;
 			++begin;
 		}

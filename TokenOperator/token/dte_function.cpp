@@ -14,20 +14,20 @@ const dte_function::metadata& dte_function::get_meta() const {
 
 
 using f_step = dte_function::step;
-f_step::step(const strong_ref<c_function>& c_func, const dynamic_array<size_t>& jumps, const semi_pointer& sp, destructor* imm_destructor) :
-_is_dynamic(false), _jumps(jumps), _semi_ptr(sp), _imm_destructor(imm_destructor) {
-	new (&_func_unit.c_func) strong_ref<c_function>(c_func);
+f_step::step(const dte_utils::atomic_strong_ref<c_function>& c_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp) :
+_is_dynamic(false), _jumps(jumps), _semi_ptr(sp) {
+	new (&_func_unit.c_func) atomic_strong_ref<c_function>(c_func);
 }
-f_step::step(const strong_ref<dte_function>& dte_func, const dynamic_array<size_t>& jumps, const semi_pointer& sp, destructor* imm_destructor) :
-_is_dynamic(true), _jumps(jumps), _semi_ptr(sp), _imm_destructor(imm_destructor) {
-	new (&_func_unit.dte_func) strong_ref<dte_function>(dte_func);
+f_step::step(const atomic_strong_ref<dte_function>& dte_func, const dynamic_array<size_t>& jumps, const semi_pointer& sp) :
+_is_dynamic(true), _jumps(jumps), _semi_ptr(sp) {
+	new (&_func_unit.dte_func) atomic_strong_ref<dte_function>(dte_func);
 }
-f_step::step(const step& other) : _is_dynamic(other.get_is_dynamic()), _semi_ptr(other.get_semi_ptr()), _jumps(other.get_jumps()), _imm_destructor(other.get_imm_destructor()) {
+f_step::step(const step& other) : _is_dynamic(other.get_is_dynamic()), _semi_ptr(other.get_semi_ptr()), _jumps(other.get_jumps()) {
 	if (get_is_dynamic()) {
-		new (&_func_unit.dte_func) strong_ref<dte_function>(other.get_function_unit().dte_func);
+		new (&_func_unit.dte_func) atomic_strong_ref<dte_function>(other.get_function_unit().dte_func);
 	}
 	else {
-		new (&_func_unit.c_func) strong_ref<c_function>(other.get_function_unit().c_func);
+		new (&_func_unit.c_func) atomic_strong_ref<c_function>(other.get_function_unit().c_func);
 	}
 }
 f_step::~step() {
@@ -49,9 +49,6 @@ const dynamic_array<size_t>& f_step::get_jumps() const noexcept {
 }
 const semi_pointer& f_step::get_semi_ptr() const noexcept {
 	return _semi_ptr;
-}
-destructor* f_step::get_imm_destructor() const noexcept {
-	return _imm_destructor;
 }
 
 

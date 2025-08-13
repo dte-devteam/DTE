@@ -63,10 +63,7 @@ namespace dte_utils {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (this->_counter->sub_weak()) {
-					this->_counter = cnew<ref_counter>(
-						static_cast<size_type>(1),
-						static_cast<size_type>(get_strength() ? 1 : 0)
-					);
+					this->_counter = cnew<ref_counter>(1, get_strength() ? 1 : 0);
 				}
 				return *this;
 			}

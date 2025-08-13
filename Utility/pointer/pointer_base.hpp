@@ -19,10 +19,7 @@ namespace dte_utils {
 				}
 				return *_instance;
 			}
-			pointer operator->() const {
-				if (!_instance) {
-					throw nullptr_access();
-				}
+			pointer operator->() const noexcept {
 				return _instance;
 			}
 
