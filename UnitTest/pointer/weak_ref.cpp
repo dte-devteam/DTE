@@ -2,7 +2,7 @@
 #include "pointer/weak_ref.hpp"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace dte_utils;
-namespace dte_test::memory::weak_reference {
+namespace dte_test::pointer::weak_reference {
 	struct A {
 		virtual ~A() {}
 	};
@@ -51,15 +51,6 @@ namespace dte_test::memory::weak_reference {
 					first.get_counter()->get_strong()
 				);
 				cdelete(i);
-			}
-			TEST_METHOD(WEAK_REF_OTHER_LVAL_CONSTRUCTOR) {
-				B* const b = cnew<B>();
-				weak_ref<A> ptr = weak_ref<B>{ b };
-				Assert::AreEqual(
-					(void*)ptr.operator->(), 
-					(void*)b
-				);
-				cdelete(b);
 			}
 	};
 	TEST_CLASS(WEAK_REF_GET) {

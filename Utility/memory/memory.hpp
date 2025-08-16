@@ -185,8 +185,8 @@ namespace dte_utils {
 	template<typename U, typename T>
 	inline void array_to_array(U* dest, T* src, size_t count) noexcept (
 		(std::is_trivial_v<U> && std::is_same_v<T, U>) || std::is_constructible_v<U, T&&> ?
-		std::is_nothrow_move_constructible_v<U> :
-		std::is_nothrow_copy_constructible_v<U>
+		std::is_nothrow_constructible_v<U, T&&> :
+		std::is_nothrow_constructible_v<U, const T&>
 	) {
 		if constexpr (std::is_trivial_v<U> && std::is_same_v<T, U>) {
 			copy_memory(dest, src, count * sizeof(U));

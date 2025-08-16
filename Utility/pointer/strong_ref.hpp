@@ -17,11 +17,12 @@ namespace dte_utils {
 				this->_counter->add_strong();
 			}
 
-			template<typename U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			strong_ref(const weak_ref<U, RC>& other) : weak_ref<T, RC>(other) {
-				if (other.expired()) {
-					throw bad_weak_ptr();
+			template<bool is_fail_safe = false>
+			strong_ref(const weak_ref<T, RC>& other) noexcept(is_fail_safe) : weak_ref<T, RC>(other) {
+				if constexpr (!is_fail_safe) {
+					if (other.expired()) {
+						throw bad_weak_ptr();
+					}
 				}
 				this->_counter->add_strong();
 			}
@@ -44,7 +45,11 @@ namespace dte_utils {
 			}
 
 			
-			strong_ref& operator=(const strong_ref& other) {
+			strong_ref& operator=(const strong_ref& other)
+			noexcept(
+				std::is_nothrow_destructible_v<T> && 
+				std::is_nothrow_destructible_v<RC>
+			) {
 				if (this == &other) {
 					return *this;
 				}
@@ -63,14 +68,17 @@ namespace dte_utils {
 				return *this;
 			}
 
-			template<typename U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			strong_ref& operator=(const weak_ref<U, RC>& other) {
-				if (reinterpret_cast<weak_ref<U, RC>*>(this) == &other) {
-					return *this;
-				}
-				if (other.expired()) {
-					throw bad_weak_ptr();
+			template<bool is_fail_safe = false>
+			strong_ref& operator=(const weak_ref<T, RC>& other)
+			noexcept(
+				std::is_nothrow_destructible_v<T> &&
+				std::is_nothrow_destructible_v<RC> && 
+				is_fail_safe
+			) {
+				if constexpr (!is_fail_safe) {
+					if (other.expired()) {
+						throw bad_weak_ptr();
+					}
 				}
 				this->_strong_decrease();
 				weak_ref<T, RC>::operator=(other);

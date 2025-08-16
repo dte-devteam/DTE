@@ -9,14 +9,12 @@ inline void test_weak_ref_constructor_0() {
 
 	dte_utils::weak_ref<A>* wr1 = new dte_utils::weak_ref<A>(dte_utils::tmalloc<B>(1));
 	dte_utils::weak_ref<B>* wr2 = new dte_utils::weak_ref<B>(dte_utils::tmalloc<B>(1));
-	dte_utils::weak_ref<A>* wr3 = new dte_utils::weak_ref<A>(*wr2);
 
 	free(wr1->operator->());
 	free(wr2->operator->());
 
 	delete wr1;
 	delete wr2;
-	delete wr3;
 		
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;

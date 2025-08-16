@@ -11,7 +11,7 @@ namespace dte_utils {
 		using const_pointer = weak_ref<T, RC>::const_pointer;
 		protected:
 			bool _strength;
-			void _unknown_decrease() {
+			void _unknown_decrease() noexcept(std::is_nothrow_destructible_v<T>) {
 				if (get_strength()) {
 					this->_strong_decrease();
 				}
@@ -34,9 +34,7 @@ namespace dte_utils {
 				_unknown_increase();
 			}
 
-			template<typename U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref(const weak_ref<U, RC>& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
+			unknown_ref(const weak_ref<T, RC>& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
 				_unknown_increase();
 			}
 
@@ -75,9 +73,7 @@ namespace dte_utils {
 					return *this;
 				}
 				_unknown_decrease();
-				this->_weak_decrease();
-				this->_instance = other._instance;
-				this->_counter->add_weak();
+				weak_ref<T, RC>::operator=(other);
 				_unknown_increase();
 				return *this;
 			}
@@ -91,16 +87,9 @@ namespace dte_utils {
 				return *this;
 			}
 
-			template<typename U>
-			requires std::is_base_of_v<type, U> || std::is_same_v<type, U>
-			unknown_ref& operator=(const weak_ref<U, RC>& other) {
-				if (reinterpret_cast<weak_ref<U, RC>*>(this) == &other) {
-					return *this;
-				}
+			unknown_ref& operator=(const weak_ref<T, RC>& other) {
 				_unknown_decrease();
-				this->_weak_decrease();
-				this->_instance = other.operator->();
-				this->_counter->add_weak();
+				weak_ref<T, RC>::operator=(other);
 				_unknown_increase();
 				return *this;
 			}

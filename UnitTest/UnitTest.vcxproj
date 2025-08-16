@@ -159,8 +159,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="memory\strong_ref.cpp" />
-    <ClCompile Include="memory\weak_ref.cpp" />
+    <ClCompile Include="pointer\strong_ref.cpp" />
+    <ClCompile Include="pointer\weak_ref.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

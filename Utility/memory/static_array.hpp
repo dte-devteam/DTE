@@ -116,18 +116,29 @@ namespace dte_utils {
 			return *this;
 		}
 
-
-		type& operator[](size_t index) {
-			if (index < N) {
+		template<bool is_fail_safe = false>
+		type& operator[](size_t index) noexcept(is_fail_safe) {
+			if constexpr (!is_fail_safe) {
+				if (index < N) {
+					return begin()[index];
+				}
+				throw out_of_range();
+			}
+			else {
 				return begin()[index];
 			}
-			throw out_of_range();
 		}
-		const_type& operator[](size_t index) const {
-			if (index < N) {
+		template<bool is_fail_safe = false>
+		const_type& operator[](size_t index) const noexcept(is_fail_safe) {
+			if constexpr (!is_fail_safe) {
+				if (index < N) {
+					return begin()[index];
+				}
+				throw out_of_range();
+			}
+			else {
 				return begin()[index];
 			}
-			throw out_of_range();
 		}
 	};
 }

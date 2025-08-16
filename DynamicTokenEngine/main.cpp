@@ -51,12 +51,22 @@ ull measure(F&& f, Args&&... args) {
 	return __rdtsc() - start_time;
 }
 */
-
-
+struct DDD
+{
+	void operator()(int) noexcept {
+		std::cout << "+" << std::endl;
+	}
+};
 
 
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
+
+	//test_memory();
+	//test_pointer();
+
+	is_functor_noexcept_v<DDD, int>;
+
 
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"

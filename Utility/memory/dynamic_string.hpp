@@ -13,7 +13,7 @@ namespace dte_utils {
 		
 
 		dynamic_string(size_t alocate_extra_size = 0) : dynamic_array<T, A>(alocate_extra_size + 1) {
-			place_at(end(), static_cast<type>(0));
+			place_at(end(), 0);
 			++this->_used;
 		}
 
@@ -24,12 +24,12 @@ namespace dte_utils {
 			return !str_len();
 		}
 
-		void clear() {
+		void clear() noexcept(std::is_nothrow_destructible_v<type>) {
 			if constexpr (!std::is_trivially_destructible_v<type>) {
 				destruct_range(begin() + 1, end());
 			}
 			this->_used = 1;
-			this->back() = 0;
+			this->back<true>() = 0;
 		}
 
 		void push_back(const_type& value) {
@@ -54,33 +54,40 @@ namespace dte_utils {
 		}
 		template<typename ...Args>
 		void emplace_back(Args&&... args) = delete;
-		void pop_back() {
-			if (empty_str()) {
-				throw zero_size_access();
+
+		template<bool is_fail_safe = false>
+		void pop_back()
+		noexcept(std::is_nothrow_destructible_v<type> && is_fail_safe) {
+			if constexpr (!is_fail_safe) {
+				if (empty_str()) {
+					throw zero_size_access();
+				}
 			}
-			*(end() - 2) = 0;
-			--this->_used;
-			if constexpr (!std::is_trivially_destructible_v<type>) {
-				destuct_at(end());
-			}
-		}
-		void pop_back(size_type num) {
-			if (num > str_len()) {
-				throw out_of_range();
-			}
-			*(end() - num - 1) = 0;
-			if constexpr (!std::is_trivially_destructible_v<type>) {
-				destruct_range(end() - num, end())
-			}
-			this->_used -= num;
-		}
-		//don`t forget - string must end by 0!
-		void native_pop() {
 			dynamic_stack<T, A>::pop_back();
+			this->back<true>() = 0;
+		}
+		template<bool is_fail_safe = false>
+		void pop_back(size_type num)
+		noexcept(std::is_nothrow_destructible_v<type> && is_fail_safe) {
+			if constexpr (!is_fail_safe) {
+				if (num > str_len()) {
+					throw out_of_range();
+				}
+			}
+			dynamic_stack<T, A>::pop_back(num);
+			this->back<true>() = 0;
 		}
 		//don`t forget - string must end by 0!
-		void native_pop(size_type num) {
-			dynamic_stack<T, A>::pop_back(num);
+		template<bool is_fail_safe = false>
+		void native_pop() 
+		noexcept(std::is_nothrow_destructible_v<type>&& is_fail_safe) {
+			dynamic_stack<T, A>::pop_back<is_fail_safe>();
+		}
+		//don`t forget - string must end by 0!
+		template<bool is_fail_safe = false>
+		void native_pop(size_type num)
+		noexcept(std::is_nothrow_destructible_v<type>&& is_fail_safe) {
+			dynamic_stack<T, A>::pop_back<is_fail_safe>(num);
 		}
 
 		dynamic_string substr(size_type from, size_type to) {

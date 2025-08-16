@@ -31,4 +31,18 @@ namespace dte_utils {
 	};
 	template<typename T, typename ...Args>
 	using is_functor_t = decltype(std::declval<T>()(std::declval<Args>()...));
+	template<typename T, bool>
+	struct is_functor_noexcept {
+		template<typename ...Args>
+		static constexpr bool value = false;
+	};
+	template<typename T>
+	struct is_functor_noexcept<T, true> {
+		template<typename ...Args>
+		static constexpr bool value = noexcept(
+			std::declval<T>().operator()(std::declval<Args>()...)
+		);
+	};
+	template<typename T, typename ...Args>
+	inline constexpr bool is_functor_noexcept_v = is_functor_noexcept<T, is_functor_v<T, Args...>>::template value<Args...>;
 }

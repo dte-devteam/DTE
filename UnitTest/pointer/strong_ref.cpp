@@ -3,7 +3,7 @@
 #include <thread>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace dte_utils;
-namespace dte_test::memory::strong_reference {
+namespace dte_test::pointer::strong_reference {
 	int A_constructed;
 	int A_destructed;
 	int B_constructed;
@@ -41,12 +41,9 @@ namespace dte_test::memory::strong_reference {
 				strong_ref<A> ptr_0 = strong_ref<A>{ cnew<A>() };
 				strong_ref<A> ptr_1 = strong_ref<A>{ ptr_0 };
 				Assert::AreEqual(
-					(void*)ptr_0.operator->(), 
+					(void*)ptr_0.operator->(),
 					(void*)ptr_1.operator->()
 				);
-			}
-			void strong_ref_other_constructor() {
-				strong_ref<A> ptr_0 = strong_ref<A>{ strong_ref<B>{cnew<B>()} };
 			}
 		public:
 			TEST_METHOD(STRONG_REF_PTR_CONSTRUCTOR) {
@@ -58,12 +55,6 @@ namespace dte_test::memory::strong_reference {
 				reset_A();
 				strong_ref_lval_constructor();
 				Assert::AreEqual(A_constructed, A_destructed);
-			}
-			TEST_METHOD(STRONG_REF_OTHER_CONSTRUCTOR) {
-				reset_A();
-				reset_B();
-				Assert::AreEqual(A_constructed, A_destructed);
-				Assert::AreEqual(B_constructed, B_destructed);
 			}
 	};
 	//outside of class - because causes strange "&" error
@@ -121,20 +112,6 @@ namespace dte_test::memory::strong_reference {
 					(void*)ptr_1.operator->()
 				);
 			}
-			void weak_operator() {
-				B* b = cnew<B>();
-				strong_ref<A> ptr_0 = strong_ref<A>{ cnew<A>() };
-				strong_ref<B> ptr_1 = strong_ref<B>{ b };
-				ptr_0 = ptr_1;
-				Assert::AreEqual(
-					(void*)b,
-					(void*)ptr_0.operator->()
-				);
-				Assert::AreEqual(
-					static_cast<decltype(ptr_0)::size_type>(2),
-					ptr_0.get_counter()->get_strong()
-				);
-			}
 		public:
 			TEST_METHOD(PTR_OPERATOR) {
 				reset_A();
@@ -150,13 +127,6 @@ namespace dte_test::memory::strong_reference {
 				reset_A();
 				rval_operator();
 				Assert::AreEqual(A_constructed, A_destructed);
-			}
-			TEST_METHOD(WEAK_OPERATOR) {
-				reset_A();
-				reset_B();
-				weak_operator();
-				Assert::AreEqual(A_constructed, A_destructed);
-				Assert::AreEqual(B_constructed, B_destructed);
 			}
 			TEST_METHOD(TEST_ATOM) {
 				reset_A();

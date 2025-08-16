@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="memory\weak_ref.cpp">
+    <ClCompile Include="pointer\weak_ref.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="memory\strong_ref.cpp">
+    <ClCompile Include="pointer\strong_ref.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
