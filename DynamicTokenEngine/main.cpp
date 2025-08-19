@@ -64,6 +64,10 @@ int main(int argc, const char* argv[]) {
 
 	//test_memory();
 	//test_pointer();
+	//mh();
+	void* block = aligned_xmalloc(1, 1);
+	std::cout << block << "\n";
+	aligned_free(block);
 
 	is_functor_noexcept_v<DDD, int>;
 
@@ -85,19 +89,6 @@ int main(int argc, const char* argv[]) {
 	atomic_strong_ref<c_function> cffsr{
 		cnew<c_function>(close_file, c_function::metadata{})
 	};
-	/*
-	dte_function dteff({ "FILE" },
-		{
-			//{unit{cfssr}, 0, true, {1}},
-			{unit{}, 0, true, {1}, {ifstr_create, ifstr_destr, sizeof(std::ifstream), ifstr_args_i}, {1}},
-			//{unit{"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"}, 1, false, {1}},
-			{unit{}, 1, true, {1}, {c_str_copy, c_str_destr, sizeof(dynamic_cstring), new dynamic_cstring()}, {1}},
-			//{unit{ofsr}, 0, true, {1}},
-			{unit{rlsr}, 0, true, {1}, {}, {1}},
-			{unit{rlsr}, 0, true, {1}, {}, {1}},
-			{unit{cffsr}, 0, true, {1}, {}, {1}}
-		}
-	);*/
 	dte_function dteff({ "FILE", 0 },
 		{
 			{cfssr, {1}, {ifstr_args_i}},

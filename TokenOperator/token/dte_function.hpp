@@ -50,7 +50,7 @@ namespace dte_token {
 					if (!s.get_is_dynamic()) {
 						if (s.get_function_unit().c_func->get_args_destructor() && s.get_semi_ptr().is_real_ptr()) {
 							s.get_function_unit().c_func->get_args_destructor()(s.get_semi_ptr().get_spu().ptr);
-							free(s.get_semi_ptr().get_spu().ptr);
+							dte_utils::aligned_free(s.get_semi_ptr().get_spu().ptr);
 						}
 					}
 				}

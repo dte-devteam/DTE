@@ -15,9 +15,26 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<typename T>
+	template<typename T, bool align = false>
 	inline T* tmalloc(size_t num) {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
+	}
+	inline void* aligned_xmalloc(size_t size, size_t alignment) {
+		if (size) {
+			const size_t offset = sizeof(void*) + alignment - 1;
+			void* original = malloc(size + alignment);
+			if (!original) {
+				throw bad_malloc();
+			}
+			void* aligned = reinterpret_cast<void*>((reinterpret_cast<size_t>(original) + offset) & ~(alignment - 1));
+			reinterpret_cast<void**>(aligned)[-1] = original;
+			return aligned;
+		}
+		return nullptr;
+	}
+	template<typename T, bool align = false>
+	inline T* aligned_tmalloc(size_t num) {
+		return static_cast<T*>(aligned_xmalloc(num * sizeof(T), alignof(T)));
 	}
 	inline void* xrealloc(void* block, size_t size) {
 		if (size) {
@@ -34,6 +51,11 @@ namespace dte_utils {
 	inline T* trealloc(T* block, size_t num) {
 		return static_cast<T*>(xrealloc(block, num * sizeof(T)));
 	}
+	inline void aligned_free(void* block) {
+		if (block) {
+			free(reinterpret_cast<void**>(block)[-1]);
+		}
+	}
 
 	//at = invalid/nulptr -> UB
 	template<typename T, typename ...Args>
@@ -49,7 +71,7 @@ namespace dte_utils {
 
 	template<typename T, typename ...Args>
 	inline T* cnew(Args&&... args) {
-		T* ptr = tmalloc<T>(1);
+		T* ptr = aligned_tmalloc<T>(1);
 		place_at(ptr, std::forward<Args>(args)...);
 		return ptr;
 	}
@@ -79,7 +101,7 @@ namespace dte_utils {
 			}
 			//function can`t be freed
 			if constexpr (!return_type_v<T>) {
-				free(at);
+				aligned_free(at);
 			}
 		}
 	}

@@ -207,16 +207,11 @@ namespace dte_utils {
 				}
 				if (this->get_allocated() != size) {
 					this->_allocated = size;
-					if constexpr (std::is_trivial_v<type>) {
-						this->_allocator.resize(size);
+					A<T> new_allocator = _provide_buffer();
+					if constexpr (!std::is_trivially_destructible_v<type>) {
+						destruct_range(begin(), end());
 					}
-					else {
-						A<T> new_allocator = _provide_buffer();
-						if constexpr (!std::is_trivially_destructible_v<type>) {
-							destruct_range(begin(), end());
-						}
-						this->_allocator = std::move(new_allocator);
-					}
+					this->_allocator = std::move(new_allocator);
 				}
 			}
 			void clear() noexcept(std::is_nothrow_destructible_v<type>) {

@@ -62,10 +62,6 @@ struct ballocator : dte_utils::mem_handler {
 		ballocator(size_type num = 0) : mem_handler(num * sizeof(T)) {}
 		ballocator(const ballocator&) = delete;
 		ballocator(ballocator&& other) noexcept : mem_handler(std::move(other)) {}
-		void resize(size_type num) {
-			static_assert(std::is_trivial_v<T>, "do not try reallocating nontrivial data");
-			mem_handler::resize(num * sizeof(T));
-		}
 		ballocator& operator=(const ballocator&) = delete;
 		ballocator& operator=(ballocator&& other) noexcept {
 			if (this == &other) {

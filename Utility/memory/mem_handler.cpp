@@ -2,24 +2,12 @@
 #include "memory.hpp"
 #include <utility>
 using namespace dte_utils;
-mem_handler::mem_handler(size_type size) : _ptr(xmalloc(size)) {}
-mem_handler::mem_handler(pointer ptr) noexcept : _ptr(ptr) {}
+mem_handler::mem_handler(size_type size, size_type alignment) : _ptr(aligned_xmalloc(size, alignment)) {}
 mem_handler::mem_handler(mem_handler&& other) noexcept : _ptr(other) {
 	other._ptr = nullptr; 
 }
 mem_handler::~mem_handler() { 
-	free(_ptr);
-}
-void mem_handler::resize(size_type size) {
-	_ptr = xrealloc(_ptr, size);
-}
-mem_handler& mem_handler::operator=(pointer ptr) noexcept {
-	if (_ptr == ptr) {
-		return *this;
-	}
-	free(_ptr);
-	_ptr = ptr;
-	return *this;
+	aligned_free(_ptr);
 }
 mem_handler& mem_handler::operator=(mem_handler&& other) noexcept {
 	if (this == &other) {
