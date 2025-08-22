@@ -22,10 +22,7 @@ namespace dte_utils {
 	inline void* aligned_xmalloc(size_t size, size_t alignment) {
 		if (size) {
 			const size_t offset = sizeof(void*) + alignment - 1;
-			void* original = malloc(size + alignment);
-			if (!original) {
-				throw bad_malloc();
-			}
+			void* original = xmalloc(size + offset);
 			void* aligned = reinterpret_cast<void*>((reinterpret_cast<size_t>(original) + offset) & ~(alignment - 1));
 			reinterpret_cast<void**>(aligned)[-1] = original;
 			return aligned;
