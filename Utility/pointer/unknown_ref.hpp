@@ -1,6 +1,7 @@
 #pragma once
 #include "weak_ref.hpp"
 #include "exceptions/pointer_exception.hpp"
+#include "template_forwarding.hpp"
 namespace dte_utils {
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
@@ -33,8 +34,16 @@ namespace dte_utils {
 				_unknown_increase();
 			}
 
-			unknown_ref(const weak_ref<T, RC>& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
-				_unknown_increase();
+			template<bool is_fail_safe = false>
+			unknown_ref(const weak_ref<T, RC>& other, bool strength = false, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) : weak_ref<T, RC>(other), _strength(strength) {
+				if constexpr (is_fail_safe) {
+					if (get_strength()) {
+						this->_counter->add_strong();
+					}
+				}
+				else {
+					_unknown_increase();
+				}
 			}
 
 			~unknown_ref() {
@@ -60,7 +69,7 @@ namespace dte_utils {
 				_unknown_decrease();
 				this->_instance = instance;
 				if (this->_counter->sub_weak()) {
-					this->_counter = cnew<ref_counter>(1, get_strength() ? 1 : 0);
+					this->_counter = cnew<ref_counter>(1, get_strength());
 				}
 				return *this;
 			}

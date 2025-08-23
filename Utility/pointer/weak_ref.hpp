@@ -1,6 +1,5 @@
 #pragma once
 #include "ref.hpp"
-#include "memory/memory.hpp"
 #include "pointer_base.hpp"
 namespace dte_utils {
 	template<typename T, typename RC = ref_counter>
@@ -76,11 +75,4 @@ namespace dte_utils {
 	};
 	template<typename T>
 	using atomic_weak_ref = weak_ref<T, atomic_ref_counter>;
-	//create counter for static data
-	template<typename T, typename RC>
-	weak_ref<T, RC> create_static_ptr(T* instance = nullptr) {
-		weak_ref<T, RC> r(instance);
-		const_cast<RC*>(r.get_counter())->add_strong();
-		return r;
-	}
 }

@@ -84,9 +84,6 @@ int main(int argc, const char* argv[]) {
 
 	std::cout << cfh.c_func_num << "\n";
 
-	std::cout << create_static_ptr<int, ref_counter>().get_counter()->get_strong() << "\n";
-	strong_ref<int> sri = strong_ref<int>(create_static_ptr<int, ref_counter>(), template_forwarding<bool, true>());
-
 	is_functor_noexcept_v<DDD, int>;
 
 
