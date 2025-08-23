@@ -26,13 +26,16 @@ data_stack& data_stack::operator=(data_stack&& other) noexcept {
 	return *this;
 }
 
-data_stack::pointer data_stack::push_real(size_type block_size, destructor* destr) {
-	if (block_size > get_memory_left()) {
+data_stack::pointer data_stack::push_real(size_type block_size, size_type alignment, destructor* destr) {
+	size_type virtual_begin = reinterpret_cast<size_type>(blocks.back<true>().physical_end) + alignment - 1;
+	virtual_begin &= ~(alignment - 1);
+	char* physical_end = reinterpret_cast<char*>(virtual_begin) + block_size;
+	if (physical_end > blocks[0].virtual_begin) {
 		throw exception(0, "stack overflow");
 	}
 	blocks.emplace_back(
-		blocks.back().physical_end,
-		blocks.back().physical_end + block_size,
+		reinterpret_cast<char*>(virtual_begin),
+		physical_end,
 		destr
 	);
 	return blocks.back().virtual_begin;

@@ -21,7 +21,7 @@ namespace dte_token {
 		public:
 			c_function(func* body, const metadata& meta, destructor* args_destructor = nullptr);
 			c_function(func* body, metadata&& meta, destructor* args_destructor = nullptr);
-			c_function(const c_function& other) : _meta(other.get_meta()), _body(other.get_body()), _args_destructor(other.get_args_destructor()) {};
+			c_function(const c_function& other);
 			c_function(c_function&& other) noexcept;
 			const metadata& get_meta() const noexcept;
 			func* get_body() const noexcept;

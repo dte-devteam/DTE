@@ -4,6 +4,7 @@ using namespace dte_utils;
 using namespace dte_token;
 c_function::c_function(func* body, const metadata& meta, destructor* args_destructor) : _body(body), _meta(meta), _args_destructor(args_destructor) {}
 c_function::c_function(func* body, metadata&& meta, destructor* args_destructor) : _body(body), _meta(std::move(meta)), _args_destructor(args_destructor) {}
+c_function::c_function(const c_function& other) : _meta(other.get_meta()), _body(other.get_body()), _args_destructor(other.get_args_destructor()) {}
 c_function::c_function(c_function&& other) noexcept : _body(other.get_body()), _meta(std::move(other._meta)), _args_destructor(other.get_args_destructor()) {}
 const c_function::metadata& c_function::get_meta() const noexcept {
 	return _meta;

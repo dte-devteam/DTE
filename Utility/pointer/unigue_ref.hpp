@@ -6,9 +6,8 @@ namespace dte_utils {
 	struct unique_ref : pointer_base<T> {
 		using type = pointer_base<T>::type;
 		using pointer = pointer_base<T>::pointer;
-		using const_pointer = pointer_base<T>::const_pointer;
 		public:
-			unique_ref(const_pointer instance = nullptr) noexcept : pointer_base<T>(instance) {}
+			unique_ref(pointer instance = nullptr) noexcept : pointer_base<T>(instance) {}
 			unique_ref(const unique_ref&) = delete;
 			unique_ref(unique_ref&& other) noexcept : pointer_base<T>(other._instance) {
 				other._instance = nullptr;

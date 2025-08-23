@@ -25,19 +25,19 @@ namespace dte_core {
 	inline size_t create_ifstream(dte_token::data_stack& ds, const dte_token::semi_pointer::data& spd) {
 		if (spd.ptr) {
 			const ifstr_args& args = *static_cast<const ifstr_args*>(spd.ptr);
-			new (ds.push_real(sizeof(std::ifstream), ifstream_destructor)) std::ifstream(args._Filename, args._Mode, args._Prot);
+			new (ds.push_real(sizeof(std::ifstream), alignof(std::ifstream), ifstream_destructor)) std::ifstream(args._Filename, args._Mode, args._Prot);
 			return 0;
 		}
-		new (ds.push_real(sizeof(std::ifstream), ifstream_destructor)) std::ifstream();
+		new (ds.push_real(sizeof(std::ifstream), alignof(std::ifstream), ifstream_destructor)) std::ifstream();
 		return 0;
 	}
 	inline size_t create_cstr(dte_token::data_stack& ds, const dte_token::semi_pointer::data& spd) {
 		if (spd.ptr) {
 			const dte_utils::dynamic_cstring& arg = *static_cast<const dte_utils::dynamic_cstring*>(spd.ptr);
-			new (ds.push_real(sizeof(dte_utils::dynamic_cstring), dynamic_cstring_destructor)) dte_utils::dynamic_cstring(arg);
+			new (ds.push_real(sizeof(dte_utils::dynamic_cstring), alignof(dte_utils::dynamic_cstring), dynamic_cstring_destructor)) dte_utils::dynamic_cstring(arg);
 			return 0;
 		}
-		new (ds.push_real(sizeof(dte_utils::dynamic_cstring), dynamic_cstring_destructor)) dte_utils::dynamic_cstring();
+		new (ds.push_real(sizeof(dte_utils::dynamic_cstring), alignof(dte_utils::dynamic_cstring), dynamic_cstring_destructor)) dte_utils::dynamic_cstring();
 		return 0;
 	}
 

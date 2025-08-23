@@ -6,11 +6,10 @@ namespace dte_utils {
 	struct pointer_base {
 		using type = T;
 		using pointer = type*;
-		using const_pointer = const pointer;
 		protected:
 			pointer _instance;
 		public:
-			pointer_base(const_pointer instance) noexcept : _instance(instance) {}
+			pointer_base(pointer instance) noexcept : _instance(instance) {}
 
 			template<bool is_fail_safe = false>
 			type& operator*() const noexcept(is_fail_safe)

@@ -49,6 +49,7 @@
     <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />
+    <ClInclude Include="template_forwarding.hpp" />
     <ClInclude Include="pointer\unigue_ref.hpp" />
     <ClInclude Include="pointer\unknown_ref.hpp" />
     <ClInclude Include="pointer\weak_ref.hpp" />

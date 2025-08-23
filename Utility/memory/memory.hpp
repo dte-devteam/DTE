@@ -15,7 +15,7 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<typename T, bool align = false>
+	template<typename T>
 	inline T* tmalloc(size_t num) {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
 	}
@@ -29,7 +29,7 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<typename T, bool align = false>
+	template<typename T>
 	inline T* aligned_tmalloc(size_t num) {
 		return static_cast<T*>(aligned_xmalloc(num * sizeof(T), alignof(T)));
 	}

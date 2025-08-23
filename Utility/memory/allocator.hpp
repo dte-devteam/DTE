@@ -19,23 +19,23 @@ namespace dte_utils {
 		using const_type = const type;
 		using pointer = type*;
 		using const_pointer = const_type*;
-	public:
-		allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
-		allocator(const allocator&) = delete;
-		allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
-		allocator& operator=(const allocator&) = delete;
-		allocator& operator=(allocator&& other) noexcept {
-			if (this == &other) {
+		public:
+			allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
+			allocator(const allocator&) = delete;
+			allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
+			allocator& operator=(const allocator&) = delete;
+			allocator& operator=(allocator&& other) noexcept {
+				if (this == &other) {
+					return *this;
+				}
+				std::swap(_ptr, other._ptr);
 				return *this;
 			}
-			std::swap(_ptr, other._ptr);
-			return *this;
-		}
-		operator pointer() noexcept {
-			return static_cast<pointer>(_ptr);
-		}
-		operator const_pointer() const noexcept {
-			return static_cast<const_pointer>(_ptr);
-		}
+			operator pointer() noexcept {
+				return static_cast<pointer>(_ptr);
+			}
+			operator const_pointer() const noexcept {
+				return static_cast<const_pointer>(_ptr);
+			}
 	};
 }

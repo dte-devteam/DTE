@@ -13,7 +13,7 @@ namespace dte_utils {
 		
 
 		dynamic_string(size_t alocate_extra_size = 0) : dynamic_array<T, A>(alocate_extra_size + 1) {
-			place_at(end(), 0);
+			place_at(this->end(), 0);
 			++this->_used;
 		}
 
@@ -26,7 +26,7 @@ namespace dte_utils {
 
 		void clear() noexcept(std::is_nothrow_destructible_v<type>) {
 			if constexpr (!std::is_trivially_destructible_v<type>) {
-				destruct_range(begin() + 1, end());
+				destruct_range(this->begin() + 1, this->end());
 			}
 			this->_used = 1;
 			this->back<true>() = 0;
@@ -34,13 +34,13 @@ namespace dte_utils {
 
 		void push_back(const_type& value) {
 			if (value) {
-				this->back() = value;
+				this->back<true>() = value;
 				dynamic_stack<T, A>::push_back(0);
 			}
 		}
 		void push_back(type&& value) {
 			if (value) {
-				this->back() = std::move(value);
+				this->back<true>() = std::move(value);
 				dynamic_stack<T, A>::push_back(0);
 			}
 		}
@@ -63,7 +63,7 @@ namespace dte_utils {
 					throw zero_size_access();
 				}
 			}
-			dynamic_stack<T, A>::pop_back();
+			dynamic_stack<T, A>::pop_back<true>();
 			this->back<true>() = 0;
 		}
 		template<bool is_fail_safe = false>
@@ -74,7 +74,7 @@ namespace dte_utils {
 					throw out_of_range();
 				}
 			}
-			dynamic_stack<T, A>::pop_back(num);
+			dynamic_stack<T, A>::pop_back<true>(num);
 			this->back<true>() = 0;
 		}
 		//don`t forget - string must end by 0!
@@ -98,7 +98,7 @@ namespace dte_utils {
 				throw out_of_range();
 			}
 			dynamic_string new_str(this->begin() + from, to - from, 1);
-			place_at(new_str.end(), static_cast<type>(0));
+			place_at(new_str.end(), 0);
 			++new_str._used;
 			return new_str;
 		}
@@ -106,7 +106,7 @@ namespace dte_utils {
 
 		template<typename U, template<typename> typename UA>
 		dynamic_string& operator +=(const dynamic_string<U, UA>& other) {
-			native_pop();
+			native_pop<true>();
 			dynamic_stack<T, A>::operator+=(other);
 			if (&other == reinterpret_cast<dynamic_string<U, UA>*>(this)) {
 				native_push(0);
@@ -115,7 +115,7 @@ namespace dte_utils {
 		}
 		template<typename U, size_t N>
 		dynamic_string& operator +=(const U(&arr)[N]) {
-			native_pop();
+			native_pop<true>();
 			dynamic_stack<T, A>::operator+=(arr);
 			return *this;
 		}

@@ -1,16 +1,18 @@
 #pragma once
 #include "weak_ref.hpp"
 #include "exceptions/pointer_exception.hpp"
+#include "template_forwarding.hpp"
 namespace dte_utils {
+	template<typename T, T v>
+	struct bool_h {};
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
 	struct strong_ref : weak_ref<T, RC> {
 		using size_type = weak_ref<T, RC>::size_type;
 		using type = weak_ref<T, RC>::type;
 		using pointer = weak_ref<T, RC>::pointer;
-		using const_pointer = weak_ref<T, RC>::const_pointer;
 		public:
-			strong_ref(const_pointer instance = nullptr) : weak_ref<T, RC>(instance) {
+			strong_ref(pointer instance = nullptr) : weak_ref<T, RC>(instance) {
 				this->_counter->add_strong();
 			}
 			strong_ref(const strong_ref& other) noexcept : weak_ref<T, RC>(other) {
@@ -18,7 +20,7 @@ namespace dte_utils {
 			}
 
 			template<bool is_fail_safe = false>
-			strong_ref(const weak_ref<T, RC>& other) noexcept(is_fail_safe) : weak_ref<T, RC>(other) {
+			strong_ref(const weak_ref<T, RC>& other, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) : weak_ref<T, RC>(other) {
 				if constexpr (!is_fail_safe) {
 					if (other.expired()) {
 						throw bad_weak_ptr();
@@ -32,7 +34,7 @@ namespace dte_utils {
 			}
 
 
-			strong_ref& operator=(const_pointer instance) {
+			strong_ref& operator=(pointer instance) {
 				this->_strong_decrease();
 				this->_instance = instance;
 				if (this->_counter->sub_weak()) {

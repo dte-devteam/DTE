@@ -162,7 +162,7 @@
     <ClCompile Include="token\semi_pointer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="module\module_instance.hpp" />
+    <ClInclude Include="module\c_func_handler.hpp" />
     <ClInclude Include="module\version.hpp" />
     <ClInclude Include="token\c_function.hpp" />
     <ClInclude Include="token\data_stack.hpp" />

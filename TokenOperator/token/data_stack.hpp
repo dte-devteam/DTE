@@ -19,7 +19,7 @@ namespace dte_token {
 			data_stack& operator=(const data_stack& other) = delete;
 			data_stack& operator=(data_stack&& other) noexcept;
 			~data_stack();
-			pointer push_real(size_type block_size, destructor* destr);
+			pointer push_real(size_type block_size, size_type alignment, destructor* destr);
 			void push_virt(pointer virt_block);
 			void pop();
 			void pop(size_type block_num);

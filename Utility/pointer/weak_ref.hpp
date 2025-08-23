@@ -9,7 +9,6 @@ namespace dte_utils {
 		using size_type = RC::size_type;
 		using type = pointer_base<T>::type;
 		using pointer = pointer_base<T>::pointer;
-		using const_pointer = pointer_base<T>::const_pointer;
 		protected:
 			RC* _counter;
 			void _weak_decrease() noexcept(std::is_nothrow_destructible_v<RC>) {
@@ -23,7 +22,7 @@ namespace dte_utils {
 				}
 			}
 		public:
-			weak_ref(const_pointer instance = nullptr) : pointer_base<T>(instance), _counter(cnew<RC>(static_cast<size_type>(1), static_cast<size_type>(0))) {}
+			weak_ref(pointer instance = nullptr) : pointer_base<T>(instance), _counter(cnew<RC>(1, 0)) {}
 			weak_ref(const weak_ref& other) noexcept : pointer_base<T>(other._instance), _counter(other._counter) {
 				_counter->add_weak();
 			}
@@ -39,7 +38,7 @@ namespace dte_utils {
 				return !get_counter()->get_strong();
 			}
 
-			weak_ref& operator=(const_pointer instance) {
+			weak_ref& operator=(pointer instance) {
 				this->_instance = instance;
 				if (_counter->sub_weak()) {
 					_counter = cnew<RC>(1, 0);
@@ -77,4 +76,11 @@ namespace dte_utils {
 	};
 	template<typename T>
 	using atomic_weak_ref = weak_ref<T, atomic_ref_counter>;
+	//create counter for static data
+	template<typename T, typename RC>
+	weak_ref<T, RC> create_static_ptr(T* instance = nullptr) {
+		weak_ref<T, RC> r(instance);
+		const_cast<RC*>(r.get_counter())->add_strong();
+		return r;
+	}
 }
