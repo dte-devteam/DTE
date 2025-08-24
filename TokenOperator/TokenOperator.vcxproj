@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="module\c_func_unit.cpp" />
     <ClCompile Include="module\version.cpp" />
     <ClCompile Include="token\c_function.cpp" />
     <ClCompile Include="token\data_stack.cpp" />
@@ -163,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="module\c_func_handler.hpp" />
+    <ClInclude Include="module\c_func_unit.hpp" />
     <ClInclude Include="module\version.hpp" />
     <ClInclude Include="token\c_function.hpp" />
     <ClInclude Include="token\data_stack.hpp" />

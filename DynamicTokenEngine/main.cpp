@@ -59,30 +59,33 @@ struct DDD
 };
 
 
-inline size_t helo(dte_token::data_stack& ds, const dte_token::semi_pointer::data& spd) {
-	std::cout << "Helo there!\n";
-	return 0;
-}
+
+
 
 template<typename ...Args>
-static_array<atomic_strong_ref<c_function>, sizeof...(Args)> the(Args&&... args) {
+inline const static_array<c_func_unit, sizeof...(Args)> the(Args&&... args) {
 	return { args... };
 }
-
-
+enum function_index : size_t{
+	CREATE_IFSTREAM,
+	CREATE_CSTRING,
+	READ_LINE,
+	CLOSE_FILE
+};
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
 
 	//test_memory();
 	//test_pointer();
-	auto oooo = the(
-		cnew<c_function>(helo, c_function::metadata{}, nullptr),
-		cnew<c_function>(helo, c_function::metadata{}, nullptr),
-		cnew<c_function>(helo, c_function::metadata{}, nullptr)
-	);
-	c_func_handler cfh = c_func_handler(oooo);
 
-	std::cout << cfh.c_func_num << "\n";
+	auto oooo = the(
+		c_func_unit{ create_ifstream, c_function::metadata{}, ifstr_args_destructor },
+		c_func_unit{ create_cstr, c_function::metadata{}, dynamic_cstring_destructor },
+		c_func_unit{ read_line, c_function::metadata{} },
+		c_func_unit{ close_file, c_function::metadata{} }
+	);
+	c_func_handler cfh(oooo);
+
 
 	is_functor_noexcept_v<DDD, int>;
 
@@ -92,24 +95,12 @@ int main(int argc, const char* argv[]) {
 	);
 	std::cout << "-----------------" << std::endl;
 	stream* strf = new stream{ {10000}, {} };
-	atomic_strong_ref<c_function> cfssr{
-		cnew<c_function>(create_ifstream, c_function::metadata{}, ifstr_args_destructor)
-	};
-	atomic_strong_ref<c_function> ccstrsr{
-		cnew<c_function>(create_cstr, c_function::metadata{}, dynamic_cstring_destructor)
-	};
-	atomic_strong_ref<c_function> rlsr{
-		cnew<c_function>(read_line, c_function::metadata{})
-	};
-	atomic_strong_ref<c_function> cffsr{
-		cnew<c_function>(close_file, c_function::metadata{})
-	};
 	dte_function dteff({ "FILE", 0 },
 		{
-			{cfssr, {1}, {ifstr_args_i}},
-			{ccstrsr, {1}, {size_t(0)}},
-			{rlsr, {1}, {size_t(0)}},
-			{cffsr, {1}, {size_t(0)}}
+			{cfh[CREATE_IFSTREAM],	{1}, {ifstr_args_i}},	//create new function by "registry"
+			{cfh[CREATE_CSTRING],	{1}, {size_t(0)}},
+			{cfh[READ_LINE],		{1}, {size_t(0)}},
+			{cfh[CLOSE_FILE],		{1}, {size_t(0)}}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();
@@ -126,12 +117,10 @@ int main(int argc, const char* argv[]) {
 	strf = new stream{ {10000}, {} };
 	*static_cast<int*>(strf->stack.push_real(sizeof(int), alignof(int), nullptr)) = 100;
 	*static_cast<int*>(strf->stack.push_real(sizeof(int), alignof(int), nullptr)) = 10;
-	atomic_strong_ref<c_function> adder{
-		cnew<c_function>(add<int>, c_function::metadata{})
-	};
+	c_func_unit adder(add<int>, c_function::metadata{});
 	dte_function dteaf({ "FILE", 0 },
 		{
-			{adder, {1}, {size_t(0)}}
+			dte_function::step{adder, {1}, {size_t(0)}}
 		}
 	);
 	dteaf(*strf, 0);

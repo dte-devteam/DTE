@@ -2,11 +2,14 @@
 //#include "unit.hpp"
 #include "memory/dynamic_string.hpp"
 #include "pointer/strong_ref.hpp"
-#include "c_function.hpp"
 #include "types.hpp"
 #include "semi_pointer.hpp"
+namespace dte_module {
+	struct c_func_unit;
+}
 namespace dte_token {
 	struct stream;
+	struct c_function;
 	struct dte_function {
 		struct metadata {
 			dte_utils::dynamic_cstring name;
@@ -15,8 +18,10 @@ namespace dte_token {
 		struct step {
 			union function_unit {
 				function_unit() {}
+				function_unit(const dte_utils::atomic_weak_ref<const c_function>& c_func);
+				function_unit(const dte_utils::atomic_strong_ref<dte_function>& dte_func);
 				~function_unit() {}
-				dte_utils::atomic_strong_ref<c_function> c_func;
+				dte_utils::atomic_weak_ref<const c_function> c_func;
 				dte_utils::atomic_strong_ref<dte_function> dte_func;
 			};
 			protected:
@@ -25,8 +30,12 @@ namespace dte_token {
 				dte_utils::dynamic_array<size_t> _jumps;
 				semi_pointer _semi_ptr;
 			public:
-				step(const dte_utils::atomic_strong_ref<c_function>& c_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
+				step(const dte_module::c_func_unit& unit, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
+				step(const dte_module::c_func_unit& unit, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
+				step(const dte_utils::atomic_weak_ref<const c_function>& c_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
+				step(const dte_utils::atomic_weak_ref<const c_function>& c_func, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
+				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const step& other);
 				~step();
 				const function_unit& get_function_unit() const noexcept;
@@ -41,19 +50,10 @@ namespace dte_token {
 			//dte_function(metadata&& meta, dte_utils::dynamic_array<step>&& steps) : _meta(std::move(meta)), _steps(std::move(steps)) {}
 			//dte_function(const dte_function& other) = delete;
 			//dte_function(dte_function&& other);	//TODO
-			const metadata& get_meta() const;
+			const metadata& get_meta() const noexcept;
 			dte_function& operator=(const dte_function& other);
 			dte_function& operator=(dte_function&& other) noexcept;
 			size_t operator()(stream& s, size_t frame_offset);
-			~dte_function() {
-				for (const step& s : _steps) {
-					if (!s.get_is_dynamic()) {
-						if (s.get_function_unit().c_func->get_args_destructor() && s.get_semi_ptr().is_real_ptr()) {
-							s.get_function_unit().c_func->get_args_destructor()(s.get_semi_ptr().get_spu().ptr);
-							dte_utils::aligned_free(s.get_semi_ptr().get_spu().ptr);
-						}
-					}
-				}
-			}
+			~dte_function();
 	};
 }
