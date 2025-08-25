@@ -16,4 +16,9 @@ namespace dte_utils {
 		nullptr_access(const nullptr_access& other) noexcept;
 		nullptr_access& operator=(const nullptr_access&) = delete;
 	};
+	struct bad_alignment : exception {
+		bad_alignment(size_t code = 0) noexcept;
+		bad_alignment(const bad_alignment& other) noexcept;
+		bad_alignment& operator=(const bad_alignment&) = delete;
+	};
 }

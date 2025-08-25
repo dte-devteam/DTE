@@ -19,7 +19,13 @@ namespace dte_utils {
 	inline T* tmalloc(size_t num) {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
 	}
+	template<bool is_alignment_safe = false>
 	inline void* aligned_xmalloc(size_t size, size_t alignment) {
+		if constexpr (!is_alignment_safe) {
+			if (!alignment) {
+				throw bad_alignment();
+			}
+		}
 		if (size) {
 			const size_t offset = sizeof(void*) + alignment - 1;
 			void* original = xmalloc(size + offset);
@@ -31,7 +37,7 @@ namespace dte_utils {
 	}
 	template<typename T>
 	inline T* aligned_tmalloc(size_t num) {
-		return static_cast<T*>(aligned_xmalloc(num * sizeof(T), alignof(T)));
+		return static_cast<T*>(aligned_xmalloc<true>(num * sizeof(T), alignof(T)));
 	}
 	inline void* xrealloc(void* block, size_t size) {
 		if (size) {

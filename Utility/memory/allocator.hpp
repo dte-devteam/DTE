@@ -20,7 +20,7 @@ namespace dte_utils {
 		using pointer = type*;
 		using const_pointer = const_type*;
 		public:
-			allocator(size_type num = 0) : mem_handler(num * sizeof(type)) {}
+			allocator(size_type num = 0) : mem_handler(num * sizeof(type), alignof(type)) {}
 			allocator(const allocator&) = delete;
 			allocator(allocator&& other) noexcept : mem_handler(std::move(other)) {}
 			allocator& operator=(const allocator&) = delete;

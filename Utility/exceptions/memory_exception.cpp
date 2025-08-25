@@ -8,3 +8,6 @@ bad_realloc::bad_realloc(const bad_realloc& other) noexcept : exception(other) {
 
 nullptr_access::nullptr_access(size_t code) noexcept : exception(code, "nullptr access") {}
 nullptr_access::nullptr_access(const nullptr_access& other) noexcept : exception(other) {}
+
+bad_alignment::bad_alignment(size_t code) noexcept : exception(code, "bad alignment") {}
+bad_alignment::bad_alignment(const bad_alignment& other) noexcept : exception(other) {}
