@@ -6,4 +6,3 @@ using floatpoint = double;
 using floatpoint = float;
 #endif
 using destructor = void(void*);
-using constructor = void(void*, const void*);

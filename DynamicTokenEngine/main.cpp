@@ -74,7 +74,7 @@ enum function_index : size_t{
 };
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
-
+	
 	//test_memory();
 	//test_pointer();
 

@@ -6,12 +6,9 @@ namespace dte_token {
 	struct data_stack;
 	struct c_function {
 		struct metadata {
-			dte_utils::dynamic_cstring name;
+			const char* name;
 			//max jump index this function can output
 			size_t max_jump;
-			//size of data type pushed on stack
-			//if it is <=sizeof(void*) uses casted void* as data
-			size_t data_size_push;
 		};
 		using func = size_t(data_stack&, const semi_pointer::data&);
 		protected:
