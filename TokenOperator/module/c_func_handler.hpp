@@ -4,18 +4,21 @@
 namespace dte_module {
 	struct c_func_handler {
 		using size_type = size_t;
-		//protected:
-			const c_func_unit* c_func_ptr;
-			size_type c_func_num;
-		//public:
-			c_func_handler() noexcept : c_func_ptr(nullptr), c_func_num(0) {}
+		protected:
+			const dte_token::c_function* c_func_ptr;
+			const size_type c_func_num;
+		public:
+			constexpr c_func_handler() noexcept : c_func_ptr(nullptr), c_func_num(0) {}
 			template<size_type N>
-			c_func_handler(const dte_utils::static_array<c_func_unit, N>& functions) noexcept : c_func_ptr(functions.begin()), c_func_num(N) {}
-			const c_func_unit& operator[](size_type index) {
-				if (index < N) {
-					return c_func_ptr[index];
-				}
-				throw dte_utils::out_of_range();
+			constexpr c_func_handler(const dte_token::c_function (&functions)[N]) noexcept : c_func_ptr(functions), c_func_num(N) {}
+			const dte_token::c_function* begin() const noexcept {
+				return c_func_ptr;
+			}
+			const dte_token::c_function* end() const noexcept {
+				return c_func_ptr + c_func_num;
+			}
+			const size_type get_num() const noexcept {
+				return c_func_num;
 			}
 	};
 }

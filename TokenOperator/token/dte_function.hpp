@@ -30,8 +30,6 @@ namespace dte_token {
 				dte_utils::dynamic_array<size_t> _jumps;
 				semi_pointer _semi_ptr;
 			public:
-				step(const dte_module::c_func_unit& unit, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
-				step(const dte_module::c_func_unit& unit, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_weak_ref<const c_function>& c_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_weak_ref<const c_function>& c_func, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);

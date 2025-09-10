@@ -14,11 +14,9 @@ using namespace dte_module;
 
 using f_step = dte_function::step;
 using f_unit = f_step::function_unit;
-f_unit::function_unit(const dte_utils::atomic_weak_ref<const c_function>& c_func) : c_func(c_func) {}
-f_unit::function_unit(const dte_utils::atomic_strong_ref<dte_function>& dte_func) : dte_func(dte_func) {}
+f_unit::function_unit(const atomic_weak_ref<const c_function>& c_func) : c_func(c_func) {}
+f_unit::function_unit(const atomic_strong_ref<dte_function>& dte_func) : dte_func(dte_func) {}
 
-f_step::step(const c_func_unit& unit, const dynamic_array<size_t>& jumps, const semi_pointer& sp) : step(unit.get_c_func_ptr(), jumps, sp) {}
-f_step::step(const c_func_unit& unit, dynamic_array<size_t>&& jumps, const semi_pointer& sp) : step(unit.get_c_func_ptr(), std::move(jumps), sp) {}
 f_step::step(const atomic_weak_ref<const c_function>& c_func, const dynamic_array<size_t>& jumps, const semi_pointer& sp) :
 _is_dynamic(false), _jumps(jumps), _semi_ptr(sp), _func_unit(c_func) {}
 f_step::step(const atomic_weak_ref<const c_function>& c_func, dynamic_array<size_t>&& jumps, const semi_pointer& sp) :
@@ -105,7 +103,7 @@ dte_function::~dte_function() {
 		if (!s.get_is_dynamic()) {
 			if (s.get_function_unit().c_func->get_args_destructor() && s.get_semi_ptr().is_real_ptr()) {
 				s.get_function_unit().c_func->get_args_destructor()(s.get_semi_ptr().get_spu().ptr);
-				dte_utils::aligned_free(s.get_semi_ptr().get_spu().ptr);
+				aligned_free(s.get_semi_ptr().get_spu().ptr);
 			}
 		}
 	}
