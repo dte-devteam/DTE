@@ -18,7 +18,8 @@
 #include "core/functions/file_functions.hpp"
 #include "core/functions/algebra.hpp"
 
-#include "module/c_func_handler.hpp"
+#include "module/function_set.hpp"
+#include "module/module_container.hpp"
 
 #include <iostream>
 
@@ -64,30 +65,29 @@ enum function_index : size_t {
 	CLOSE_FILE
 };
 constexpr c_function fff[] = {
-	{ create_ifstream, c_function::metadata{}, ifstr_args_destructor },
-	{ create_cstr, c_function::metadata{}, dynamic_cstring_destructor },
-	{ read_line, c_function::metadata{} },
-	{ close_file, c_function::metadata{} }
+	{ create_ifstream, {}, ifstr_args_destructor },
+	{ create_cstr, {}, dynamic_cstring_destructor },
+	{ read_line, {} },
+	{ close_file, {} }
 };
+constexpr function_set fs(fff);
 
-int sss = 10;
-atomic_weak_ref<const int>* sss2 = (atomic_weak_ref<const int>*)malloc(sizeof(atomic_weak_ref<const int>));
-constexpr c_func_handler cfh{ fff };
-//static atomic_weak_ref<const c_function> awrf0 = cfh[CREATE_IFSTREAM];
-//static atomic_weak_ref<const c_function> awrf1 = cfh[CREATE_CSTRING];
-//static atomic_weak_ref<const c_function> awrf2 = cfh[READ_LINE];
-//static atomic_weak_ref<const c_function> awrf3 = cfh[CLOSE_FILE];
 dynamic_stack<atomic_weak_ref<const c_function>> ggg; // (cfh.begin(), cfh.get_num(), 0);
+size_t log_int(data_stack& ds, const semi_pointer::data& spd) {
+	std::cout << *get<int>(ds, spd.offset) << std::endl;
+	return 0;
+}
+
 
 int main(int argc, const char* argv[]) {
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();
-	
-	place_at(sss2, &sss);
+	std::cout << fs.get_num() << std::endl;
 
-	copy_range(&sss, (&sss) + 1, sss2);
-	//ggg.push_back(fff + 0);
+	for (const c_function& cf : fff) {
+		ggg.emplace_back(&cf);
+	}
 
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
@@ -96,10 +96,10 @@ int main(int argc, const char* argv[]) {
 	stream* strf = new stream{ {10000}, {} };
 	dte_function dteff({ "FILE", 0 },
 		{
-			//{ggg[CREATE_IFSTREAM],	{1}, {ifstr_args_i}},	//create new function by "registry"
-			//{ggg[CREATE_CSTRING],	{1}, {size_t(0)}},
-			//{ggg[READ_LINE],	{1}, {size_t(0)}},
-			//{ggg[CLOSE_FILE],	{1}, {size_t(0)}}
+			{ggg[CREATE_IFSTREAM],	{1}, {ifstr_args_i}},	//create new function by "registry"
+			{ggg[CREATE_CSTRING],	{1}, {size_t(0)}},
+			{ggg[READ_LINE],	{1}, {size_t(0)}},
+			{ggg[CLOSE_FILE],	{1}, {size_t(0)}}
 		}
 	);
 	t1 = std::chrono::high_resolution_clock::now();
@@ -116,16 +116,39 @@ int main(int argc, const char* argv[]) {
 	strf = new stream{ {10000}, {} };
 	*static_cast<int*>(strf->stack.push_real(sizeof(int), alignof(int), nullptr)) = 100;
 	*static_cast<int*>(strf->stack.push_real(sizeof(int), alignof(int), nullptr)) = 10;
-	c_func_unit adder(add<int>, c_function::metadata{});
-	dte_function dteaf({ "FILE", 0 },
+	//c_func_unit adder(add<int>, c_function::metadata{});
+	c_function cfff(add<int>, {});
+	c_function cfffl(log_int, {});
+	atomic_strong_ref<dte_function> r0(cnew<dte_function>(
+		dte_function::metadata{ "FILE", 0 },
+		dynamic_array<dte_function::step>{
+		dte_function::step{
+			atomic_weak_ref<const c_function>(&cfff),
+			dynamic_array<size_t>{1},
+			semi_pointer(size_t(0))
+		}
+	}
+	));
+	atomic_strong_ref<dte_function> r1(cnew<dte_function>(
+		dte_function::metadata{ "FILE", 0 },
+		dynamic_array<dte_function::step>{
+			dte_function::step{ 
+				atomic_weak_ref<const c_function>(&cfffl), 
+				dynamic_array<size_t>{1}, 
+				semi_pointer(size_t(0))
+			}
+		}
+	));
+	dte_function add_and_log({ "FILE", 0 },
 		{
-		//	dte_function::step{adder, {1}, {size_t(0)}}
+			{r0, {1}, {size_t(0)}},
+			{r1, {1}, {size_t(0)}}
 		}
 	);
-	dteaf(*strf, 0);
-	std::cout << strf->stack.get_block_num() << std::endl;
-	std::cout << strf->stack.get_memory_left() << std::endl;
-	std::cout << *static_cast<int*>(strf->stack[0]) << std::endl;
+	add_and_log(*strf, 0);
+	//std::cout << strf->stack.get_block_num() << std::endl;
+	//std::cout << strf->stack.get_memory_left() << std::endl;
+	//std::cout << *static_cast<int*>(strf->stack[0]) << std::endl;
 	std::cin.get();
 	return 0;
 }

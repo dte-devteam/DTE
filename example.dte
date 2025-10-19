@@ -18,13 +18,13 @@ func3() = {}
 func4() = {}
 func5() = {}
 func() = {
-	@@goto_1
-	[@@goto_1, 2]func1() //jumps [1, @@goto_1, 2], @@goto_1 = 0 in func
+	goto_1:
+	[1, goto_1, 2]func1() //jumps [1, goto_1, 2], @@goto_1 = 0 in func
 	func2()
-	[@@goto_1]func3()	//jumps [1, @@goto_1], @@goto_1 = 0 in func
-	@@goto_2
+	[1, goto_1]func3()	//jumps [1, goto_1], @@goto_1 = 0 in func
+	goto_2:
 	func4()
-	[@@goto_2]func5()	//jumps [1, @@goto_2], @@goto_2 = 4 in func
+	[1, goto_2]func5()	//jumps [1, goto_2], @@goto_2 = 4 in func
 }
 
 

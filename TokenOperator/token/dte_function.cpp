@@ -1,7 +1,6 @@
 #include "dte_function.hpp"
 #include "stream.hpp"
 #include "c_function.hpp"
-#include "module/c_func_unit.hpp"
 using namespace dte_utils;
 using namespace dte_token;
 using namespace dte_module;
@@ -73,11 +72,10 @@ dte_function& dte_function::operator=(dte_function&& other) noexcept {
 	_meta = std::move(other._meta);
 	return *this;
 }
-size_t dte_function::operator()(stream& s, size_t frame_offset) {
+size_t dte_function::operator()(stream& s, size_t frame_offset, size_t index) {
 	s.call_stack.push_back(this);
-	size_t i = 0;
-	while (i < _steps.get_used()) {
-		const step& action = _steps[i];
+	while (index < _steps.get_used()) {
+		const step& action = _steps[index];
 		size_t jump;
 		if (action.get_is_dynamic()) {
 			jump = action.get_function_unit().dte_func(s, frame_offset + action.get_semi_ptr().get_spu().offset);
@@ -93,10 +91,10 @@ size_t dte_function::operator()(stream& s, size_t frame_offset) {
 		if (jump >= action.get_jumps().get_used()) {
 			throw exception();
 		}
-		i += action.get_jumps()[jump];
+		index += action.get_jumps().operator[]<true>(jump);
 	}
 	s.call_stack.pop_back();
-	return i - _steps.get_used();
+	return index - _steps.get_used();
 }
 dte_function::~dte_function() {
 	for (const step& s : _steps) {

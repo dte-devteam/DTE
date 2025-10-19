@@ -30,7 +30,7 @@
     <ClCompile Include="token\semi_pointer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="module\c_func_unit.cpp">
+    <ClCompile Include="module\module_container.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,10 +56,10 @@
     <ClInclude Include="token\semi_pointer.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="module\c_func_handler.hpp">
+    <ClInclude Include="module\module_container.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="module\c_func_unit.hpp">
+    <ClInclude Include="module\function_set.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

@@ -51,7 +51,7 @@ namespace dte_token {
 			const metadata& get_meta() const noexcept;
 			dte_function& operator=(const dte_function& other);
 			dte_function& operator=(dte_function&& other) noexcept;
-			size_t operator()(stream& s, size_t frame_offset);
+			size_t operator()(stream& s, size_t frame_offset, size_t index = 0);
 			~dte_function();
 	};
 }
