@@ -40,6 +40,7 @@ namespace dte_token {
 				bool get_is_dynamic() const noexcept;
 				const dte_utils::dynamic_array<size_t>& get_jumps() const noexcept;
 				const semi_pointer& get_semi_ptr() const noexcept;
+				size_t get_start_index() const noexcept;
 		};
 		//protected:
 			metadata _meta;
@@ -51,7 +52,7 @@ namespace dte_token {
 			const metadata& get_meta() const noexcept;
 			dte_function& operator=(const dte_function& other);
 			dte_function& operator=(dte_function&& other) noexcept;
-			size_t operator()(stream& s, size_t frame_offset, size_t index = 0);
+			size_t operator()(stream& s, size_t frame_offset = 0, size_t index = 0);
 			~dte_function();
 	};
 }

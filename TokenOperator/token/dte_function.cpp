@@ -81,6 +81,7 @@ size_t dte_function::operator()(stream& s, size_t frame_offset, size_t index) {
 			jump = action.get_function_unit().dte_func(s, frame_offset + action.get_semi_ptr().get_spu().offset);
 		}
 		else {
+			s.functional_index = index;
 			jump = action.get_function_unit().c_func(
 				s.stack,
 				action.get_semi_ptr().is_real_ptr() ?
