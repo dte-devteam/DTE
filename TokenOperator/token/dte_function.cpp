@@ -74,14 +74,14 @@ dte_function& dte_function::operator=(dte_function&& other) noexcept {
 }
 size_t dte_function::operator()(stream& s, size_t frame_offset, size_t index) {
 	s.call_stack.push_back(this);
-	while (index < _steps.get_used()) {
-		const step& action = _steps[index];
+	while (index < get_steps().get_used()) {
+		s.functional_index = index;
+		const step& action = get_steps()[index];
 		size_t jump;
 		if (action.get_is_dynamic()) {
 			jump = action.get_function_unit().dte_func(s, frame_offset + action.get_semi_ptr().get_spu().offset);
 		}
 		else {
-			s.functional_index = index;
 			jump = action.get_function_unit().c_func(
 				s.stack,
 				action.get_semi_ptr().is_real_ptr() ?
@@ -95,10 +95,10 @@ size_t dte_function::operator()(stream& s, size_t frame_offset, size_t index) {
 		index += action.get_jumps().operator[]<true>(jump);
 	}
 	s.call_stack.pop_back();
-	return index - _steps.get_used();
+	return index - get_steps().get_used();
 }
 dte_function::~dte_function() {
-	for (const step& s : _steps) {
+	for (const step& s : get_steps()) {
 		if (!s.get_is_dynamic()) {
 			if (s.get_function_unit().c_func->get_args_destructor() && s.get_semi_ptr().is_real_ptr()) {
 				s.get_function_unit().c_func->get_args_destructor()(s.get_semi_ptr().get_spu().ptr);
@@ -106,4 +106,7 @@ dte_function::~dte_function() {
 			}
 		}
 	}
+}
+const dynamic_array<dte_function::step>& dte_function::get_steps() const noexcept {
+	return _steps;
 }

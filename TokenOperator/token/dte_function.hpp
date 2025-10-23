@@ -54,5 +54,6 @@ namespace dte_token {
 			dte_function& operator=(dte_function&& other) noexcept;
 			size_t operator()(stream& s, size_t frame_offset = 0, size_t index = 0);
 			~dte_function();
+			const dte_utils::dynamic_array<step>& get_steps() const noexcept;
 	};
 }

@@ -191,10 +191,18 @@ int main(int argc, const char* argv[]) {
 	}
 	catch (const exception& e) {
 		std::cout << e.what() << std::endl;
+		//log call stack----------------------------
 		for (dte_function* f : strf->call_stack) {
 			std::cout << f->get_meta().name.begin() << std::endl;
 		}
-		std::cout << strf->functional_index << " (" << strf->call_stack.back()->_steps[strf->functional_index].get_function_unit().c_func.operator*().get_meta().name << ")" << std::endl;
+		const dte_function::step& st = strf->call_stack.back()->get_steps().operator[]<true>(strf->functional_index);
+		if (st.get_is_dynamic()) {
+			std::cout << st.get_function_unit().dte_func.operator*().get_meta().name.begin() << std::endl;
+		}
+		else {
+			std::cout << st.get_function_unit().c_func.operator*().get_meta().name << std::endl;
+		}
+		//------------------------------------------
 	}
 	delete strf;
 	std::cin.get();
