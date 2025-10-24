@@ -33,6 +33,8 @@
     <ClCompile Include="pointer\ref.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="exceptions\error_codes.hpp" />
+    <ClInclude Include="exceptions\error_desc.hpp" />
     <ClInclude Include="exceptions\exception.hpp" />
     <ClInclude Include="exceptions\logic_exception.hpp" />
     <ClInclude Include="exceptions\memory_exception.hpp" />

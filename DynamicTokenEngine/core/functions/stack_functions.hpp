@@ -1,8 +1,8 @@
 #pragma once
 #include "token/data_stack.hpp"
 #include "token/semi_pointer.hpp"
-#include "core/error_codes.hpp"
-#include "core/error_desc.hpp"
+#include "exceptions/error_codes.hpp"
+#include "exceptions/error_desc.hpp"
 namespace dte_core {
 	inline size_t get_frame_size(dte_token::data_stack& ds, size_t offset) {
 		return ds.get_block_num() - offset;

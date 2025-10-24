@@ -6,6 +6,6 @@ namespace dte_token {
 		size_t functional_index;
 		data_stack stack;
 		//we can store simple pointers because functions are hold by functions/stream/global
-		dte_utils::dynamic_stack<dte_function*> call_stack;
+		dte_utils::dynamic_stack<const dte_function*> call_stack;
 	};
 }

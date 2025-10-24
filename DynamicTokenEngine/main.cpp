@@ -127,22 +127,22 @@ int main(int argc, const char* argv[]) {
 	atomic_strong_ref<dte_function> r0(cnew<dte_function>(
 		dte_function::metadata{ "FILE", 0 },
 		dynamic_array<dte_function::step>{
-			dte_function::step{
-				atomic_weak_ref<const c_function>(&cfff),
-				dynamic_array<size_t>{1},
-				semi_pointer(size_t(0))
-			}
+		dte_function::step{
+			atomic_weak_ref<const c_function>(&cfff),
+			dynamic_array<size_t>{1},
+			semi_pointer(size_t(0))
 		}
+	}
 	));
 	atomic_strong_ref<dte_function> r1(cnew<dte_function>(
 		dte_function::metadata{ "FILE", 0 },
 		dynamic_array<dte_function::step>{
-			dte_function::step{ 
-				atomic_weak_ref<const c_function>(&cfffl), 
-				dynamic_array<size_t>{1}, 
-				semi_pointer(size_t(0))
-			}
+		dte_function::step{
+			atomic_weak_ref<const c_function>(&cfffl),
+			dynamic_array<size_t>{1},
+			semi_pointer(size_t(0))
 		}
+	}
 	));
 	dte_function add_and_log({ "FILE", 0 },
 		{
@@ -151,34 +151,34 @@ int main(int argc, const char* argv[]) {
 		}
 	);
 	add_and_log(*strf);
-	
 
-	c_function thr_c(thr, {"THROW"});
-	c_function nop_c(nop, {"NOP"});
+
+	c_function thr_c(thr, { "THROW" });
+	c_function nop_c(nop, { "NOP" });
 	atomic_strong_ref<dte_function> thr0(cnew<dte_function>(
 		dte_function::metadata{ "NOP", 0 },
 		dynamic_array<dte_function::step>{
-			dte_function::step{
-				atomic_weak_ref<const c_function>(&nop_c),
-				dynamic_array<size_t>{1},
-				semi_pointer(size_t(0))
-			}
+		dte_function::step{
+			atomic_weak_ref<const c_function>(&nop_c),
+			dynamic_array<size_t>{1},
+			semi_pointer(size_t(0))
 		}
+	}
 	));
 	atomic_strong_ref<dte_function> thr1(cnew<dte_function>(
 		dte_function::metadata{ "NOP&THR", 0 },
 		dynamic_array<dte_function::step>{
-			dte_function::step{
-				atomic_weak_ref<const c_function>(&nop_c),
-				dynamic_array<size_t>{1},
-				semi_pointer(size_t(0))
-			},
+		dte_function::step{
+			atomic_weak_ref<const c_function>(&nop_c),
+			dynamic_array<size_t>{1},
+			semi_pointer(size_t(0))
+		},
 			dte_function::step{
 				atomic_weak_ref<const c_function>(&thr_c),
 				dynamic_array<size_t>{1},
 				semi_pointer(size_t(0))
-			}
 		}
+	}
 	));
 	dte_function thr_catch({ "CALL", 0 },
 		{
@@ -192,18 +192,19 @@ int main(int argc, const char* argv[]) {
 	catch (const exception& e) {
 		std::cout << e.what() << std::endl;
 		//log call stack----------------------------
-		for (dte_function* f : strf->call_stack) {
-			std::cout << f->get_meta().name.begin() << std::endl;
+		for (const dte_function* f : strf->call_stack) {
+			std::cout << f->meta.name.begin() << std::endl;
 		}
-		const dte_function::step& st = strf->call_stack.back()->get_steps().operator[]<true>(strf->functional_index);
+		const dte_function::step& st = strf->call_stack.back()->steps.operator[]<true>(strf->functional_index);
 		if (st.get_is_dynamic()) {
-			std::cout << st.get_function_unit().dte_func.operator*().get_meta().name.begin() << std::endl;
+			std::cout << st.get_dte_function<true>().meta.name.begin() << std::endl;
 		}
 		else {
-			std::cout << st.get_function_unit().c_func.operator*().get_meta().name << std::endl;
+			std::cout << st.get_c_function<true>().get_meta().name << std::endl;
 		}
 		//------------------------------------------
 	}
+
 	delete strf;
 	std::cin.get();
 	return 0;
