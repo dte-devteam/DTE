@@ -9,6 +9,7 @@
 
 #include "token/dte_function.hpp"
 
+#include "token/dte_type.hpp"
 
 #include "token/stream.hpp"
 
@@ -206,6 +207,14 @@ int main(int argc, const char* argv[]) {
 	}
 
 	delete strf;
+
+	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>());
+	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>());
+	dte_t0->add_parent(dte_t1);
+
+	std::cout << dte_t0->is_basic_type() << std::endl;
+	std::cout << dte_t1->is_basic_type() << std::endl;
+
 	std::cin.get();
 	return 0;
 }

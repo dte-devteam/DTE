@@ -4,9 +4,6 @@
 #include "pointer/strong_ref.hpp"
 #include "types.hpp"
 #include "semi_pointer.hpp"
-namespace dte_module {
-	struct c_func_unit;
-}
 namespace dte_token {
 	struct stream;
 	struct c_function;
@@ -40,6 +37,7 @@ namespace dte_token {
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const step& other);
+				step(const step&& other);
 				~step();
 				bool get_is_dynamic() const noexcept;
 				bool get_is_weak() const noexcept;
@@ -61,10 +59,11 @@ namespace dte_token {
 							throw exception();
 						}
 					}
-					if (get_is_weak()) {
-						return _func_unit.weak_dte_func.operator*();
-					}
-					return _func_unit.strong_dte_func.operator*();
+					return static_cast<const pointer_base<dte_function>>(_func_unit.weak_dte_func).operator*();
+					//if (get_is_weak()) {
+					//	return _func_unit.weak_dte_func.operator*();
+					//}
+					//return _func_unit.strong_dte_func.operator*();
 				}
 		};
 		public:
