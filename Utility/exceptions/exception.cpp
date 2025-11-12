@@ -1,6 +1,6 @@
 #include "exception.hpp"
 using namespace dte_utils;
-exception::exception(size_t code, const char* what) noexcept : _error_code(code), _what(what) {}
+exception::exception(size_t code) noexcept : _error_code(code), _what(nullptr) {}
 exception::exception(const exception& other) noexcept : _error_code(other._error_code), _what(other._what) {}
 const char* exception::what() const noexcept {
 	return _what ? _what : "Unknown error";
