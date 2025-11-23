@@ -24,6 +24,19 @@ namespace dte_utils {
 			pointer operator->() const noexcept {
 				return _instance;
 			}
+			operator pointer() const noexcept {
+				return this->_instance;
+			}
+
+			ptrdiff_t operator-(const pointer_base& other) const noexcept {
+				return _instance - other._instance;
+			}
+			bool operator==(const pointer_base& other) const noexcept {
+				return _instance == other._instance;
+			}
+			bool operator!=(const pointer_base& other) const noexcept {
+				return !(*this == other);
+			}
 
 			template<bool is_fail_safe = false, typename ...Args>
 			requires return_type_v<type>
@@ -47,5 +60,14 @@ namespace dte_utils {
 				}
 				return _instance->operator()(std::forward<Args>(args)...);
 			}
+	};
+	template<>
+	struct pointer_base<void> {
+		using type = void;
+		using pointer = type*;
+		protected:
+			pointer _instance;
+		public:
+			pointer_base(pointer instance) noexcept : _instance(instance) {}
 	};
 }

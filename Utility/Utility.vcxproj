@@ -48,6 +48,7 @@
     <ClInclude Include="memory\memory.hpp" />
     <ClInclude Include="memory\mem_handler.hpp" />
     <ClInclude Include="memory\static_array.hpp" />
+    <ClInclude Include="pointer\iterator.hpp" />
     <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />

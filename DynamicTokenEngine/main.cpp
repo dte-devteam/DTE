@@ -22,6 +22,8 @@
 #include "module/function_set.hpp"
 #include "module/module_container.hpp"
 
+#include "pointer/iterator.hpp"
+
 #include <iostream>
 
 #include <chrono>
@@ -57,8 +59,6 @@ ull measure(F&& f, Args&&... args) {
 #include <bit>
 #include <memory>
 
-
-
 enum function_index : size_t {
 	CREATE_IFSTREAM,
 	CREATE_CSTRING,
@@ -85,7 +85,27 @@ size_t thr(data_stack& ds, const semi_pointer::data& spd) {
 	throw exception(0, "HAHA");
 }
 
+struct SA {
+	const size_t s = 10;
+	SA() {
+		i = new int[s] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	}
+	~SA() {
+		delete i;
+	}
+	int* i;
+	f_iterator<int> begin() { return i; }
+	f_iterator<int> end() { return begin() + s; }
+};
+
 int main(int argc, const char* argv[]) {
+	SA nigga;
+	for (int u : nigga) {
+		std::cout << u << " ";
+	}
+	std::cout << std::endl;
+	f_iterator<int> aaa(nullptr);
+	b_iterator<int> bbb(aaa);
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();
@@ -94,7 +114,7 @@ int main(int argc, const char* argv[]) {
 	for (const c_function& cf : fff) {
 		ggg.emplace_back(&cf);
 	}
-
+	std::vector<int> a;
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
 	);

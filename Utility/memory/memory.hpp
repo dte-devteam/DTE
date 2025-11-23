@@ -5,6 +5,10 @@
 #include <malloc.h>
 //TODO: some typenames cant be void/arrays
 namespace dte_utils {
+	template<typename T>
+	concept non_void = !std::is_void_v<T>;
+
+
 	inline void* xmalloc(size_t size) {
 		if (size) {
 			void* mem = malloc(size);
@@ -15,7 +19,7 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<typename T>
+	template<non_void T>
 	inline T* tmalloc(size_t num) {
 		return static_cast<T*>(xmalloc(num * sizeof(T)));
 	}
@@ -35,7 +39,7 @@ namespace dte_utils {
 		}
 		return nullptr;
 	}
-	template<typename T>
+	template<non_void T>
 	inline T* aligned_tmalloc(size_t num) {
 		return static_cast<T*>(aligned_xmalloc<true>(num * sizeof(T), alignof(T)));
 	}
@@ -62,7 +66,9 @@ namespace dte_utils {
 
 	//at = invalid/nulptr -> UB
 	template<typename T, typename ...Args>
-	inline void place_at(T* at, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args>) {
+	inline void place_at(T* at, Args&&... args) 
+	noexcept(std::is_nothrow_constructible_v<T, Args>)
+	requires std::is_constructible_v<T, Args> {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
 			*at = T(std::forward<Args>(args)...);
 		}
@@ -73,7 +79,8 @@ namespace dte_utils {
 
 
 	template<typename T, typename ...Args>
-	inline T* cnew(Args&&... args) {
+	inline T* cnew(Args&&... args) 
+	requires std::is_constructible_v<T, Args> {
 		T* ptr = aligned_tmalloc<T>(1);
 		place_at(ptr, std::forward<Args>(args)...);
 		return ptr;
@@ -81,7 +88,9 @@ namespace dte_utils {
 
 	//at = invalid/nulptr -> UB
 	template<typename T>
-	inline void destuct_at(T* at) noexcept(std::is_nothrow_destructible_v<T>) {
+	inline void destuct_at(T* at) 
+	noexcept(std::is_nothrow_destructible_v<T>) 
+	requires std::is_destructible_v<T> {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		if constexpr (std::is_array_v<T>) {
 			for (std::remove_pointer_t<std::decay_t<T>>& elem : *at) {
@@ -96,7 +105,9 @@ namespace dte_utils {
 	//at = invalid -> UB
 	//see defenition limitations: destuct_at (except for nulptr)
 	template<typename T>
-	inline void cdelete(T* at) noexcept(std::is_nothrow_destructible_v<T>) {
+	inline void cdelete(T* at) 
+	noexcept(std::is_nothrow_destructible_v<T>) 
+	requires std::is_destructible_v<T> {
 		if (at) {
 			//don`t call destructor of trivial type
 			if constexpr (!std::is_trivially_destructible_v<T>) {
@@ -112,7 +123,9 @@ namespace dte_utils {
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename T, typename ...Args>
-	inline void construct_range(T* begin, T* end, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args>) {
+	inline void construct_range(T* begin, T* end, Args&&... args) 
+	noexcept(std::is_nothrow_constructible_v<T, Args>) 
+	requires std::is_constructible_v<T, Args> {
 		while (begin != end) {
 			place_at(begin, args...);
 			++begin;
@@ -121,7 +134,9 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename U, typename T>
-	inline void copy_range(const T* begin, const T* end, U* dest) noexcept(std::is_nothrow_constructible_v<U, const T&>) {
+	inline void copy_range(const T* begin, const T* end, U* dest) 
+	noexcept(std::is_nothrow_constructible_v<U, const T&>) 
+	requires std::is_constructible_v<U, const T&> {
 		while (begin != end) {
 			place_at(dest, *begin);
 			++dest;
@@ -222,5 +237,5 @@ namespace dte_utils {
 		else {
 			copy_range(src, src + count, dest);
 		}
-	}
+	}	
 }
