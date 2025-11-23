@@ -68,7 +68,7 @@ namespace dte_utils {
 	template<typename T, typename ...Args>
 	inline void place_at(T* at, Args&&... args) 
 	noexcept(std::is_nothrow_constructible_v<T, Args>)
-	requires std::is_constructible_v<T, Args> {
+	requires std::is_constructible_v<T, Args...> {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
 			*at = T(std::forward<Args>(args)...);
 		}
@@ -80,7 +80,7 @@ namespace dte_utils {
 
 	template<typename T, typename ...Args>
 	inline T* cnew(Args&&... args) 
-	requires std::is_constructible_v<T, Args> {
+	requires std::is_constructible_v<T, Args...> {
 		T* ptr = aligned_tmalloc<T>(1);
 		place_at(ptr, std::forward<Args>(args)...);
 		return ptr;
@@ -125,7 +125,7 @@ namespace dte_utils {
 	template<typename T, typename ...Args>
 	inline void construct_range(T* begin, T* end, Args&&... args) 
 	noexcept(std::is_nothrow_constructible_v<T, Args>) 
-	requires std::is_constructible_v<T, Args> {
+	requires std::is_constructible_v<T, Args...> {
 		while (begin != end) {
 			place_at(begin, args...);
 			++begin;
@@ -146,7 +146,9 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename U, typename T>
-	inline void move_range(T* begin, T* end, U* dest) noexcept(std::is_nothrow_constructible_v<U, T&&>) {
+	inline void move_range(T* begin, T* end, U* dest) 
+	noexcept(std::is_nothrow_constructible_v<U, T&&>) 
+	requires std::is_constructible_v<U, T&&> {
 		while (begin != end) {
 			place_at(dest, std::move(*begin));
 			++dest;
@@ -156,7 +158,9 @@ namespace dte_utils {
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: destuct_at (all restrictions)
 	template<typename T>
-	inline void destruct_range(T* begin, T* end) noexcept(std::is_nothrow_destructible_v<T>) {
+	inline void destruct_range(T* begin, T* end) 
+	noexcept(std::is_nothrow_destructible_v<T>) 
+	requires std::is_destructible_v<T> {
 		while (begin != end) {
 			destuct_at(--end);
 		}
