@@ -48,7 +48,7 @@ namespace dte_core {
 		//if (get_frame_size(ds, offset) > 2) {
 		//	open_mode = get<dte_token::unit>(ds, offset + 2)->get_int()[0];
 		//}
-		get<std::ifstream>(ds, spd.offset)->open(get<dte_utils::dynamic_cstring>(ds, spd.offset + 1)->begin(), open_mode);
+		get<std::ifstream>(ds, spd.offset)->open(get<dte_utils::dynamic_cstring>(ds, spd.offset + 1)->begin().operator pointer_base<char>::pointer(), open_mode);
 		return 0;
 	}
 	inline size_t close_file(dte_token::data_stack& ds, const dte_token::semi_pointer::data& spd) {

@@ -1,6 +1,6 @@
 #include "tests/memory/test_m.h"
 #include "tests/pointer/test_p.h"
-/*
+
 #include "memory/static_array.hpp"
 
 
@@ -48,7 +48,7 @@ ull measure(F&& f, Args&&... args) {
 	__asm cpuid
 	return __rdtsc() - start_time;
 }
-
+*/
 enum function_index : size_t {
 	CREATE_IFSTREAM,
 	CREATE_CSTRING,
@@ -88,14 +88,13 @@ struct SA {
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
 };
-*/
+
 int main(int argc, const char* argv[]) {
 	test_memory();
 	test_pointer();
 
-	/*
-	allocator<int> aa(10);
-	destruct_range(aa.operator dte_utils::allocator<int>::iterator(), aa.operator dte_utils::f_iterator<int>() + 2);
+	//allocator<int> aa(10);
+	//destruct_range(aa.operator dte_utils::allocator<int>::iterator(), aa.operator dte_utils::f_iterator<int>() + 2);
 	SA nigga;
 	for (int u : nigga) {
 		std::cout << u << " ";
@@ -122,7 +121,7 @@ int main(int argc, const char* argv[]) {
 	std::vector<int> a;
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
-	);
+	).operator pointer_base<ifstr_args>::pointer();
 	std::cout << "-----------------" << std::endl;
 	stream* strf = new stream{ 0, {10000}, {} };
 	dte_function dteff({ "FILE", 0 },
@@ -141,7 +140,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << strf->stack.get_block_num() << std::endl;
 	std::cout << strf->stack.get_memory_left() << std::endl;
 	//std::cout << static_cast<dte_token::unit*>(strf->stack[1])->get_cstr().begin() << std::endl;
-	std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin() << std::endl;
+	std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin().operator f_iterator<char>::pointer() << std::endl;
 	delete strf;
 	std::cout << "-----------------" << std::endl;
 	strf = new stream{ 0, {10000}, {} };
@@ -159,7 +158,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	));
+	).operator pointer_base<dte_function>::pointer());
 	atomic_strong_ref<dte_function> r1(cnew<dte_function>(
 		dte_function::metadata{ "FILE", 0 },
 		dynamic_array<dte_function::step>{
@@ -169,7 +168,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	));
+	).operator pointer_base<dte_function>::pointer());
 	dte_function add_and_log({ "FILE", 0 },
 		{
 			{r0, {1}, {size_t(0)}},
@@ -190,7 +189,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	));
+	).operator pointer_base<dte_function>::pointer());
 	atomic_strong_ref<dte_function> thr1(cnew<dte_function>(
 		dte_function::metadata{ "NOP&THR", 0 },
 		dynamic_array<dte_function::step>{
@@ -205,7 +204,7 @@ int main(int argc, const char* argv[]) {
 				semi_pointer(size_t(0))
 		}
 	}
-	));
+	).operator pointer_base<dte_function>::pointer());
 	dte_function thr_catch({ "CALL", 0 },
 		{
 			{thr0, {1}, {size_t(0)}},
@@ -219,11 +218,11 @@ int main(int argc, const char* argv[]) {
 		std::cout << e.what() << std::endl;
 		//log call stack----------------------------
 		for (const dte_function* f : strf->call_stack) {
-			std::cout << f->meta.name.begin() << std::endl;
+			std::cout << f->meta.name.begin().operator pointer_base<const char>::pointer() << std::endl;
 		}
 		const dte_function::step& st = strf->call_stack.back()->steps.operator[]<true>(strf->functional_index);
 		if (st.get_is_dynamic()) {
-			std::cout << st.get_dte_function<true>().meta.name.begin() << std::endl;
+			std::cout << st.get_dte_function<true>().meta.name.begin().operator pointer_base<const char>::pointer() << std::endl;
 		}
 		else {
 			std::cout << st.get_c_function<true>().get_meta().name << std::endl;
@@ -233,14 +232,13 @@ int main(int argc, const char* argv[]) {
 
 	delete strf;
 
-	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>());
-	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>());
+	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>().operator pointer_base<dte_type>::pointer());
+	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>().operator pointer_base<dte_type>::pointer());
 	dte_t0->add_parent(dte_t1);
 
 	std::cout << dte_t0->is_basic_type() << std::endl;
 	std::cout << dte_t1->is_basic_type() << std::endl;
 
 	std::cin.get();
-	*/
 	return 0;
 }

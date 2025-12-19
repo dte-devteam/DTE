@@ -37,7 +37,7 @@ namespace dte_token {
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, const dte_utils::dynamic_array<size_t>& jumps, const semi_pointer& sp);
 				step(const dte_utils::atomic_strong_ref<dte_function>& dte_func, dte_utils::dynamic_array<size_t>&& jumps, const semi_pointer& sp);
 				step(const step& other);
-				step(const step&& other);
+				step(const step&& other) noexcept;
 				~step();
 				bool get_is_dynamic() const noexcept;
 				bool get_is_weak() const noexcept;

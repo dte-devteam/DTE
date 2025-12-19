@@ -1,4 +1,4 @@
-/*
+
 #include "dte_function.hpp"
 #include "stream.hpp"
 #include "c_function.hpp"
@@ -45,7 +45,7 @@ f_step::step(const step& other) : _is_dynamic(other.get_is_dynamic()), _is_weak(
 		place_at(pointer_base(&_func_unit.c_func), other._func_unit.c_func);
 	}
 }
-f_step::step(const step&& other) : _is_dynamic(other.get_is_dynamic()), _is_weak(other.get_is_weak()), _semi_ptr(other.get_semi_ptr()), _jumps(std::move(other.get_jumps())) {
+f_step::step(const step&& other) noexcept : _is_dynamic(other.get_is_dynamic()), _is_weak(other.get_is_weak()), _semi_ptr(other.get_semi_ptr()), _jumps(std::move(other.get_jumps())) {
 	if (get_is_dynamic()) {
 		if (get_is_weak()) {
 			place_at(pointer_base(&_func_unit.weak_dte_func), other._func_unit.weak_dte_func);
@@ -135,4 +135,3 @@ dte_function::~dte_function() {
 		}
 	}
 }
-*/
