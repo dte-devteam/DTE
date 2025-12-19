@@ -8,12 +8,12 @@ namespace dte_utils {
 	struct static_array {
 		using type = T;
 		using const_type = const type;
-		using pointer = type*;
-		using const_pointer = const_type*;
+		using iterator = f_iterator<type>;
+		using const_iterator = f_iterator<const_type>;
 		alignas(type) char arr[sizeof(type) * N];
 		static_array() noexcept(std::is_nothrow_default_constructible_v<type>)
 		requires std::is_default_constructible_v<type> {
-			pointer iter = begin();
+			iterator iter = begin();
 			while (iter != end()) {
 				place_at(iter);
 				++iter;
@@ -22,7 +22,7 @@ namespace dte_utils {
 		template<typename U>
 		requires std::is_constructible_v<type, const U&>
 		static_array(const U& instance) noexcept(std::is_nothrow_constructible_v<type, const U&>) {
-			pointer iter = begin();
+			iterator iter = begin();
 			while (iter != end()) {
 				place_at(iter, instance);
 				++iter;
@@ -31,7 +31,7 @@ namespace dte_utils {
 		template<typename U>
 		requires std::is_constructible_v<type, const U&>
 		static_array(const U (&arr)[N]) noexcept(std::is_nothrow_constructible_v<type, const U&>) {
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const U& val : arr) {
 				place_at(iter, val);
 				++iter;
@@ -42,7 +42,7 @@ namespace dte_utils {
 			if (il.size() != N) {
 				throw invalid_range();
 			}
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const_type& val : il) {
 				place_at(iter, val);
 				++iter;
@@ -50,7 +50,7 @@ namespace dte_utils {
 		}
 		static_array(const static_array& other) noexcept(std::is_nothrow_copy_constructible_v<type>)
 		requires std::is_copy_constructible_v<type> {
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const_type& val : other) {
 				place_at(iter, val);
 				++iter;
@@ -59,7 +59,7 @@ namespace dte_utils {
 		template<typename U>
 		requires std::is_constructible_v<type, const U&>
 		static_array(const static_array<U, N> other) noexcept(std::is_nothrow_constructible_v<type, const U&>) {
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const U& val : other) {
 				place_at(iter, val);
 				++iter;
@@ -67,16 +67,16 @@ namespace dte_utils {
 		}
 
 
-		pointer begin() noexcept {
-			return reinterpret_cast<pointer>(arr);
+		iterator begin() noexcept {
+			return reinterpret_cast<type*>(arr);
 		}
-		const_pointer begin() const noexcept {
-			return reinterpret_cast<const_pointer>(arr);
+		const_iterator begin() const noexcept {
+			return reinterpret_cast<const_type*>(arr);
 		}
-		pointer end() noexcept {
+		iterator end() noexcept {
 			return begin() + N;
 		}
-		const_pointer end() const noexcept {
+		const_iterator end() const noexcept {
 			return begin() + N;
 		}
 
@@ -86,7 +86,7 @@ namespace dte_utils {
 			if (this == &other) {
 				return *this;
 			}
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const_type& val : other) {
 				*iter = val;
 				++iter;
@@ -96,7 +96,7 @@ namespace dte_utils {
 		template<typename U>
 		requires std::is_assignable_v<type, const U&>
 		static_array& operator=(const static_array<U, N>& other) noexcept(std::is_nothrow_assignable_v<type, const U&>) {
-			pointer iter = begin();
+			iterator iter = begin();
 			for (const U& val : other) {
 				*iter = val;
 				++iter;
@@ -108,7 +108,7 @@ namespace dte_utils {
 			if (this == &other) {
 				return *this;
 			}
-			pointer iter = begin();
+			iterator iter = begin();
 			for (type& val : other) {
 				std::swap(*iter, val);
 				++iter;

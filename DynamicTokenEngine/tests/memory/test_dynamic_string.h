@@ -7,10 +7,10 @@ inline void test_dynamic_cstring_constructor() {
 	dte_utils::dynamic_cstring* s = new dte_utils::dynamic_cstring("ABCDEF");
 	dte_utils::dynamic_cstring* e = new dte_utils::dynamic_cstring();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	std::cout << s->substr(0, 3).begin() << std::endl;
+	std::cout << s->substr(0, 3).begin().operator char*() << std::endl;
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
-	std::cout << e->begin() << std::endl;
+	std::cout << e->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring_operator_0() {
@@ -21,7 +21,7 @@ inline void test_dynamic_cstring_operator_0() {
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 
-	std::cout << s->begin() << std::endl;
+	std::cout << s->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring_operator_1() {
@@ -32,7 +32,7 @@ inline void test_dynamic_cstring_operator_1() {
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 
-	std::cout << s->begin() << std::endl;
+	std::cout << s->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring_operator_2() {
@@ -43,7 +43,7 @@ inline void test_dynamic_cstring_operator_2() {
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 
-	std::cout << s->begin() << std::endl;
+	std::cout << s->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring_operator_3() {
@@ -54,7 +54,7 @@ inline void test_dynamic_cstring_operator_3() {
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 
-	std::cout << s->begin() << std::endl;
+	std::cout << s->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring_operator_4() {
@@ -65,7 +65,7 @@ inline void test_dynamic_cstring_operator_4() {
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 
-	std::cout << s->begin() << std::endl;
+	std::cout << s->begin().operator char*() << std::endl;
 	delete s;
 }
 inline void test_dynamic_cstring() {

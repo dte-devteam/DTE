@@ -11,10 +11,10 @@ inline void test_common_memory_copy() {
 	}
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	A* A_mem = dte_utils::tmalloc<A>(N);
-	dte_utils::copy_range(init_array, init_array + N, A_mem);
+	dte_utils::f_iterator<A> A_mem = dte_utils::tmalloc<A>(N);
+	dte_utils::copy_range(dte_utils::f_iterator<int>(init_array), dte_utils::f_iterator<int>(init_array) + N, A_mem);
 	dte_utils::destruct_range(A_mem, A_mem + N);
-	free(A_mem);
+	free(A_mem.operator dte_utils::f_iterator<A>::pointer());
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	std::cout << "per element: " << (end - start) / N << std::endl;
@@ -26,8 +26,8 @@ inline void test_common_memory_construct() {
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 	A* A_mem = dte_utils::tmalloc<A>(N);
-	dte_utils::construct_range(A_mem, A_mem + N, 0);
-	dte_utils::destruct_range(A_mem, A_mem + N);
+	dte_utils::construct_range(dte_utils::f_iterator<A>(A_mem), dte_utils::f_iterator<A>(A_mem) + N, 0);
+	dte_utils::destruct_range(dte_utils::f_iterator<A>(A_mem), dte_utils::f_iterator<A>(A_mem) + N);
 	free(A_mem);
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
@@ -43,10 +43,10 @@ inline void test_common_memory_move() {
 	}
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	A* A_mem = dte_utils::tmalloc<A>(N);
-	dte_utils::move_range(init_array, init_array + N, A_mem);
+	dte_utils::f_iterator<A> A_mem = dte_utils::tmalloc<A>(N);
+	dte_utils::move_range(dte_utils::f_iterator<A>(init_array), dte_utils::f_iterator<A>(init_array) + N, A_mem);
 	dte_utils::destruct_range(A_mem, A_mem + N);
-	free(A_mem);
+	free(static_cast<A*>(A_mem));
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	std::cout << "per element: " << (end - start) / N << std::endl;
@@ -73,13 +73,13 @@ inline void test_common_memory_place() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	A* A_mem = dte_utils::tmalloc<A>(N);
+	dte_utils::f_iterator<A> A_mem = dte_utils::tmalloc<A>(N);
 	int counter = N;
 	while (counter) {
 		dte_utils::place_at(A_mem + counter, --counter);
 	}
 	dte_utils::destruct_range(A_mem, A_mem + N);
-	free(A_mem);
+	free(A_mem.operator f_iterator<A>::pointer());
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	std::cout << "per element: " << (end - start) / N << std::endl;
@@ -94,10 +94,10 @@ inline void test_common_memory_array() {
 	}
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	A* A_mem = dte_utils::tmalloc<A>(N);
-	dte_utils::array_to_array(A_mem, init_array, N);
+	dte_utils::f_iterator<A> A_mem = dte_utils::tmalloc<A>(N);
+	dte_utils::array_to_array(dte_utils::f_iterator<int>(init_array), dte_utils::f_iterator<int>(init_array) + N, A_mem);
 	dte_utils::destruct_range(A_mem, A_mem + N);
-	free(A_mem);
+	free(A_mem.operator f_iterator<A>::pointer());
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	std::cout << "per element: " << (end - start) / N << std::endl;

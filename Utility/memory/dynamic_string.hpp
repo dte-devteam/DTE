@@ -2,17 +2,19 @@
 #include "dynamic_array.hpp"
 namespace dte_utils {
 	template<typename T, template<typename> typename A = allocator>
-	requires is_allocator_v<A, T>
 	struct dynamic_string : dynamic_array<T, A> {
-		using size_type = dynamic_array<T, A>::size_type;
-		using type = dynamic_array<T, A>::type;
-		using const_type = dynamic_array<T, A>::const_type;
-		using pointer = dynamic_array<T, A>::pointer;
-		using const_pointer = dynamic_array<T, A>::const_pointer;
-		using dynamic_array<T, A>::dynamic_array;
+		using array				= dynamic_array<T, A>;
+		using stack				= array::stack;
+		using alloc_hand		= array::alloc_hand;
+		using alloc_inst		= array::alloc_inst;
+		using size_type			= array::size_type;
+		using type				= array::type;
+		using const_type		= array::const_type;
+		using iterator			= array::iterator;
+		using const_iterator	= array::const_iterator;
 		
-
-		dynamic_string(size_t alocate_extra_size = 0) : dynamic_array<T, A>(alocate_extra_size + 1) {
+		using array::dynamic_array;
+		dynamic_string(size_t alocate_extra_size = 0) : array(alocate_extra_size + 1) {
 			place_at(this->end(), 0);
 			++this->_used;
 		}
@@ -35,22 +37,22 @@ namespace dte_utils {
 		void push_back(const_type& value) {
 			if (value) {
 				this->back<true>() = value;
-				dynamic_stack<T, A>::push_back(0);
+				stack::push_back(0);
 			}
 		}
 		void push_back(type&& value) {
 			if (value) {
 				this->back<true>() = std::move(value);
-				dynamic_stack<T, A>::push_back(0);
+				stack::push_back(0);
 			}
 		}
 		//don`t forget - string must end by 0!
 		void native_push(const_type& value) {
-			dynamic_stack<T, A>::push_back(value);
+			stack::push_back(value);
 		}
 		//don`t forget - string must end by 0!
 		void native_push(type&& value) {
-			dynamic_stack<T, A>::push_back(std::move(value));
+			stack::push_back(std::move(value));
 		}
 		template<typename ...Args>
 		void emplace_back(Args&&... args) = delete;
@@ -63,7 +65,7 @@ namespace dte_utils {
 					throw zero_size_access();
 				}
 			}
-			dynamic_stack<T, A>::pop_back<true>();
+			stack::pop_back<true>();
 			this->back<true>() = 0;
 		}
 		template<bool is_fail_safe = false>
@@ -74,20 +76,20 @@ namespace dte_utils {
 					throw out_of_range();
 				}
 			}
-			dynamic_stack<T, A>::pop_back<true>(num);
+			stack::pop_back<true>(num);
 			this->back<true>() = 0;
 		}
 		//don`t forget - string must end by 0!
 		template<bool is_fail_safe = false>
 		void native_pop() 
 		noexcept(std::is_nothrow_destructible_v<type>&& is_fail_safe) {
-			dynamic_stack<T, A>::pop_back<is_fail_safe>();
+			stack::pop_back<is_fail_safe>();
 		}
 		//don`t forget - string must end by 0!
 		template<bool is_fail_safe = false>
 		void native_pop(size_type num)
 		noexcept(std::is_nothrow_destructible_v<type>&& is_fail_safe) {
-			dynamic_stack<T, A>::pop_back<is_fail_safe>(num);
+			stack::pop_back<is_fail_safe>(num);
 		}
 
 		dynamic_string substr(size_type from, size_type to) {
@@ -123,7 +125,7 @@ namespace dte_utils {
 		template<typename U, template<typename> typename UA>
 		dynamic_string operator+(const dynamic_string<U, UA>& other) const {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, other.get_used());
-			array_to_array(new_str.end(), other.begin(), other.get_used());
+			array_to_array(other.begin(), other.end(), new_str.end());
 			new_str._used += other.get_used();
 			return new_str;
 		}
@@ -131,7 +133,7 @@ namespace dte_utils {
 		template<typename U, size_t N>
 		dynamic_string operator+(const U(&arr)[N]) {
 			dynamic_string new_str(this->begin(), this->get_used() - 1, N);
-			array_to_array(new_str.end(), arr, N);
+			array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, new_str.end());
 			new_str._used += N;
 			return new_str;
 		}		

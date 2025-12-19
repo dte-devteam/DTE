@@ -7,7 +7,7 @@ inline void test_dynamic_array_insert_0() {
 	reset_A();
 	dte_utils::dynamic_array<A>* s = new dte_utils::dynamic_array<A>({ 0,1,2,3,4,5,6,7,8,9 }, 10);
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	s->insert(s->end(), 10);
+	s->insert(s->begin(), 10);
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	for (A& i : *s) {
@@ -20,7 +20,6 @@ inline void test_dynamic_array_insert_0() {
 inline void test_dynamic_array_insert_1() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
-	int arr[] = { 1,2,3,4,5 };
 	dte_utils::dynamic_array<A>* s = new dte_utils::dynamic_array<A>({ 0,1,2,3,4,5,6,7,8,9 });
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 	s->insert(s->begin() + 2, 10, 3);
@@ -39,7 +38,7 @@ inline void test_dynamic_array_insert_2() {
 	int arr[] = { 1,2,3,4,5 };
 	dte_utils::dynamic_array<A>* s = new dte_utils::dynamic_array<A>({ 0,1,2,3,4,5,6,7,8,9 });
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	s->insert(s->begin() + 2, arr, arr + 5);
+	s->insert(s->begin(), dte_utils::f_iterator<int>(arr), dte_utils::f_iterator<int>(arr) + 5);
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
 	for (A& i : *s) {

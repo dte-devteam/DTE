@@ -9,8 +9,13 @@ namespace dte_utils {
 		protected:
 			pointer _instance;
 		public:
-			pointer_base(pointer instance) noexcept : _instance(instance) {}
-
+			pointer_base(pointer instance = nullptr) noexcept : _instance(instance) {}
+			pointer_base(const pointer_base& other) noexcept : pointer_base(other._instance) {}
+			pointer_base(const pointer_base<std::remove_const_t<type>>& other) noexcept 
+			requires std::is_const_v<type> : pointer_base(
+				other.operator std::remove_const_t<type>*()
+			) {}
+			
 			template<bool is_fail_safe = false>
 			type& operator*() const noexcept(is_fail_safe)
 			requires !return_type_v<type> {
@@ -24,13 +29,10 @@ namespace dte_utils {
 			pointer operator->() const noexcept {
 				return _instance;
 			}
-			operator pointer() const noexcept {
+			explicit operator pointer() const noexcept {
 				return this->_instance;
 			}
 
-			ptrdiff_t operator-(const pointer_base& other) const noexcept {
-				return _instance - other._instance;
-			}
 			bool operator==(const pointer_base& other) const noexcept {
 				return _instance == other._instance;
 			}

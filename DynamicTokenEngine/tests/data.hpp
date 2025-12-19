@@ -53,11 +53,11 @@ struct B : A {
 };
 template<typename T>
 struct ballocator : dte_utils::mem_handler {
-	using size_type = mem_handler::size_type;
-	using type = T;
-	using const_type = const type;
-	using pointer = type*;
-	using const_pointer = const_type*;
+	using size_type			= mem_handler::size_type;
+	using type				= T;
+	using const_type		= const type;
+	using iterator			= dte_utils::f_iterator<type>;
+	using const_iterator	= dte_utils::f_iterator<const_type>;
 	public:
 		ballocator(size_type num = 0) : mem_handler(num * sizeof(T)) {}
 		ballocator(const ballocator&) = delete;
@@ -70,10 +70,10 @@ struct ballocator : dte_utils::mem_handler {
 			std::swap(_ptr, other._ptr);
 			return *this;
 		}
-		operator pointer() {
-			return static_cast<pointer>(_ptr);
+		operator iterator() {
+			return static_cast<type*>(_ptr);
 		}
-		operator const_pointer() const {
-			return static_cast<const_pointer>(_ptr);
+		operator const_iterator() const {
+			return static_cast<const_type*>(_ptr);
 		}
 };

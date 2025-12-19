@@ -24,13 +24,13 @@ inline void test_weak_ref_constructor_0() {
 inline void test_weak_ref_constructor_1() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
-	dte_utils::weak_ref<A>* wr1 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(10));
-	dte_utils::weak_ref<A>* wr2 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(100));
+	dte_utils::weak_ref<A>* wr1 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(10).operator pointer_base<A>::pointer());
+	dte_utils::weak_ref<A>* wr2 = new dte_utils::weak_ref<A>(dte_utils::cnew<A>(100).operator pointer_base<A>::pointer());
 	std::cout << (*wr1)->i << " & " << (*wr2)->i << std::endl;
 	*wr1 = std::move(*wr2);
 	std::cout << (*wr1)->i << " & " << (*wr2)->i << std::endl;
-	dte_utils::cdelete(wr1->operator->());
-	dte_utils::cdelete(wr2->operator->());
+	dte_utils::cdelete(dte_utils::pointer_base<A>(wr1->operator->()));
+	dte_utils::cdelete(dte_utils::pointer_base<A>(wr2->operator->()));
 	*wr1 = nullptr;
 	delete wr1;
 	delete wr2;

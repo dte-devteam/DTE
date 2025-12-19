@@ -13,7 +13,7 @@ namespace dte_utils {
 				other._instance = nullptr;
 			}
 			~unique_ref() {
-				cdelete(_instance);
+				cdelete(pointer_base<type>(_instance));
 			}
 
 			unique_ref& operator=(const unique_ref&) = delete;

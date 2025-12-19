@@ -15,7 +15,5 @@ namespace dte_utils {
 			~mem_handler();
 			mem_handler& operator=(const mem_handler&) = delete;
 			mem_handler& operator=(mem_handler&& other) noexcept;
-			operator pointer() noexcept;
-			operator const_pointer() const noexcept;
 	};
 }

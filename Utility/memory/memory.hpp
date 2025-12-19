@@ -2,8 +2,8 @@
 #include "target_architecture.hpp"
 #include "exceptions/memory_exception.hpp"
 #include "function_traits.hpp"
+#include "pointer/iterator.hpp"
 #include <malloc.h>
-//TODO: some typenames cant be void/arrays
 namespace dte_utils {
 	template<typename T>
 	concept non_void = !std::is_void_v<T>;
@@ -66,30 +66,31 @@ namespace dte_utils {
 
 	//at = invalid/nulptr -> UB
 	template<typename T, typename ...Args>
-	inline void place_at(T* at, Args&&... args) 
-	noexcept(std::is_nothrow_constructible_v<T, Args>)
-	requires std::is_constructible_v<T, Args> {
+	inline void place_at(const pointer_base<T>& at, Args&&... args) 
+	noexcept(std::is_nothrow_constructible_v<T, Args...>) 
+	requires std::is_constructible_v<T, Args...> {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
 			*at = T(std::forward<Args>(args)...);
 		}
 		else {
-			new (at) T(std::forward<Args>(args)...);
+			new (at.operator pointer_base<T>::pointer()) T(std::forward<Args>(args)...);
 		}
 	}
 
 
 	template<typename T, typename ...Args>
-	inline T* cnew(Args&&... args) 
-	requires std::is_constructible_v<T, Args> {
-		T* ptr = aligned_tmalloc<T>(1);
+	inline pointer_base<T> cnew(Args&&... args)
+	noexcept (std::is_nothrow_constructible_v<T, Args...>) 
+	requires std::is_constructible_v<T, Args...> {
+		pointer_base<T> ptr(aligned_tmalloc<T>(1));
 		place_at(ptr, std::forward<Args>(args)...);
 		return ptr;
 	}
 
 	//at = invalid/nulptr -> UB
 	template<typename T>
-	inline void destuct_at(T* at) 
-	noexcept(std::is_nothrow_destructible_v<T>) 
+	inline void destuct_at(const pointer_base<T>& at) 
+	noexcept (std::is_nothrow_destructible_v<T>)
 	requires std::is_destructible_v<T> {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		if constexpr (std::is_array_v<T>) {
@@ -105,38 +106,38 @@ namespace dte_utils {
 	//at = invalid -> UB
 	//see defenition limitations: destuct_at (except for nulptr)
 	template<typename T>
-	inline void cdelete(T* at) 
-	noexcept(std::is_nothrow_destructible_v<T>) 
+	inline void cdelete(const pointer_base<T>& at) 
+	noexcept (std::is_nothrow_destructible_v<T>)
 	requires std::is_destructible_v<T> {
-		if (at) {
+		if (at.operator pointer_base<T>::pointer()) {
 			//don`t call destructor of trivial type
 			if constexpr (!std::is_trivially_destructible_v<T>) {
 				destuct_at(at);
 			}
 			//function can`t be freed
 			if constexpr (!return_type_v<T>) {
-				aligned_free(at);
+				aligned_free(at.operator pointer_base<T>::pointer());
 			}
 		}
 	}
 
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
-	template<typename T, typename ...Args>
-	inline void construct_range(T* begin, T* end, Args&&... args) 
-	noexcept(std::is_nothrow_constructible_v<T, Args>) 
-	requires std::is_constructible_v<T, Args> {
+	template<typename T, template<typename> typename It, typename ...Args>
+	inline void construct_range(It<T> begin, const pointer_base<T>& end, Args&&... args) 
+	noexcept (std::is_nothrow_constructible_v<T, Args...>) 
+	requires std::is_constructible_v<T, Args...> && iteroid_v<It, T> {
 		while (begin != end) {
-			place_at(begin, args...);
+			place_at(begin, std::forward<Args>(args)...);
 			++begin;
 		}
 	}
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
-	template<typename U, typename T>
-	inline void copy_range(const T* begin, const T* end, U* dest) 
-	noexcept(std::is_nothrow_constructible_v<U, const T&>) 
-	requires std::is_constructible_v<U, const T&> {
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	inline void copy_range(ItT<T> begin, const pointer_base<T>& end, ItU<U> dest) 
+	noexcept (std::is_constructible_v<U, T>)
+	requires std::is_constructible_v<U, T> && iteroid_v<ItT, T> && iteroid_v<ItU, U> {
 		while (begin != end) {
 			place_at(dest, *begin);
 			++dest;
@@ -145,8 +146,10 @@ namespace dte_utils {
 	}
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
-	template<typename U, typename T>
-	inline void move_range(T* begin, T* end, U* dest) noexcept(std::is_nothrow_constructible_v<U, T&&>) {
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	inline void move_range(ItT<T> begin, const pointer_base<T>& end, ItU<U> dest)
+	noexcept(std::is_nothrow_move_constructible_v<T>) 
+	requires iteroid_v<ItT, T> && iteroid_v<ItU, T> {
 		while (begin != end) {
 			place_at(dest, std::move(*begin));
 			++dest;
@@ -155,8 +158,10 @@ namespace dte_utils {
 	}
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: destuct_at (all restrictions)
-	template<typename T>
-	inline void destruct_range(T* begin, T* end) noexcept(std::is_nothrow_destructible_v<T>) {
+	template<typename T, template<typename> typename It>
+	inline void destruct_range(const pointer_base<T>& begin, It<T> end) 
+	noexcept(std::is_nothrow_destructible_v<T>)
+	requires iteroid_v<It, T> {
 		while (begin != end) {
 			destuct_at(--end);
 		}
@@ -205,37 +210,27 @@ namespace dte_utils {
 		}
 	}
 
+	//TODO: noexcept
 	//Copies array elements
 	//dest/src = invalid/nullptr -> UB
 	//count = invalid -> UB
-	template<typename U, typename T>
-	inline void array_to_array(U* dest, const T* src, size_t count) noexcept(
-		(std::is_trivial_v<U> && std::is_same_v<T, U>) || std::is_nothrow_copy_constructible_v<U>
-	) {
-		if constexpr (std::is_trivial_v<U> && std::is_same_v<T, U>) {
-			copy_memory(dest, src, count * sizeof(U));
-		}
-		else {
-			copy_range(src, src + count, dest);
-		}
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	inline void array_to_array(const ItT<const T>& begin, const pointer_base<const T>& end, const ItU<U>& dest)
+	requires iteroid_v<ItT, T> && iteroid_v<ItU, U> {
+		copy_range(begin, end, dest);
 	}
+	//TODO: noexcept
 	//Makes an effort to copy memory, if not possible moves array elements, if not possible copies array elements
 	//dest/src = invalid/nullptr -> UB
 	//count = invalid -> UB
-	template<typename U, typename T>
-	inline void array_to_array(U* dest, T* src, size_t count) noexcept (
-		(std::is_trivial_v<U> && std::is_same_v<T, U>) || std::is_constructible_v<U, T&&> ?
-		std::is_nothrow_constructible_v<U, T&&> :
-		std::is_nothrow_constructible_v<U, const T&>
-	) {
-		if constexpr (std::is_trivial_v<U> && std::is_same_v<T, U>) {
-			copy_memory(dest, src, count * sizeof(U));
-		}
-		else if constexpr (std::is_constructible_v<U, T&&>) {
-			move_range(src, src + count, dest);
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	inline void array_to_array(const ItT<T>& begin, const pointer_base<T>& end, const ItU<U>& dest) 
+	requires iteroid_v<ItT, T>&& iteroid_v<ItU, U> {
+		if constexpr (std::is_constructible_v<U, T&&>) {
+			move_range(begin, end, dest);
 		}
 		else {
-			copy_range(src, src + count, dest);
+			copy_range(begin, end, dest);
 		}
 	}	
 }

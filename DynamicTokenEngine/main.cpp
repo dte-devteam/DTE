@@ -1,6 +1,6 @@
 #include "tests/memory/test_m.h"
 #include "tests/pointer/test_p.h"
-
+/*
 #include "memory/static_array.hpp"
 
 
@@ -28,13 +28,7 @@
 
 #include <chrono>
 #include <thread>
-#include <intrin.h>
 
-#include <vector>
-
-#include <array>
-
-#include <functional>
 using namespace dte_utils;
 using namespace dte_token;
 using namespace dte_core;
@@ -54,10 +48,6 @@ ull measure(F&& f, Args&&... args) {
 	__asm cpuid
 	return __rdtsc() - start_time;
 }
-*/
-
-#include <bit>
-#include <memory>
 
 enum function_index : size_t {
 	CREATE_IFSTREAM,
@@ -65,6 +55,7 @@ enum function_index : size_t {
 	READ_LINE,
 	CLOSE_FILE
 };
+
 constexpr c_function fff[] = {
 	{ create_ifstream, {}, ifstr_args_destructor },
 	{ create_cstr, {}, dynamic_cstring_destructor },
@@ -97,15 +88,29 @@ struct SA {
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
 };
-
+*/
 int main(int argc, const char* argv[]) {
+	test_memory();
+	test_pointer();
+
+	/*
+	allocator<int> aa(10);
+	destruct_range(aa.operator dte_utils::allocator<int>::iterator(), aa.operator dte_utils::f_iterator<int>() + 2);
 	SA nigga;
 	for (int u : nigga) {
 		std::cout << u << " ";
 	}
+	std::cout << nigga.begin()[1];
+	nigga.begin() + 3;
 	std::cout << std::endl;
+	//checking compability
 	f_iterator<int> aaa(nullptr);
+	pointer_base<int> ll;
+	iterator_base<int> gg(ll);
 	b_iterator<int> bbb(aaa);
+	b_iterator<int> ccc(ll);
+	weak_ref<int> www;
+	f_iterator<int> qw(www);
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();
@@ -236,5 +241,6 @@ int main(int argc, const char* argv[]) {
 	std::cout << dte_t1->is_basic_type() << std::endl;
 
 	std::cin.get();
+	*/
 	return 0;
 }

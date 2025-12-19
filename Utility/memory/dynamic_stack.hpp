@@ -6,42 +6,44 @@
 #include <initializer_list>
 namespace dte_utils {
 	template<typename T, template<typename> typename A = allocator>
-	requires is_allocator_v<A, T>
 	struct dynamic_stack : alloc_handler<T, A> {
-		using size_type = alloc_handler<T, A>::size_type;
-		using type = alloc_handler<T, A>::type;
-		using const_type = alloc_handler<T, A>::const_type;
-		using pointer = alloc_handler<T, A>::pointer;
-		using const_pointer = alloc_handler<T, A>::const_pointer;
+		using alloc_hand		= alloc_handler<T, A>;
+		using alloc_inst		= alloc_hand::alloc_inst;
+		using size_type			= alloc_hand::size_type;
+		using type				= alloc_hand::type;
+		using const_type		= alloc_hand::const_type;
+		using iterator			= alloc_hand::iterator;
+		using const_iterator	= alloc_hand::const_iterator;
 		protected:
 			size_type _used;
 			size_type _extend_by_el() const noexcept {
 				return this->get_allocated() * 2 + 1;
 			}
-			A<T> _provide_buffer() const {
-				A<T> new_allocator(this->get_allocated());
-				array_to_array(static_cast<pointer>(new_allocator), begin(), get_used());
+			alloc_inst _provide_buffer() const {
+				alloc_inst new_allocator(this->get_allocated());
+				array_to_array(begin(), end(), new_allocator.operator iterator());
 				return new_allocator;
 			}
 		public:
-			dynamic_stack(size_type alocate_size = 0) : _used(0), alloc_handler<T, A>(alocate_size) {}
+			dynamic_stack(size_type alocate_size = 0) : _used(0), alloc_hand(alocate_size) {}
 			template<typename U, size_type N>
-			dynamic_stack(const U(&arr)[N], size_type reserved_size = 0) : dynamic_stack(arr, N, reserved_size) {}
-			template<typename U>
-			dynamic_stack(const U* array, size_type used_size, size_type reserved_size) : _used(used_size), alloc_handler<T, A>(used_size + reserved_size) {
-				array_to_array(begin(), array, get_used());
+			dynamic_stack(const U(&arr)[N], size_type reserved_size = 0) : dynamic_stack(f_iterator<const U>(arr), N, reserved_size) {}
+			template<typename U, template<typename> typename It>
+			requires iteroid_v<It, U>
+			dynamic_stack(const It<U>& array, size_type used_size, size_type reserved_size) : _used(used_size), alloc_hand(used_size + reserved_size) {
+				array_to_array(array, array + get_used(), begin());
 			}
-			dynamic_stack(std::initializer_list<type> il, size_type reserved_size = 0) : dynamic_stack(il.begin(), il.size(), reserved_size) {}
-			dynamic_stack(const dynamic_stack& other) : _used(other.get_used()), alloc_handler<T, A>(other.get_allocated()) {
-				dte_utils::array_to_array(begin(), other.begin(), get_used());
+			dynamic_stack(std::initializer_list<type> il, size_type reserved_size = 0) : dynamic_stack(f_iterator<const_type>(il.begin()), il.size(), reserved_size) {}
+			dynamic_stack(const dynamic_stack& other) : _used(other.get_used()), alloc_hand(other.get_allocated()) {
+				array_to_array(other.begin(), other.end(), begin());
 			}
-			dynamic_stack(dynamic_stack&& other) noexcept : _used(other.get_used()), alloc_handler<T, A>(std::move(other)) {
+			dynamic_stack(dynamic_stack&& other) noexcept : _used(other.get_used()), alloc_hand(std::move(other)) {
 				other._used = 0;
 			}
 
 			template<typename U, template<typename> typename UA>
-			dynamic_stack(const dynamic_stack<U, UA>& other) : _used(other.get_used()), alloc_handler<T, A>(other.get_allocated()) {
-				array_to_array(begin(), other.begin(), get_used());
+			dynamic_stack(const dynamic_stack<U, UA>& other) : _used(other.get_used()), alloc_hand(other.get_allocated()) {
+				array_to_array(other.begin(), other.end(), begin());
 			}
 
 			~dynamic_stack() {
@@ -50,16 +52,16 @@ namespace dte_utils {
 				}
 			}
 
-			pointer begin() noexcept {
-				return static_cast<pointer>(this->_allocator);
+			iterator begin() noexcept {
+				return this->_allocator.operator iterator();
 			}
-			const_pointer begin() const noexcept {
-				return static_cast<const_pointer>(this->_allocator);
+			const_iterator begin() const noexcept {
+				return this->_allocator.operator const_iterator();
 			}
-			pointer end() noexcept {
+			iterator end() noexcept {
 				return begin() + get_used();
 			}
-			const_pointer end() const noexcept {
+			const_iterator end() const noexcept {
 				return begin() + get_used();
 			}
 
@@ -127,10 +129,10 @@ namespace dte_utils {
 
 
 			template<typename P>
-			pointer find(P predicate) 
+			iterator find(P predicate)
 			noexcept(noexcept(predicate(std::declval<type&>()))) {
 				//we guarantee the correct range by begin() & end()
-				pointer i = begin();
+				iterator i = begin();
 				while (i != end()) {
 					if (predicate(*i)) {
 						return i;
@@ -140,10 +142,10 @@ namespace dte_utils {
 				return nullptr;
 			}
 			template<typename P>
-			const_pointer find(P predicate) const 
+			const_iterator find(P predicate) const
 			noexcept(noexcept(predicate(std::declval<const_type&>()))) {
 				//we guarantee the correct range by begin() & end()
-				const_pointer i = begin();
+				const_iterator i = begin();
 				while (i != end()) {
 					if (predicate(*i)) {
 						return i;
@@ -152,9 +154,10 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			template<typename P, bool is_fail_safe = false>
-			pointer find_ranged(P predicate, pointer from, pointer to) 
-			noexcept(noexcept(predicate(std::declval<type&>())) && is_fail_safe) {
+			template<typename P, template<typename> typename It, bool is_fail_safe = false>
+			iterator find_ranged(P predicate, It<type> from, const pointer_base<type>& to)
+			noexcept(noexcept(predicate(std::declval<type&>())) && is_fail_safe) 
+			requires iteroid_v<It, type> {
 				if constexpr (!is_fail_safe) {
 					if (from > to) {
 						throw invalid_range();
@@ -171,9 +174,10 @@ namespace dte_utils {
 				}
 				return nullptr;
 			}
-			template<typename P, bool is_fail_safe = false>
-			const_pointer find_ranged(P predicate, const_pointer from, const_pointer to) const
-			noexcept(noexcept(predicate(std::declval<const_type&>())) && is_fail_safe) {
+			template<typename P, template<typename> typename It, bool is_fail_safe = false>
+			const_iterator find_ranged(P predicate, It<const_type> from, const pointer_base<const_type>& to) const
+			noexcept(noexcept(predicate(std::declval<const_type&>())) && is_fail_safe) 
+			requires iteroid_v<It, const_type> {
 				if constexpr (!is_fail_safe) {
 					if (from > to) {
 						throw invalid_range();
@@ -207,7 +211,7 @@ namespace dte_utils {
 				}
 				if (this->get_allocated() != size) {
 					this->_allocated = size;
-					A<T> new_allocator = _provide_buffer();
+					alloc_inst new_allocator = _provide_buffer();
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
@@ -226,11 +230,11 @@ namespace dte_utils {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
-					A<T> new_allocator = _provide_buffer();
+					alloc_inst new_allocator = _provide_buffer();
 					this->_allocator = std::move(new_allocator);
 					place_at(end(), value);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(static_cast<pointer>(new_allocator), static_cast<pointer>(new_allocator) + get_used());
+						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
 					}
 				}
 				else {
@@ -243,11 +247,11 @@ namespace dte_utils {
 				if (this->get_allocated() == get_used()) {
 					//push reallocated
 					this->_allocated = _extend_by_el();
-					A<T> new_allocator = _provide_buffer();
+					alloc_inst new_allocator = _provide_buffer();
 					this->_allocator = std::move(new_allocator);
 					place_at(end(), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(static_cast<pointer>(new_allocator), static_cast<pointer>(new_allocator) + get_used());
+						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
 					}
 				}
 				else {
@@ -261,11 +265,11 @@ namespace dte_utils {
 				if (this->get_allocated() == get_used()) {
 					//emplace reallocated
 					this->_allocated = _extend_by_el();
-					A<T> new_allocator = _provide_buffer();
+					alloc_inst new_allocator = _provide_buffer();
 					this->_allocator = std::move(new_allocator);
 					place_at(end(), std::forward<Args>(args)...);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(static_cast<pointer>(new_allocator), static_cast<pointer>(new_allocator) + get_used());
+						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
 					}
 				}
 				else {
@@ -283,7 +287,7 @@ namespace dte_utils {
 					}
 				}
 				--_used;
-				if constexpr (!std::is_trivially_destructible_v<T>) {
+				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destuct_at(end());
 				}
 			}
@@ -295,7 +299,7 @@ namespace dte_utils {
 						throw out_of_range();
 					}
 				}
-				if constexpr (!std::is_trivially_destructible_v<T>) {
+				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(end() - num, end());
 				}
 				_used -= num;
@@ -307,7 +311,7 @@ namespace dte_utils {
 				if (get_used() != other.get_used()) {
 					return false;
 				}
-				const_pointer this_val = begin();
+				const_iterator this_val = begin();
 				for (const_type& val : other) {
 					if (val != *this_val) {
 						return false;
@@ -333,10 +337,10 @@ namespace dte_utils {
 				}
 				if (other.get_used() > this->get_allocated()) {
 					this->_allocated = other.get_used();
-					A<T> new_allocator(other.get_used());
+					alloc_inst new_allocator(other.get_used());
 					this->_allocator = std::move(new_allocator);
 				}
-				array_to_array(begin(), other.begin(), other.get_used());
+				array_to_array(other.begin(), other.end(), begin());
 				_used = other.get_used();
 				return *this;
 			}
@@ -358,10 +362,10 @@ namespace dte_utils {
 				}
 				if (other.get_used() > this->get_allocated()) {
 					this->_allocated = other.get_used();
-					A<T> new_allocator(other.get_used());
+					alloc_inst new_allocator(other.get_used());
 					this->_allocator = std::move(new_allocator);
 				}
-				array_to_array(begin(), other.begin(), other.get_used());
+				array_to_array(other.begin(), other.end(), begin());
 				_used = other.get_used();
 				return *this;
 			}
@@ -373,10 +377,10 @@ namespace dte_utils {
 				}
 				if (il.size() > this->get_allocated()) {
 					this->_allocated = il.size();
-					A<T> new_allocator(il.size());
+					alloc_inst new_allocator(il.size());
 					this->_allocator = std::move(new_allocator);
 				}
-				array_to_array(begin(), il.begin(), il.size());
+				array_to_array(il.begin(), il.end(), begin());
 				_used = il.size();
 				return *this;
 			}
@@ -387,10 +391,10 @@ namespace dte_utils {
 				}
 				if (N > this->get_allocated()) {
 					this->_allocated = N;
-					A<T> new_allocator(N);
+					alloc_inst new_allocator(N);
 					this->_allocator = std::move(new_allocator);
 				}
-				array_to_array(begin(), arr, N);
+				array_to_array(arr, arr + N, begin());
 				_used = N;
 				return *this;
 			}
@@ -400,8 +404,8 @@ namespace dte_utils {
 			dynamic_stack& operator +=(const dynamic_stack<U, UA>& other) {
 				if (get_used() + other.get_used() > this->get_allocated()) {
 					this->_allocated = get_used() + other.get_used();
-					A<T> new_allocator = _provide_buffer();
-					array_to_array(static_cast<pointer>(new_allocator) + get_used(), other.begin(), other.get_used());
+					alloc_inst new_allocator = _provide_buffer();
+					array_to_array(other.begin(), other.end(), new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
@@ -409,7 +413,7 @@ namespace dte_utils {
 				}
 				else {
 					//copy to unused
-					array_to_array(end(), other.begin(), other.get_used());
+					array_to_array(other.begin(), other.end(), begin());
 				}
 				_used += other.get_used();
 				return *this;
@@ -420,15 +424,15 @@ namespace dte_utils {
 			dynamic_stack& operator +=(std::initializer_list<type> il) {
 				if (get_used() + il.size() > this->get_allocated()) {
 					this->_allocated = get_used() + il.size();
-					A<T> new_allocator = _provide_buffer();
-					array_to_array(static_cast<pointer>(new_allocator) + get_used(), il.begin(), il.size());
+					alloc_inst new_allocator = _provide_buffer();
+					array_to_array(il.begin(), il.end(), new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
 					this->_allocator = std::move(new_allocator);
 				}
 				else {
-					array_to_array(end(), il.begin(), il.size());
+					array_to_array(il.begin(), il.end(), begin());
 				}
 				_used += il.size();
 				return *this;
@@ -437,15 +441,15 @@ namespace dte_utils {
 			dynamic_stack& operator +=(const U(&arr)[N]) {
 				if (get_used() + N > this->get_allocated()) {
 					this->_allocated = get_used() + N;
-					A<T> new_allocator = _provide_buffer();
-					array_to_array(static_cast<pointer>(new_allocator) + get_used(), arr, N);
+					alloc_inst new_allocator = _provide_buffer();
+					array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
 					this->_allocator = std::move(new_allocator);
 				}
 				else {
-					array_to_array(end(), arr, N);
+					array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, end());
 				}
 				_used += N;
 				return *this;
@@ -455,7 +459,7 @@ namespace dte_utils {
 			template<typename U, template<typename> typename UA>
 			dynamic_stack operator +(const dynamic_stack<U, UA>& other) {
 				dynamic_stack new_stack(begin(), get_used(), other.get_used());
-				array_to_array(new_stack.end(), other.begin(), other.get_used());
+				array_to_array(other.begin(), other.end(), new_stack.end());
 				new_stack._used += other.get_used();
 				return new_stack;
 			}
@@ -463,7 +467,7 @@ namespace dte_utils {
 			template<typename U, size_type N>
 			dynamic_stack operator +(const U(&arr)[N]) {
 				dynamic_stack new_stack(begin(), get_used(), N);
-				array_to_array(new_stack.end(), arr, N);
+				array_to_array(arr, arr + N, new_stack.end());
 				new_stack._used += N;
 				return new_stack;
 			}

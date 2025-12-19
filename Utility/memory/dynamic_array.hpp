@@ -1,48 +1,56 @@
 ﻿#pragma once
 #include "dynamic_stack.hpp"
+
+#include <iostream>
 namespace dte_utils {
 	template<typename T, template<typename> typename A = allocator>
-	requires is_allocator_v<A, T>
 	struct dynamic_array : dynamic_stack<T, A> {
-		using size_type = dynamic_stack<T, A>::size_type;
-		using type = dynamic_stack<T, A>::type;
-		using const_type = dynamic_stack<T, A>::const_type;
-		using pointer = dynamic_stack<T, A>::pointer;
-		using const_pointer = dynamic_stack<T, A>::const_pointer;
-		using dynamic_stack<T, A>::dynamic_stack;
+		using stack				= dynamic_stack<T, A>;
+		using alloc_hand		= stack::alloc_hand;
+		using alloc_inst		= stack::alloc_inst;
+		using size_type			= stack::size_type;
+		using type				= stack::type;
+		using const_type		= stack::const_type;
+		using iterator			= stack::iterator;
+		using const_iterator	= stack::const_iterator;
+
+		using stack::dynamic_stack;
 		protected:
-			A<T> _provide_spaced_buffer(pointer gap_pointer, size_type gap_size) const {
-				A<T> new_allocator(this->get_allocated() + gap_size);
+			//TODO: second array_to_array can be optimised by b_iterator
+			alloc_inst _provide_spaced_buffer(const iterator& gap_pointer, size_type gap_size) const {
+				alloc_inst new_allocator(this->get_allocated() + gap_size);
+				//TODO: size can be negative
 				size_type first_section_size = gap_pointer - this->begin();
 				array_to_array(
-					static_cast<pointer>(new_allocator), 
 					this->begin(),
-					first_section_size
+					this->begin() + first_section_size,
+					new_allocator.operator iterator()
 				);
 				array_to_array(
-					static_cast<pointer>(new_allocator) + first_section_size + gap_size,
 					this->begin() + first_section_size,
-					this->get_used() - first_section_size
+					this->end(),
+					new_allocator.operator iterator() + first_section_size + gap_size
 				);
 				return new_allocator;
 			}
 		public:
-			template<typename U>
-			void insert(pointer pos, const U& value) {
+			template<typename U, template<typename> typename It>
+			void insert(const It<type>& pos, const U& value) 
+			requires iteroid_v<It, type> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
 				if (this->get_used() == this->get_allocated()) {
 					this->_allocated = this->_extend_by_el();
-					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), value);
+					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
+					place_at(new_allocator.operator iterator() + (pos - this->begin()), value);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
 				}
 				else {
-					pointer over_pos = this->end();
+					iterator over_pos = this->end();
 					place_at(over_pos, value);
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
@@ -50,22 +58,23 @@ namespace dte_utils {
 				}
 				++this->_used;
 			}
-			template<typename U>
-			void insert(pointer pos, U&& value) {
+			template<typename U, template<typename> typename It>
+			void insert(const It<type>& pos, U&& value) 
+			requires iteroid_v<It, type> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
 				if (this->get_used() == this->get_allocated()) {
 					this->_allocated = this->_extend_by_el();
-					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), std::move(value));
+					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
+					place_at(new_allocator.operator iterator() + (pos - this->begin()), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
 				}
 				else {
-					pointer over_pos = this->end();
+					iterator over_pos = this->end();
 					place_at(over_pos, std::move(value));
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
@@ -74,15 +83,16 @@ namespace dte_utils {
 				++this->_used;
 			}
 			
+			//TODO: check, if other iterators (pos) can be used
 			template<typename U>
-			void insert(pointer pos, const U& value, size_type num) {
+			void insert(iterator pos, const U& value, size_type num) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
 				if (this->get_used() + num > this->get_allocated()) {
 					this->_allocated = this->get_used() + num;
-					A<T> new_allocator = this->_provide_spaced_buffer(pos, num);
-					pointer target = static_cast<pointer>(new_allocator) + (pos - this->begin());
+					alloc_inst new_allocator = this->_provide_spaced_buffer(pos, num);
+					iterator target = new_allocator.operator iterator() + (pos - this->begin());
 					while (num) {
 						place_at(target, value);
 						--num;
@@ -95,7 +105,7 @@ namespace dte_utils {
 					this->_used = this->get_allocated();
 				}
 				else {
-					pointer over_pos = this->end() + num;
+					iterator over_pos = this->end() + num;
 					while (this->end() != over_pos) {
 						place_at(--over_pos, value);
 					}
@@ -110,20 +120,23 @@ namespace dte_utils {
 					}
 				}
 			}
-			template<typename U>
-			void insert(pointer pos, const U* first, const U* last) {
+			//TODO: check, if other iterators (pos) can be used
+			template<typename U, template<typename> typename ItT, template<typename> typename ItU>
+			void insert(iterator pos, const ItT<U>& first, ItU<U> last) 
+			requires iteroid_v<ItT, U> && iteroid_v<ItU, U> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
+				//TODO: check if num can be negative
 				size_type num = last - first;
 				if (this->get_used() + num > this->get_allocated()) {
 					this->_allocated = this->get_used() + num;
-					A<T> new_allocator = _provide_spaced_buffer(pos, num);
-					pointer target = static_cast<pointer>(new_allocator) + (pos - this->begin());
+					alloc_inst new_allocator = _provide_spaced_buffer(pos, num);
+					iterator target = new_allocator.operator iterator() + (pos - this->begin());
 					array_to_array(
-						target,
 						first,
-						num
+						last,
+						target
 					);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
@@ -132,7 +145,7 @@ namespace dte_utils {
 					this->_used = this->get_allocated();
 				}
 				else {
-					pointer over_pos = this->end() + num;
+					iterator over_pos = this->end() + num;
 					while (this->end() != over_pos) {
 						place_at(--over_pos, *--last);
 					}
@@ -147,26 +160,28 @@ namespace dte_utils {
 					}
 				}
 			}
-			void insert(pointer pos, std::initializer_list<type> il) {
-				insert(pos, il.begin(), il.end());
+			//TODO: check, if other iterators (pos) can be used
+			template<template<typename> typename It>
+			void insert(const iterator& pos, std::initializer_list<type> il) {
+				insert(pos, iterator(il.begin()), iterator(il.end()));
 			}
-
+			//TODO: check, if other iterators (pos) can be used
 			template<typename ...Args>
-			void emplace(pointer pos, Args&&... args) {
+			void emplace(const iterator& pos, Args&&... args) {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
 				if (this->get_used() == this->get_allocated()) {
 					this->_allocated = this->_extend_by_el();
-					A<T> new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(static_cast<pointer>(new_allocator) + (pos - this->begin()), std::forward<Args>(args)...);
+					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
+					place_at(new_allocator.operator iterator() + (pos - this->begin()), std::forward<Args>(args)...);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(this->begin(), this->end());
 					}
 					this->_allocator = std::move(new_allocator);
 				}
 				else {
-					pointer over_pos = this->end();
+					iterator over_pos = this->end();
 					place_at(over_pos, std::forward<Args>(args)...);
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
@@ -175,9 +190,9 @@ namespace dte_utils {
 				++this->_used;
 			}
 
-
+			//TODO: check, if other iterators (pos) can be used
 			template<bool is_fail_safe = false>
-			void erase(pointer pos) 
+			void erase(iterator pos)
 			noexcept(
 				std::is_nothrow_destructible_v<type> &&
 				std::is_nothrow_swappable_v<type> &&
@@ -196,8 +211,9 @@ namespace dte_utils {
 					destuct_at(this->end());
 				}
 			}
+			//TODO: check, if other iterators (pos) can be used
 			template<bool is_fail_safe = false>
-			void erase(pointer first, pointer last)
+			void erase(iterator first, iterator last)
 			noexcept(
 				std::is_nothrow_destructible_v<type>&&
 				std::is_nothrow_swappable_v<type>&&
@@ -225,7 +241,7 @@ namespace dte_utils {
 
 			//unordered removal (faster, but order breaks)
 			template<bool is_fail_safe = false>
-			void remove(pointer pos) 
+			void remove(const iterator& pos) 
 			noexcept(
 				std::is_nothrow_destructible_v<type>&&
 				std::is_nothrow_swappable_v<type>&&
@@ -242,9 +258,10 @@ namespace dte_utils {
 					destuct_at(this->end());
 				}
 			}
+			//TODO: check, if other iterators (pos) can be used
 			//is effective in larger arrays and smaller removal
 			template<bool is_fail_safe = false>
-			void remove(pointer first, pointer last)
+			void remove(const iterator& first, iterator last)
 			noexcept(
 				std::is_nothrow_destructible_v<type>&&
 				std::is_nothrow_swappable_v<type>&&
@@ -265,7 +282,7 @@ namespace dte_utils {
 					this->_used -= last - first;
 				}
 				else {
-					pointer over_pos = this->end();
+					iterator over_pos = this->end();
 					this->_used -= last - first;
 					while (last != first) {
 						std::swap(*--last, *--over_pos);

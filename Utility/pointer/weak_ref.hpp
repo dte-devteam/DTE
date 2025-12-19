@@ -9,7 +9,7 @@ namespace dte_utils {
 		using type = pointer_base<T>::type;
 		using pointer = pointer_base<T>::pointer;
 		protected:
-			RC* _counter;
+			pointer_base<RC> _counter;
 			void _weak_decrease() noexcept(std::is_nothrow_destructible_v<RC>) {
 				if (!_counter->sub_weak()) {
 					cdelete(_counter);
@@ -17,7 +17,7 @@ namespace dte_utils {
 			}
 			void _strong_decrease() noexcept(std::is_nothrow_destructible_v<T>) {
 				if (!_counter->sub_strong()) {
-					cdelete(this->_instance);
+					cdelete(pointer_base<type>(this->_instance));
 				}
 			}
 		public:
@@ -30,7 +30,7 @@ namespace dte_utils {
 				_weak_decrease();
 			}
 
-			const RC* get_counter() const noexcept {
+			pointer_base<const RC> get_counter() const noexcept {
 				return _counter;
 			}
 			bool expired() const noexcept {
