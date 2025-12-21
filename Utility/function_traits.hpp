@@ -8,12 +8,12 @@ namespace dte_utils {
 	};
 	template<typename R, typename ...Args>
 	struct return_type<R(Args...)> : std::true_type {
-		using type = R;
+		using type = typename R;
 		static constexpr bool is_noexcept = false;
 	};
 	template<typename R, typename ...Args>
 	struct return_type<R(Args...) noexcept> : std::true_type {
-		using type = R;
+		using type = typename R;
 		static constexpr bool is_noexcept = true;
 	};
 	template<typename T>

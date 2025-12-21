@@ -61,7 +61,6 @@
     <ClInclude Include="type_properties.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="pointer\documentation-ru.md">
       <SubType>
       </SubType>

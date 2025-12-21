@@ -29,7 +29,7 @@ namespace dte_utils {
 			template<typename U, size_type N>
 			dynamic_stack(const U(&arr)[N], size_type reserved_size = 0) : dynamic_stack(f_iterator<const U>(arr), N, reserved_size) {}
 			template<typename U, template<typename> typename It>
-			requires iteroid_v<It, U>
+			requires is_iteroid_v<It, U>
 			dynamic_stack(const It<U>& array, size_type used_size, size_type reserved_size) : _used(used_size), alloc_hand(used_size + reserved_size) {
 				array_to_array(array, array + get_used(), begin());
 			}
@@ -157,7 +157,7 @@ namespace dte_utils {
 			template<typename P, template<typename> typename It, bool is_fail_safe = false>
 			iterator find_ranged(P predicate, It<type> from, const pointer_base<type>& to)
 			noexcept(noexcept(predicate(std::declval<type&>())) && is_fail_safe) 
-			requires iteroid_v<It, type> {
+			requires is_iteroid_v<It, type> {
 				if constexpr (!is_fail_safe) {
 					if (from > to) {
 						throw invalid_range();
@@ -177,7 +177,7 @@ namespace dte_utils {
 			template<typename P, template<typename> typename It, bool is_fail_safe = false>
 			const_iterator find_ranged(P predicate, It<const_type> from, const pointer_base<const_type>& to) const
 			noexcept(noexcept(predicate(std::declval<const_type&>())) && is_fail_safe) 
-			requires iteroid_v<It, const_type> {
+			requires is_iteroid_v<It, const_type> {
 				if constexpr (!is_fail_safe) {
 					if (from > to) {
 						throw invalid_range();

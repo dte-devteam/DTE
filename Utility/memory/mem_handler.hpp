@@ -1,11 +1,11 @@
 #pragma once
 namespace dte_utils {
 	struct mem_handler {
-		using size_type = size_t;
-		using type = void;
-		using const_type = const type;
-		using pointer = type*;
-		using const_pointer = const_type*;
+		using size_type		= size_t;
+		using type			= void;
+		using const_type	= typename const type;
+		using pointer		= typename type*;
+		using const_pointer	= typename const_type*;
 		protected:
 			pointer _ptr;
 		public:

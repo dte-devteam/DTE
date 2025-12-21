@@ -36,7 +36,7 @@ namespace dte_utils {
 		public:
 			template<typename U, template<typename> typename It>
 			void insert(const It<type>& pos, const U& value) 
-			requires iteroid_v<It, type> {
+			requires is_iteroid_v<It, type> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
@@ -60,7 +60,7 @@ namespace dte_utils {
 			}
 			template<typename U, template<typename> typename It>
 			void insert(const It<type>& pos, U&& value) 
-			requires iteroid_v<It, type> {
+			requires is_iteroid_v<It, type> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}
@@ -123,7 +123,7 @@ namespace dte_utils {
 			//TODO: check, if other iterators (pos) can be used
 			template<typename U, template<typename> typename ItT, template<typename> typename ItU>
 			void insert(iterator pos, const ItT<U>& first, ItU<U> last) 
-			requires iteroid_v<ItT, U> && iteroid_v<ItU, U> {
+			requires is_iteroid_v<ItT, U> && is_iteroid_v<ItU, U> {
 				if (pos < this->begin() || pos > this->end()) {
 					throw out_of_range();
 				}

@@ -90,11 +90,8 @@ struct SA {
 };
 
 int main(int argc, const char* argv[]) {
-	test_memory();
-	test_pointer();
-
-	//allocator<int> aa(10);
-	//destruct_range(aa.operator dte_utils::allocator<int>::iterator(), aa.operator dte_utils::f_iterator<int>() + 2);
+	//test_memory();
+	//test_pointer();
 	SA nigga;
 	for (int u : nigga) {
 		std::cout << u << " ";
@@ -103,13 +100,23 @@ int main(int argc, const char* argv[]) {
 	nigga.begin() + 3;
 	std::cout << std::endl;
 	//checking compability
-	f_iterator<int> aaa(nullptr);
-	pointer_base<int> ll;
+	pointer_base<void> q;
+	f_iterator<int> aaa;
+	pointer_base<const int> llx;
+	pointer_base<const int> llz = pointer_base<const int>(pointer_base<int>());
+	pointer_base<const int>(pointer_base<int>(0));
+	pointer_base<int> ll;// = llx;
 	iterator_base<int> gg(ll);
 	b_iterator<int> bbb(aaa);
 	b_iterator<int> ccc(ll);
 	weak_ref<int> www;
 	f_iterator<int> qw(www);
+	f_iterator<const volatile int> rrr(aaa);
+	rrr == ll;
+	ll == rrr;
+	q == aaa;
+	aaa != (const int*)0;
+
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();

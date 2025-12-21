@@ -1,20 +1,19 @@
 #pragma once
+#include "type_properties.hpp"
 #include "function_traits.hpp"
 #include "exceptions/memory_exception.hpp"
 namespace dte_utils {
 	template<typename T>
 	struct pointer_base {
-		using type = T;
-		using pointer = type*;
+		using type		= typename T;
+		using pointer	= typename type*;
 		protected:
 			pointer _instance;
 		public:
 			pointer_base(pointer instance = nullptr) noexcept : _instance(instance) {}
-			pointer_base(const pointer_base& other) noexcept : pointer_base(other._instance) {}
-			pointer_base(const pointer_base<std::remove_const_t<type>>& other) noexcept 
-			requires std::is_const_v<type> : pointer_base(
-				other.operator std::remove_const_t<type>*()
-			) {}
+			template<typename U>
+			pointer_base(const pointer_base<U>& other) noexcept 
+			requires std::is_convertible_v<typename pointer_base<U>::pointer, pointer> : _instance(other.operator->()) {}
 			
 			template<bool is_fail_safe = false>
 			type& operator*() const noexcept(is_fail_safe)
@@ -29,14 +28,30 @@ namespace dte_utils {
 			pointer operator->() const noexcept {
 				return _instance;
 			}
+			//just for "for loop", operator->() is much shorter than "operator pointer_base<T>::pointer()"
 			explicit operator pointer() const noexcept {
 				return this->_instance;
 			}
 
-			bool operator==(const pointer_base& other) const noexcept {
-				return _instance == other._instance;
+			template<typename U>
+			bool operator==(U* ptr) const noexcept
+			requires has_equal_to_operator_v<pointer, U*> {
+				return _instance == ptr;
 			}
-			bool operator!=(const pointer_base& other) const noexcept {
+			template<typename U>
+			bool operator!=(U* ptr) const noexcept
+			requires has_equal_to_operator_v<pointer, U*> {
+				return !(*this == ptr);
+			}
+
+			template<typename U>
+			bool operator==(const pointer_base<U>& other) const noexcept
+			requires has_equal_to_operator_v<pointer, typename pointer_base<U>::pointer> {
+				return _instance == other.operator->();
+			}
+			template<typename U>
+			bool operator!=(const pointer_base<U>& other) const noexcept
+			requires has_equal_to_operator_v<pointer, typename pointer_base<U>::pointer> {
 				return !(*this == other);
 			}
 
@@ -52,7 +67,7 @@ namespace dte_utils {
 				return _instance(std::forward<Args>(args)...);
 			}
 			template<bool is_fail_safe = false, typename ...Args>
-			requires is_functor_v<type, Args...>
+			requires is_functor_v<type, Args...> //no need for void check - void never returns
 			is_functor_t<type, Args...> operator()(Args&&... args) const 
 			noexcept(is_functor_noexcept_v<type, Args...> && is_fail_safe) {
 				if constexpr (!is_fail_safe) {
@@ -70,6 +85,37 @@ namespace dte_utils {
 		protected:
 			pointer _instance;
 		public:
-			pointer_base(pointer instance) noexcept : _instance(instance) {}
+			pointer_base(pointer instance = nullptr) noexcept : _instance(instance) {}
+
+
+			pointer operator->() const noexcept {
+				return _instance;
+			}
+			//just for "for loop", operator->() is much shorter than "operator pointer_base<T>::pointer()"
+			explicit operator pointer() const noexcept {
+				return this->_instance;
+			}
+
+			template<typename U>
+			bool operator==(U* ptr) const noexcept
+			requires has_equal_to_operator_v<pointer, U*> {
+				return _instance == ptr;
+			}
+			template<typename U>
+			bool operator!=(U* ptr) const noexcept
+			requires has_equal_to_operator_v<pointer, U*> {
+				return !(*this == ptr);
+			}
+
+			template<typename U>
+			bool operator==(const pointer_base<U>& other) const noexcept
+			requires has_equal_to_operator_v<pointer, typename pointer_base<U>::pointer> {
+				return _instance == other.operator->();
+			}
+			template<typename U>
+			bool operator!=(const pointer_base<U>& other) const noexcept
+			requires has_equal_to_operator_v<pointer, typename pointer_base<U>::pointer> {
+				return !(*this == other);
+			}
 	};
 }
