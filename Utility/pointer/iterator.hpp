@@ -1,12 +1,33 @@
 #pragma once
 #include "pointer_base.hpp"
 namespace dte_utils {
-	//TODO: finish
 	template<template<typename> typename It, typename T>
-	inline constexpr bool is_iteroid_v = std::is_base_of_v<iterator_base<T>, It<T>>&& requires(const It<T>& ct, It<T>& t) {
-		++t; --t;
-		t++; t--;
+	inline constexpr bool is_iteroid_v = std::is_base_of_v<pointer_base<T>, It<T>> && requires(const It<T>& ct, It<T>& t) {
+		{ ++t } noexcept -> std::same_as< It<T>&>;
+		{ --t } noexcept -> std::same_as< It<T>&>;
+		{ t++ } noexcept -> std::same_as< It<T>>;
+		{ t-- } noexcept -> std::same_as< It<T>>;
+
+		{ t += std::declval<typename It<T>::size_type>() } noexcept -> std::same_as<It<T>&>;
+		{ t -= std::declval<typename It<T>::size_type>() } noexcept -> std::same_as<It<T>&>;
+
+		{ ct + std::declval<typename It<T>::size_type>() } noexcept -> std::same_as<It<T>>;
+		{ ct - std::declval<typename It<T>::size_type>() } noexcept -> std::same_as<It<T>>;
+
+		{ ct - ct } noexcept -> std::same_as<typename It<T>::size_type>;
+
+		//we ingnore [] operator, because it equals:
+		//(*this + index).operator*<is_fail_safe>()
+		//*this + index is described above
+		//operator*<is_fail_safe> is described in pointer_base
+		//also void specialisation forbids * & [] operators
+
+		{ ct > ct } noexcept -> std::same_as<bool>;
+		{ ct < ct } noexcept -> std::same_as<bool>;
+		{ ct >= ct } noexcept -> std::same_as<bool>;
+		{ ct <= ct } noexcept -> std::same_as<bool>;
 	};
+
 	template<typename T>
 	struct iterator_base : pointer_base<T> {
 		using size_type	= typename ptrdiff_t;
@@ -76,38 +97,39 @@ namespace dte_utils {
 				iter._dec(sub);
 				return iter;
 			}
-			template<template<typename> typename It>
-			size_type operator-(const It<type>& other) const noexcept 
-			requires is_iteroid_v<It, type> {
-				return this->_instance - other.operator type*();
-			}
-			template<template<typename> typename It>
-			size_type operator-(const It<const type>& other) const noexcept
-			requires is_iteroid_v<It, const type> {
-				return this->_instance - other.operator const type*();
+			template<typename U>
+			size_type operator-(const iterator_base<U>& other) const noexcept 
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				if constexpr (std::is_void_v<type>) {
+					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
+				}
+				else {
+					return this->_instance - other.operator iterator_base<U>::pointer();
+				}
 			}
 			template<bool is_fail_safe = false>
-			type& operator[](size_type index) const noexcept(is_fail_safe) {
+			std::add_lvalue_reference_t<type> operator[](size_type index) const noexcept(is_fail_safe)
+			requires !std::is_void_v<type> {
 				return (*this + index).operator*<is_fail_safe>();
 			}
-			template<template<typename> typename It>
-			bool operator>(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
-				return *this - other > 0;
+			template<typename U>
+			bool operator>(const iterator_base<U>& other) const noexcept 
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				return (*this - other) > 0;
 			}
-			template<template<typename> typename It>
-			bool operator<(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
-				return *this - other < 0;
+			template<typename U>
+			bool operator<(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				return (*this - other) < 0;
 			}
-			template<template<typename> typename It>
-			bool operator>=(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
+			template<typename U>
+			bool operator>=(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
 				return !(*this < other);
 			}
-			template<template<typename> typename It>
-			bool operator<=(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
+			template<typename U>
+			bool operator<=(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
 				return !(*this > other);
 			}
 	};
@@ -154,33 +176,39 @@ namespace dte_utils {
 				iter._inc(add);
 				return iter;
 			}
-			template<template<typename> typename It>
-			size_type operator-(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
-				return this->_instance - other._instance;
+			template<typename U>
+			size_type operator-(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				if constexpr (std::is_void_v<type>) {
+					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
+				}
+				else {
+					return this->_instance - other.operator iterator_base<U>::pointer();
+				}
 			}
 			template<bool is_fail_safe = false>
-			type& operator[](size_type index) const noexcept(is_fail_safe) {
+			std::add_lvalue_reference_t<type> operator[](size_type index) const noexcept(is_fail_safe)
+			requires !std::is_void_v<type> {
 				return (*this + index).operator*<is_fail_safe>();
 			}
-			template<template<typename> typename It>
-			bool operator>(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
-				return *this - other > 0;
+			template<typename U>
+			bool operator>(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				return (*this - other) > 0;
 			}
-			template<template<typename> typename It>
-			bool operator<(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
-				return *this - other < 0;
+			template<typename U>
+			bool operator<(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+				return (*this - other) < 0;
 			}
-			template<template<typename> typename It>
-			bool operator>=(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
+			template<typename U>
+			bool operator>=(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
 				return !(*this < other);
 			}
-			template<template<typename> typename It>
-			bool operator<=(const It<type>& other) const noexcept
-			requires is_iteroid_v<It, type> {
+			template<typename U>
+			bool operator<=(const iterator_base<U>& other) const noexcept
+			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
 				return !(*this > other);
 			}
 	};

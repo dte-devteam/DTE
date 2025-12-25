@@ -90,6 +90,10 @@ struct SA {
 };
 
 int main(int argc, const char* argv[]) {
+//#pragma message(__FILE__)
+	const f_iterator<A> y;
+	const f_iterator<const A> yy;
+	y > yy;
 	//test_memory();
 	//test_pointer();
 	SA nigga;
@@ -100,8 +104,24 @@ int main(int argc, const char* argv[]) {
 	nigga.begin() + 3;
 	std::cout << std::endl;
 	//checking compability
+	is_iteroid_v<f_iterator, void>;
+	is_iteroid_v<b_iterator, void>;
+
+	b_iterator<void> e;
+	std::cout << (int*)(++e).operator->() << std::endl;
+
 	pointer_base<void> q;
+	q = (int*)0;
+
+	void* qq = nullptr;
 	f_iterator<int> aaa;
+	f_iterator<const int> hg;
+
+	q = aaa;
+
+	aaa - aaa;
+	//aaa is nullptr (by constructor), so... we get nullptr_access error
+	//aaa.operator*();
 	pointer_base<const int> llx;
 	pointer_base<const int> llz = pointer_base<const int>(pointer_base<int>());
 	pointer_base<const int>(pointer_base<int>(0));
@@ -116,7 +136,10 @@ int main(int argc, const char* argv[]) {
 	ll == rrr;
 	q == aaa;
 	aaa != (const int*)0;
+	llx == (int*)0;
 
+	f_iterator<const volatile void> vit;
+	std::cout << (aaa == vit) << std::endl;
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();
