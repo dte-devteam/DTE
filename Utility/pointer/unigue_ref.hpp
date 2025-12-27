@@ -1,11 +1,10 @@
 #pragma once
 #include "memory/memory.hpp"
-#include "pointer_base.hpp"
 namespace dte_utils {
 	template<typename T>
 	struct unique_ref : pointer_base<T> {
-		using type = pointer_base<T>::type;
-		using pointer = pointer_base<T>::pointer;
+		using type		= typename pointer_base<T>::type;
+		using pointer	= typename pointer_base<T>::pointer;
 		public:
 			unique_ref(pointer instance = nullptr) noexcept : pointer_base<T>(instance) {}
 			unique_ref(const unique_ref&) = delete;
@@ -13,7 +12,7 @@ namespace dte_utils {
 				other._instance = nullptr;
 			}
 			~unique_ref() {
-				cdelete(pointer_base<type>(_instance));
+				cdelete(remove_const_ptr_base(*this));
 			}
 
 			unique_ref& operator=(const unique_ref&) = delete;
@@ -21,7 +20,7 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				std::swap(_instance, other._instance);
+				std::swap(this->_instance, other._instance);
 				return *this;
 			}
 	};

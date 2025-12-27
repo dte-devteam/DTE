@@ -5,9 +5,9 @@ namespace dte_utils {
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
 	struct weak_ref : pointer_base<T> {
-		using size_type = RC::size_type;
-		using type = pointer_base<T>::type;
-		using pointer = pointer_base<T>::pointer;
+		using size_type	= typename RC::size_type;
+		using type		= typename pointer_base<T>::type;
+		using pointer	= typename pointer_base<T>::pointer;
 		protected:
 			pointer_base<RC> _counter;
 			void _weak_decrease() noexcept(std::is_nothrow_destructible_v<RC>) {
@@ -17,7 +17,7 @@ namespace dte_utils {
 			}
 			void _strong_decrease() noexcept(std::is_nothrow_destructible_v<T>) {
 				if (!_counter->sub_strong()) {
-					cdelete(pointer_base<type>(this->_instance));
+					cdelete(remove_const_ptr_base(*this));
 				}
 			}
 		public:

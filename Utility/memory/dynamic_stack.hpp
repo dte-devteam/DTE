@@ -5,15 +5,15 @@
 #include "exceptions/logic_exception.hpp"
 #include <initializer_list>
 namespace dte_utils {
-	template<typename T, template<typename> typename A = allocator>
+	template<non_void T, template<typename> typename A = allocator>
 	struct dynamic_stack : alloc_handler<T, A> {
-		using alloc_hand		= alloc_handler<T, A>;
-		using alloc_inst		= alloc_hand::alloc_inst;
-		using size_type			= alloc_hand::size_type;
-		using type				= alloc_hand::type;
-		using const_type		= alloc_hand::const_type;
-		using iterator			= alloc_hand::iterator;
-		using const_iterator	= alloc_hand::const_iterator;
+		using alloc_hand		= typename alloc_handler<T, A>;
+		using alloc_inst		= typename alloc_hand::alloc_inst;
+		using size_type			= typename alloc_hand::size_type;
+		using type				= typename alloc_hand::type;
+		using const_type		= typename alloc_hand::const_type;
+		using iterator			= typename alloc_hand::iterator;
+		using const_iterator	= typename alloc_hand::const_iterator;
 		protected:
 			size_type _used;
 			size_type _extend_by_el() const noexcept {

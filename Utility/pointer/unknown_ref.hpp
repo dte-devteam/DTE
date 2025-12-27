@@ -6,9 +6,9 @@ namespace dte_utils {
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
 	struct unknown_ref : weak_ref<T, RC> {
-		using size_type = weak_ref<T, RC>::size_type;
-		using type = weak_ref<T, RC>::type;
-		using pointer = weak_ref<T, RC>::pointer;
+		using size_type	= typename weak_ref<T, RC>::size_type;
+		using type		= typename weak_ref<T, RC>::type;
+		using pointer	= typename weak_ref<T, RC>::pointer;
 		protected:
 			bool _strength;
 			void _unknown_decrease() noexcept(std::is_nothrow_destructible_v<T>) {

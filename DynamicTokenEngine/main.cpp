@@ -29,6 +29,8 @@
 #include <chrono>
 #include <thread>
 
+
+
 using namespace dte_utils;
 using namespace dte_token;
 using namespace dte_core;
@@ -88,14 +90,16 @@ struct SA {
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
 };
+struct SAS : SA {
 
-int main(int argc, const char* argv[]) {
-//#pragma message(__FILE__)
-	const f_iterator<A> y;
-	const f_iterator<const A> yy;
-	y > yy;
+};
+int main(int argc, const char* argv[]) {	
 	//test_memory();
 	//test_pointer();
+
+	unique_ref<const int>(aligned_tmalloc<int>(1));
+	strong_ref<const int>(aligned_tmalloc<int>(1));
+
 	SA nigga;
 	for (int u : nigga) {
 		std::cout << u << " ";
@@ -140,6 +144,11 @@ int main(int argc, const char* argv[]) {
 
 	f_iterator<const volatile void> vit;
 	std::cout << (aaa == vit) << std::endl;
+
+
+
+	remove_const_ptr(llx.operator->());
+
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();
@@ -151,7 +160,7 @@ int main(int argc, const char* argv[]) {
 	std::vector<int> a;
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
-	).operator pointer_base<ifstr_args>::pointer();
+	).operator->();
 	std::cout << "-----------------" << std::endl;
 	stream* strf = new stream{ 0, {10000}, {} };
 	dte_function dteff({ "FILE", 0 },
@@ -188,7 +197,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator pointer_base<dte_function>::pointer());
+	).operator->());
 	atomic_strong_ref<dte_function> r1(cnew<dte_function>(
 		dte_function::metadata{ "FILE", 0 },
 		dynamic_array<dte_function::step>{
@@ -198,7 +207,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator pointer_base<dte_function>::pointer());
+	).operator->());
 	dte_function add_and_log({ "FILE", 0 },
 		{
 			{r0, {1}, {size_t(0)}},
@@ -219,7 +228,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator pointer_base<dte_function>::pointer());
+	).operator->());
 	atomic_strong_ref<dte_function> thr1(cnew<dte_function>(
 		dte_function::metadata{ "NOP&THR", 0 },
 		dynamic_array<dte_function::step>{
@@ -234,7 +243,7 @@ int main(int argc, const char* argv[]) {
 				semi_pointer(size_t(0))
 		}
 	}
-	).operator pointer_base<dte_function>::pointer());
+	).operator->());
 	dte_function thr_catch({ "CALL", 0 },
 		{
 			{thr0, {1}, {size_t(0)}},
@@ -262,8 +271,8 @@ int main(int argc, const char* argv[]) {
 
 	delete strf;
 
-	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>().operator pointer_base<dte_type>::pointer());
-	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>().operator pointer_base<dte_type>::pointer());
+	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>().operator->());
+	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>().operator->());
 	dte_t0->add_parent(dte_t1);
 
 	std::cout << dte_t0->is_basic_type() << std::endl;

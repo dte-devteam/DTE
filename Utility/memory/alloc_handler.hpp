@@ -3,12 +3,12 @@
 namespace dte_utils {
 	template<typename T, template<typename> typename A = allocator>
 	struct alloc_handler {
-		using alloc_inst		= A<T>;
-		using size_type			= alloc_inst::size_type;
-		using type				= alloc_inst::type;
-		using const_type		= alloc_inst::const_type;
-		using iterator			= alloc_inst::iterator;
-		using const_iterator	= alloc_inst::const_iterator;
+		using alloc_inst		= typename A<T>;
+		using size_type			= typename alloc_inst::size_type;
+		using type				= typename alloc_inst::type;
+		using const_type		= typename alloc_inst::const_type;
+		using iterator			= typename alloc_inst::iterator;
+		using const_iterator	= typename alloc_inst::const_iterator;
 		protected:
 			size_type _allocated;
 			alloc_inst _allocator;

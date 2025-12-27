@@ -3,14 +3,12 @@
 #include "exceptions/pointer_exception.hpp"
 #include "template_forwarding.hpp"
 namespace dte_utils {
-	template<typename T, T v>
-	struct bool_h {};
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
 	struct strong_ref : weak_ref<T, RC> {
-		using size_type = weak_ref<T, RC>::size_type;
-		using type = weak_ref<T, RC>::type;
-		using pointer = weak_ref<T, RC>::pointer;
+		using size_type	= typename weak_ref<T, RC>::size_type;
+		using type		= typename weak_ref<T, RC>::type;
+		using pointer	= typename weak_ref<T, RC>::pointer;
 		public:
 			strong_ref(pointer instance = nullptr) : weak_ref<T, RC>(instance) {
 				this->_counter->add_strong();

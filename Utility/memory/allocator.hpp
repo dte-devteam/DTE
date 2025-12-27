@@ -6,11 +6,11 @@ namespace dte_utils {
 	//TODO: is_allocator
 	template<typename T>
 	struct allocator : mem_handler {
-		using size_type			= mem_handler::size_type;
+		using size_type			= typename mem_handler::size_type;
 		using type				= T;
-		using const_type		= const type;
-		using iterator			= f_iterator<type>;
-		using const_iterator	= f_iterator<const_type>;
+		using const_type		= typename const type;
+		using iterator			= typename f_iterator<type>;
+		using const_iterator	= typename f_iterator<const_type>;
 		public:
 			allocator(size_type num = 0) : mem_handler(num * sizeof(type), alignof(type)) {}
 			allocator(const allocator&) = delete;

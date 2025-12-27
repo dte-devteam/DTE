@@ -8,20 +8,16 @@ ref_counter::size_type ref_counter::get_strong() const noexcept {
 	return _strong_owners;
 }
 ref_counter::size_type ref_counter::add_weak() noexcept {
-	++_weak_owners;
-	return _weak_owners;
+	return ++_weak_owners;
 }
 ref_counter::size_type ref_counter::add_strong() noexcept {
-	++_strong_owners;
-	return _strong_owners;
+	return ++_strong_owners;
 }
 ref_counter::size_type ref_counter::sub_weak() noexcept {
-	--_weak_owners;
-	return _weak_owners;
+	return --_weak_owners;
 }
 ref_counter::size_type ref_counter::sub_strong() noexcept {
-	--_strong_owners;
-	return _strong_owners;
+	return --_strong_owners;
 }
 
 

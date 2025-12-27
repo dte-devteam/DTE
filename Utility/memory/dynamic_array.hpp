@@ -1,18 +1,16 @@
 ﻿#pragma once
 #include "dynamic_stack.hpp"
-
-#include <iostream>
 namespace dte_utils {
-	template<typename T, template<typename> typename A = allocator>
+	template<non_void T, template<typename> typename A = allocator>
 	struct dynamic_array : dynamic_stack<T, A> {
-		using stack				= dynamic_stack<T, A>;
-		using alloc_hand		= stack::alloc_hand;
-		using alloc_inst		= stack::alloc_inst;
-		using size_type			= stack::size_type;
-		using type				= stack::type;
-		using const_type		= stack::const_type;
-		using iterator			= stack::iterator;
-		using const_iterator	= stack::const_iterator;
+		using stack				= typename dynamic_stack<T, A>;
+		using alloc_hand		= typename stack::alloc_hand;
+		using alloc_inst		= typename stack::alloc_inst;
+		using size_type			= typename stack::size_type;
+		using type				= typename stack::type;
+		using const_type		= typename stack::const_type;
+		using iterator			= typename stack::iterator;
+		using const_iterator	= typename stack::const_iterator;
 
 		using stack::dynamic_stack;
 		protected:

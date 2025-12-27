@@ -1,17 +1,18 @@
 #pragma once
 #include "dynamic_array.hpp"
 namespace dte_utils {
-	template<typename T, template<typename> typename A = allocator>
+	//TODO: T must be nullable
+	template<non_void T, template<typename> typename A = allocator>
 	struct dynamic_string : dynamic_array<T, A> {
-		using array				= dynamic_array<T, A>;
-		using stack				= array::stack;
-		using alloc_hand		= array::alloc_hand;
-		using alloc_inst		= array::alloc_inst;
-		using size_type			= array::size_type;
-		using type				= array::type;
-		using const_type		= array::const_type;
-		using iterator			= array::iterator;
-		using const_iterator	= array::const_iterator;
+		using array				= typename dynamic_array<T, A>;
+		using stack				= typename array::stack;
+		using alloc_hand		= typename array::alloc_hand;
+		using alloc_inst		= typename array::alloc_inst;
+		using size_type			= typename array::size_type;
+		using type				= typename array::type;
+		using const_type		= typename array::const_type;
+		using iterator			= typename array::iterator;
+		using const_iterator	= typename array::const_iterator;
 		
 		using array::dynamic_array;
 		dynamic_string(size_t alocate_extra_size = 0) : array(alocate_extra_size + 1) {

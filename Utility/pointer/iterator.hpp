@@ -20,7 +20,7 @@ namespace dte_utils {
 		//(*this + index).operator*<is_fail_safe>()
 		//*this + index is described above
 		//operator*<is_fail_safe> is described in pointer_base
-		//also void specialisation forbids * & [] operators
+		//also void specialisation forbids * and [] operators
 
 		{ ct > ct } noexcept -> std::same_as<bool>;
 		{ ct < ct } noexcept -> std::same_as<bool>;
@@ -51,8 +51,6 @@ namespace dte_utils {
 					this->_instance -= sub;
 				}
 			}
-		public:
-			iterator_base(const pointer_base<T>& other) noexcept : pointer_base<T>(other) {}
 	};
 	template<typename T>
 	struct f_iterator : iterator_base<T> {
@@ -99,7 +97,7 @@ namespace dte_utils {
 			}
 			template<typename U>
 			size_type operator-(const iterator_base<U>& other) const noexcept 
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				if constexpr (std::is_void_v<type>) {
 					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
 				}
@@ -109,27 +107,27 @@ namespace dte_utils {
 			}
 			template<bool is_fail_safe = false>
 			std::add_lvalue_reference_t<type> operator[](size_type index) const noexcept(is_fail_safe)
-			requires !std::is_void_v<type> {
+			requires(!std::is_void_v<type>) {
 				return (*this + index).operator*<is_fail_safe>();
 			}
 			template<typename U>
 			bool operator>(const iterator_base<U>& other) const noexcept 
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return (*this - other) > 0;
 			}
 			template<typename U>
 			bool operator<(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return (*this - other) < 0;
 			}
 			template<typename U>
 			bool operator>=(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return !(*this < other);
 			}
 			template<typename U>
 			bool operator<=(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return !(*this > other);
 			}
 	};
@@ -178,7 +176,7 @@ namespace dte_utils {
 			}
 			template<typename U>
 			size_type operator-(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				if constexpr (std::is_void_v<type>) {
 					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
 				}
@@ -188,27 +186,27 @@ namespace dte_utils {
 			}
 			template<bool is_fail_safe = false>
 			std::add_lvalue_reference_t<type> operator[](size_type index) const noexcept(is_fail_safe)
-			requires !std::is_void_v<type> {
+			requires(!std::is_void_v<type>) {
 				return (*this + index).operator*<is_fail_safe>();
 			}
 			template<typename U>
 			bool operator>(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return (*this - other) > 0;
 			}
 			template<typename U>
 			bool operator<(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return (*this - other) < 0;
 			}
 			template<typename U>
 			bool operator>=(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return !(*this < other);
 			}
 			template<typename U>
 			bool operator<=(const iterator_base<U>& other) const noexcept
-			requires std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>> {
+			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				return !(*this > other);
 			}
 	};

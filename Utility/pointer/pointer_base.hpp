@@ -15,13 +15,14 @@ namespace dte_utils {
 			pointer _instance;
 		public:
 			pointer_base(pointer instance = nullptr) noexcept : _instance(instance) {}
+			pointer_base(const pointer_base& other) noexcept : _instance(other._instance) {}
 			template<typename U>
 			pointer_base(const pointer_base<U>& other) noexcept 
-			requires std::is_convertible_v<typename pointer_base<U>::pointer, pointer> : _instance(other.operator->()) {}
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : _instance(other.operator->()) {}
 			
 			template<bool is_fail_safe = false>
 			std::add_lvalue_reference_t<type> operator*() const noexcept(is_fail_safe)
-			requires !(return_type_v<type> || std::is_void_v<type>) {
+			requires(!(return_type_v<type> || std::is_void_v<type>)) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
 						throw nullptr_access();
@@ -39,13 +40,13 @@ namespace dte_utils {
 
 			template<typename U>
 			pointer_base& operator=(U* ptr) noexcept 
-			requires std::is_convertible_v<U*, pointer> {
+			requires(std::is_convertible_v<U*, pointer>) {
 				_instance = ptr;
 				return *this;
 			}
 			template<typename U>
 			pointer_base& operator=(const pointer_base<U>& other) noexcept 
-			requires std::is_convertible_v<typename pointer_base<U>::pointer, pointer> {
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) {
 				_instance = other.operator->();
 				return *this;
 			}
@@ -70,9 +71,9 @@ namespace dte_utils {
 			}
 
 			template<bool is_fail_safe = false, typename ...Args>
-			requires return_type_v<type>
 			return_type_t<type> operator()(Args&&... args) const 
-			noexcept(return_type_noexcept<type> && is_fail_safe) {
+			noexcept(return_type_noexcept<type> && is_fail_safe)
+			requires(return_type_v<type>) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
 						throw nullptr_access();
@@ -81,9 +82,9 @@ namespace dte_utils {
 				return _instance(std::forward<Args>(args)...);
 			}
 			template<bool is_fail_safe = false, typename ...Args>
-			requires is_functor_v<type, Args...> //no need for void check - void never returns
 			is_functor_t<type, Args...> operator()(Args&&... args) const 
-			noexcept(is_functor_noexcept_v<type, Args...> && is_fail_safe) {
+			noexcept(is_functor_noexcept_v<type, Args...> && is_fail_safe) 
+			requires(is_functor_v<type, Args...>) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
 						throw nullptr_access();
@@ -92,4 +93,20 @@ namespace dte_utils {
 				return _instance->operator()(std::forward<Args>(args)...);
 			}
 	};
+	template<typename T>
+	inline T* remove_const_ptr(T* ptr) noexcept {
+		return ptr;
+	}
+	template<typename T>
+	inline T* remove_const_ptr(const T* ptr) noexcept {
+		return const_cast<T*>(ptr);
+	}
+	template<typename T>
+	inline pointer_base<T> remove_const_ptr_base(const pointer_base<T>& ptr) noexcept {
+		return ptr;
+	}
+	template<typename T>
+	inline pointer_base<T> remove_const_ptr_base(const pointer_base<const T>& ptr) noexcept {
+		return pointer_base<T>(remove_const_ptr(ptr.operator->()));
+	}
 }

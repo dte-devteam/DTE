@@ -6,10 +6,10 @@ namespace dte_utils {
 	template<typename T, size_t N>
 	requires (N > 0)
 	struct static_array {
-		using type = T;
-		using const_type = const type;
-		using iterator = f_iterator<type>;
-		using const_iterator = f_iterator<const_type>;
+		using type				= typename T;
+		using const_type		= typename const type;
+		using iterator			= typename f_iterator<type>;
+		using const_iterator	= typename f_iterator<const_type>;
 		alignas(type) char arr[sizeof(type) * N];
 		static_array() noexcept(std::is_nothrow_default_constructible_v<type>)
 		requires std::is_default_constructible_v<type> {
