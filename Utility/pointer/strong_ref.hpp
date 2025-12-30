@@ -17,8 +17,9 @@ namespace dte_utils {
 				this->_counter->add_strong();
 			}
 
-			template<bool is_fail_safe = false>
-			strong_ref(const weak_ref<T, RC>& other, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) : weak_ref<T, RC>(other) {
+			template<typename U, bool is_fail_safe = false>
+			strong_ref(const weak_ref<U, RC>& other, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) 
+			requires(std::is_convertible_v<typename weak_ref<U, RC>::pointer, pointer>) : weak_ref<T, RC>(other) {
 				if constexpr (!is_fail_safe) {
 					if (other.expired()) {
 						throw bad_weak_ptr();
@@ -26,6 +27,9 @@ namespace dte_utils {
 				}
 				this->_counter->add_strong();
 			}
+			template<typename U>
+			strong_ref(const pointer_base<U>& other)
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : strong_ref(other.operator->()) {}
 
 			~strong_ref() {
 				this->_strong_decrease();
@@ -84,6 +88,12 @@ namespace dte_utils {
 				weak_ref<T, RC>::operator=(other);
 				this->_counter->add_strong();
 				return *this;
+			}
+
+			template<typename U>
+			strong_ref& operator=(const pointer_base<U>& other)
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) {
+				return *this = other.operator->();
 			}
 	};
 	template<typename T>

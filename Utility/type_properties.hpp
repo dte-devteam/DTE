@@ -1,6 +1,11 @@
 #pragma once
 #include <type_traits>
 namespace dte_utils {
+	template<typename T, typename F>
+	inline constexpr bool is_static_castable_v = requires (F& from) {
+		static_cast<T>(from);
+	};
+
 	template<typename T, typename U = T>
 	inline constexpr bool has_equal_to_operator_v = requires (const T& t, const U& u) { t == u; };
 	template<typename T, typename U, bool has_not_equal_to = has_equal_to_operator_v<T, U>>

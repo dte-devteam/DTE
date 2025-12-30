@@ -25,6 +25,14 @@ namespace dte_utils {
 			weak_ref(const weak_ref& other) noexcept : pointer_base<T>(other._instance), _counter(other._counter) {
 				_counter->add_weak();
 			}
+			template<typename U>
+			weak_ref(const weak_ref<U, RC>& other) noexcept
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : pointer_base<T>(other), _counter(remove_const_ptr_base(other.get_counter())) {
+				_counter->add_weak();
+			}
+			template<typename U>
+			weak_ref(const pointer_base<U>& other)
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : weak_ref(other.operator->()){}
 
 			~weak_ref() {
 				_weak_decrease();
@@ -57,6 +65,12 @@ namespace dte_utils {
 				_counter = other._counter;
 				_counter->add_weak();
 				return *this;
+			}
+
+			template<typename U>
+			weak_ref& operator=(const pointer_base<U>& other) noexcept(std::is_nothrow_destructible_v<RC>) 
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) {
+				return *this = other.operator->();
 			}
 
 			//rvalue childs can convert to weak_ref&&

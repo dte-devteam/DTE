@@ -77,13 +77,12 @@ size_t nop(data_stack& ds, const semi_pointer::data& spd) {
 size_t thr(data_stack& ds, const semi_pointer::data& spd) {
 	throw exception(0, "HAHA");
 }
-
+constexpr size_t s = 10;
 struct SA {
-	const size_t s = 10;
 	SA() {
 		i = new int[s] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	}
-	~SA() {
+	virtual ~SA() {
 		delete i;
 	}
 	int* i;
@@ -93,9 +92,35 @@ struct SA {
 struct SAS : SA {
 
 };
+void g() {
+	strong_ref<SAS> ll = cnew<SAS>().operator->();
+	strong_ref<const SA> l = strong_ref<const SA>(ll);
+
+	f_iterator<int> kk;
+
+	strong_ref<const int> k = strong_ref<const int>(kk);
+	k = kk;
+
+	pointer_base<void> s;
+	s = kk;
+
+	pointer_base<int> a = static_cast_ptr_base<int>(s);
+
+
+
+	pointer_base<SAS> g;
+
+	pointer_base<SA> gg = pointer_base<SA>(g);
+
+	weak_ref<SAS> h;
+	weak_ref<SA> hh = weak_ref<SA>(h);
+	weak_ref<SA> hhh = weak_ref<SA>(g);
+}
 int main(int argc, const char* argv[]) {	
+	g();
 	//test_memory();
-	//test_pointer();
+	test_pointer();
+
 
 	unique_ref<const int>(aligned_tmalloc<int>(1));
 	strong_ref<const int>(aligned_tmalloc<int>(1));
@@ -145,6 +170,7 @@ int main(int argc, const char* argv[]) {
 	f_iterator<const volatile void> vit;
 	std::cout << (aaa == vit) << std::endl;
 
+	//weak_ref<const int> kk = weak_ref<const int>(www);
 
 
 	remove_const_ptr(llx.operator->());

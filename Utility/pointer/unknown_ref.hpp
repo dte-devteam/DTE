@@ -34,8 +34,9 @@ namespace dte_utils {
 				_unknown_increase();
 			}
 
-			template<bool is_fail_safe = false>
-			unknown_ref(const weak_ref<T, RC>& other, bool strength = false, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) : weak_ref<T, RC>(other), _strength(strength) {
+			template<typename U, bool is_fail_safe = false>
+			unknown_ref(const weak_ref<U, RC>& other, bool strength = false, template_forwarding<bool, is_fail_safe> = {}) noexcept(is_fail_safe) 
+			requires(std::is_convertible_v<typename weak_ref<U, RC>::pointer, pointer>) : weak_ref<T, RC>(other), _strength(strength) {
 				if constexpr (is_fail_safe) {
 					if (get_strength()) {
 						this->_counter->add_strong();
@@ -43,6 +44,13 @@ namespace dte_utils {
 				}
 				else {
 					_unknown_increase();
+				}
+			}
+			template<typename U>
+			unknown_ref(const pointer_base<U>& other, bool strength = false)
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : weak_ref<T, RC>(other), _strength(strength) {
+				if (get_strength()) {
+					this->_counter->add_strong();
 				}
 			}
 
@@ -100,6 +108,12 @@ namespace dte_utils {
 				weak_ref<T, RC>::operator=(other);
 				_unknown_increase();
 				return *this;
+			}
+
+			template<typename U>
+			unknown_ref& operator=(const pointer_base<U>& other)
+			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) {
+				return *this = other.operator->();
 			}
 	};
 	template<typename T>

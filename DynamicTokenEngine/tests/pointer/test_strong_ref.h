@@ -6,7 +6,7 @@ inline void test_strong_ref_constructor_0() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::cnew<A>().operator->());
+	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::cnew<A>());
 	delete sr;
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
@@ -16,7 +16,7 @@ inline void test_strong_ref_constructor_1() {
 	std::cout << "---" << __func__ << "---" << std::endl;
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::strong_ref<A>(dte_utils::cnew<A>().operator->()));
+	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::strong_ref<A>(dte_utils::cnew<A>()));
 	delete sr;
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
@@ -28,7 +28,7 @@ inline void test_strong_ref_constructor_2() {
 	reset_A();
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 	//code below MUST throw bad_weak_ptr
-	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::weak_ref<A>(dte_utils::cnew<A>().operator->()));
+	dte_utils::strong_ref<A>* sr = new dte_utils::strong_ref<A>(dte_utils::weak_ref<A>(dte_utils::cnew<A>()));
 	delete sr;
 	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 	std::cout << end - start << std::endl;
