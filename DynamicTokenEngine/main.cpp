@@ -29,7 +29,7 @@
 #include <chrono>
 #include <thread>
 
-
+#include <functional>
 
 using namespace dte_utils;
 using namespace dte_token;
@@ -88,6 +88,10 @@ struct SA {
 	int* i;
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
+
+	SA f() {
+		return SA();
+	}
 };
 struct SAS : SA {
 
@@ -116,22 +120,7 @@ void g() {
 	weak_ref<SA> hh = weak_ref<SA>(h);
 	weak_ref<SA> hhh = weak_ref<SA>(g);
 }
-int main(int argc, const char* argv[]) {	
-	g();
-	//test_memory();
-	test_pointer();
-
-
-	unique_ref<const int>(aligned_tmalloc<int>(1));
-	strong_ref<const int>(aligned_tmalloc<int>(1));
-
-	SA nigga;
-	for (int u : nigga) {
-		std::cout << u << " ";
-	}
-	std::cout << nigga.begin()[1];
-	nigga.begin() + 3;
-	std::cout << std::endl;
+void ref_compability() {
 	//checking compability
 	is_iteroid_v<f_iterator, void>;
 	is_iteroid_v<b_iterator, void>;
@@ -174,6 +163,21 @@ int main(int argc, const char* argv[]) {
 
 
 	remove_const_ptr(llx.operator->());
+}
+int main(int argc, const char* argv[]) {	
+	g();
+	ref_compability();
+	//test_memory();
+	//test_pointer();
+
+
+	SA nigga;
+	for (int u : nigga) {
+		std::cout << u << " ";
+	}
+	std::cout << nigga.begin()[1];
+	nigga.begin() + 3;
+	std::cout << std::endl;
 
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();

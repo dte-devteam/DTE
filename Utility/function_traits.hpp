@@ -45,4 +45,15 @@ namespace dte_utils {
 	};
 	template<typename T, typename ...Args>
 	inline constexpr bool is_functor_noexcept_v = is_functor_noexcept<T, is_functor_v<T, Args...>>::template value<Args...>;
+
+	template<typename>
+	struct field_function : std::false_type {};
+	template<typename T, typename R, typename... Args>
+	struct field_function<R(T::*)(Args...)> : std::true_type {
+		using type = R;
+	};
+	template<typename T>
+	using field_function_t = typename field_function<T>::type;
+	template<typename T>
+	inline constexpr bool field_function_v = field_function<T>::value;
 }

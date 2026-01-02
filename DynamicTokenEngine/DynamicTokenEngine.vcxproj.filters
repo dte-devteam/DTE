@@ -60,6 +60,9 @@
     <ClInclude Include="core\functions\algebra.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="experiments\collectable.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DynamicTokenEngine.rc">
