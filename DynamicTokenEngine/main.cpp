@@ -85,13 +85,18 @@ struct SA {
 	virtual ~SA() {
 		delete i;
 	}
+	float fl = 0;
 	int* i;
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
-
-	SA f() {
-		return SA();
+	int f() const noexcept {
+		std::cout << "UUU" << fl << std::endl;
+		return 0;
 	}
+	void ff(int i) {
+		std::cout << "OOO" << i << std::endl;
+	}
+	const int* ptr = nullptr;
 };
 struct SAS : SA {
 
@@ -138,6 +143,7 @@ void ref_compability() {
 	q = aaa;
 
 	aaa - aaa;
+
 	//aaa is nullptr (by constructor), so... we get nullptr_access error
 	//aaa.operator*();
 	pointer_base<const int> llx;
@@ -164,7 +170,7 @@ void ref_compability() {
 
 	remove_const_ptr(llx.operator->());
 }
-int main(int argc, const char* argv[]) {	
+int main(int argc, const char* argv[]) {
 	g();
 	ref_compability();
 	//test_memory();
@@ -178,6 +184,37 @@ int main(int argc, const char* argv[]) {
 	std::cout << nigga.begin()[1];
 	nigga.begin() + 3;
 	std::cout << std::endl;
+
+	const SA GH;
+
+	//pointer_base<int(SA::**)()>::pointer;
+	//pointer_base<int(SA::*)()>::pointer;
+	//pointer_base<int(SA::*)>::pointer;
+	//pointer_base<int>::pointer;
+
+	pointer_base<const int*(SA::*)> rq(&SA::ptr);
+	pointer_base<void(SA::*)(int)> rwq(&SA::ff);
+	pointer_base<float(SA::*)> qqh(&SA::fl);
+
+	pointer_base<int(SA::*)() const noexcept> qh(&SA::f);
+	if (qh) {
+		qh.operator()(nigga);
+	}
+	qqh.operator()(nigga) = 10;
+	if (qh) {
+		qh(nigga);
+	}
+
+
+	rwq.operator()(nigga, 100);
+
+
+
+	//qqh.operator()(GH);
+	//rq.operator()(GH);
+	//rwq.operator()(nigga);
+	//qh.operator()(GH);
+
 
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();

@@ -28,4 +28,54 @@ namespace dte_utils {
 	)> {};
 	template<typename T, typename U = T>
 	inline constexpr bool is_nothrow_not_equal_to_v = is_nothrow_not_equal_to<T, U>::value;
+
+	template<typename>
+	struct is_field : std::false_type {
+		using field_type = int;	//we use non void type, because we can use references and function arguments
+		using class_type = int;	//we use non void type, because we can use references and function arguments
+	};
+	template<typename C, typename T>
+	struct is_field<T(C::*)> : std::true_type {
+		using field_type = T;
+		using class_type = C;
+	};
+	template<typename T>
+	inline constexpr bool is_field_v = is_field<T>::value;
+	template<typename T>
+	using field_t = typename is_field<T>::field_type;
+	template<typename T>
+	using field_c = typename is_field<T>::class_type;
+
+	template<typename T>
+	struct drop_pointer {
+		using type = T;
+		static constexpr size_t value = 0;
+	};
+	template<typename T>
+	using drop_pointer_t = typename drop_pointer<T>::type;
+	template<typename T>
+	inline constexpr size_t drop_pointer_v = drop_pointer<T>::value;
+	template<typename T>
+	struct drop_pointer<T*> {
+		using type = drop_pointer_t<T>;
+		static constexpr size_t value = 1 + drop_pointer_v<T>;
+	};
+	template<typename T>
+	struct drop_pointer<T* const> {
+		using type = drop_pointer_t<T>;
+		static constexpr size_t value = 1 + drop_pointer_v<T>;
+	};
+	template<typename T>
+	struct drop_pointer<T* volatile> {
+		using type = drop_pointer_t<T>;
+		static constexpr size_t value = 1 + drop_pointer_v<T>;
+	};
+	template<typename T>
+	struct drop_pointer<T* const volatile> {
+		using type = drop_pointer_t<T>;
+		static constexpr size_t value = 1 + drop_pointer_v<T>;
+	};
+
+	template<typename ...Args>
+	struct args_list {};
 }

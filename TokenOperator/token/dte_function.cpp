@@ -35,27 +35,27 @@ _is_dynamic(true), _is_weak(false), _jumps(std::move(jumps)), _semi_ptr(sp), _fu
 f_step::step(const step& other) : _is_dynamic(other.get_is_dynamic()), _is_weak(other.get_is_weak()), _semi_ptr(other.get_semi_ptr()), _jumps(other.get_jumps()) {
 	if (get_is_dynamic()) {
 		if (get_is_weak()) {
-			place_at(pointer_base(&_func_unit.weak_dte_func), other._func_unit.weak_dte_func);
+			place_at(pointer_base<atomic_weak_ref<dte_function>>(&_func_unit.weak_dte_func), other._func_unit.weak_dte_func);
 		}
 		else {
-			place_at(pointer_base(&_func_unit.strong_dte_func), other._func_unit.strong_dte_func);
+			place_at(pointer_base<atomic_strong_ref<dte_function>>(&_func_unit.strong_dte_func), other._func_unit.strong_dte_func);
 		}
 	}
 	else {
-		place_at(pointer_base(&_func_unit.c_func), other._func_unit.c_func);
+		place_at(pointer_base<atomic_weak_ref<const c_function>>(&_func_unit.c_func), other._func_unit.c_func);
 	}
 }
 f_step::step(const step&& other) noexcept : _is_dynamic(other.get_is_dynamic()), _is_weak(other.get_is_weak()), _semi_ptr(other.get_semi_ptr()), _jumps(std::move(other.get_jumps())) {
 	if (get_is_dynamic()) {
 		if (get_is_weak()) {
-			place_at(pointer_base(&_func_unit.weak_dte_func), other._func_unit.weak_dte_func);
+			place_at(pointer_base<atomic_weak_ref<dte_function>>(&_func_unit.weak_dte_func), other._func_unit.weak_dte_func);
 		}
 		else {
-			place_at(pointer_base(&_func_unit.strong_dte_func), other._func_unit.strong_dte_func);
+			place_at(pointer_base<atomic_strong_ref<dte_function>>(&_func_unit.strong_dte_func), other._func_unit.strong_dte_func);
 		}
 	}
 	else {
-		place_at(pointer_base(&_func_unit.c_func), other._func_unit.c_func);
+		place_at(pointer_base<atomic_weak_ref<const c_function>>(&_func_unit.c_func), other._func_unit.c_func);
 	}
 }
 f_step::~step() {
