@@ -27,13 +27,14 @@ namespace dte_utils {
 		{ ct >= ct } noexcept -> std::same_as<bool>;
 		{ ct <= ct } noexcept -> std::same_as<bool>;
 	};
-
 	template<typename T>
-	struct iterator_base : pointer_base<T> {
+	using iterable_pointer = std::conditional_t<is_field_v<drop_pointer_t<T>>, T*, T>;
+	template<typename T>
+	struct iterator_base : pointer_base<iterable_pointer<T>> {
 		using size_type	= typename ptrdiff_t;
-		using type		= typename pointer_base<T>::type;
-		using pointer	= typename pointer_base<T>::pointer;
-		using pointer_base<T>::pointer_base;
+		using type		= typename pointer_base<iterable_pointer<T>>::type;
+		using pointer	= typename pointer_base<iterable_pointer<T>>::pointer;
+		using pointer_base<iterable_pointer<T>>::pointer_base;
 		protected:
 			void _inc(size_type add = 1) noexcept {
 				if constexpr (std::is_void_v<type>) {

@@ -96,6 +96,9 @@ struct SA {
 	void ff(int i) {
 		std::cout << "OOO" << i << std::endl;
 	}
+	void fff(float i) const {
+		std::cout << "WWW" << i << std::endl;
+	}
 	const int* ptr = nullptr;
 };
 struct SAS : SA {
@@ -192,28 +195,43 @@ int main(int argc, const char* argv[]) {
 	//pointer_base<int(SA::*)>::pointer;
 	//pointer_base<int>::pointer;
 
+	float(SA::* fi) = &SA::fl;
+
+	f_iterator<float(SA::*)> fii(&fi);
+
+	pointer_base<void(SA::*)(float) const> rwqo(&SA::fff);
+
+	void(SA::* abc)(float) const = &SA::fff;
+	pointer_base<void(SA::**)(float) const> gr(&abc);
+	decltype(*gr) a = *gr;
+	a = &SA::fff;
+	a = rwqo.operator pointer_base<void(SA::*)(float) const>::pointer();
+
+	rwqo(nigga, 0.F);
+
 	pointer_base<const int*(SA::*)> rq(&SA::ptr);
 	pointer_base<void(SA::*)(int)> rwq(&SA::ff);
 	pointer_base<float(SA::*)> qqh(&SA::fl);
 
 	pointer_base<int(SA::*)() const noexcept> qh(&SA::f);
 	if (qh) {
-		qh.operator()(nigga);
+		qh(nigga);
 	}
-	qqh.operator()(nigga) = 10;
+	qqh(nigga) = 10;
 	if (qh) {
 		qh(nigga);
 	}
+	rwq(nigga, 100);
 
+	qqh(GH);
+	rq(GH);
 
-	rwq.operator()(nigga, 100);
+	rwq(nigga, 0);
 
+	rwq(nigga, 0);
 
+	rwqo(GH, 0.05F);
 
-	//qqh.operator()(GH);
-	//rq.operator()(GH);
-	//rwq.operator()(nigga);
-	//qh.operator()(GH);
 
 
 	std::chrono::steady_clock::time_point t1, t2;
@@ -224,7 +242,6 @@ int main(int argc, const char* argv[]) {
 	for (const c_function& cf : fff) {
 		ggg.emplace_back(&cf);
 	}
-	std::vector<int> a;
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
 	).operator->();

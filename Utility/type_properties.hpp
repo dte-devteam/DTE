@@ -76,6 +76,17 @@ namespace dte_utils {
 		static constexpr size_t value = 1 + drop_pointer_v<T>;
 	};
 
+	template<typename T, size_t N>
+	struct set_pointer {
+		using type = typename set_pointer<T*, N - 1>::type;
+	};
+	template<typename T>
+	struct set_pointer<T, 0> {
+		using type = T;
+	};
+	template<typename T, size_t N>
+	using set_pointer_t = set_pointer<T, N>::type;
+
 	template<typename ...Args>
 	struct args_list {};
 }

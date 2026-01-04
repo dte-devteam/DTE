@@ -16,11 +16,6 @@ namespace dte_utils {
 		using type = typename R;
 		static constexpr bool is_noexcept = true;
 	};
-	template<typename R, typename ...Args>
-	struct return_type<R(Args...) const noexcept> : std::true_type {
-		using type = typename R;
-		static constexpr bool is_noexcept = true;
-	};
 	template<typename T>
 	using return_type_t = typename return_type<T>::type;
 	template<typename T>

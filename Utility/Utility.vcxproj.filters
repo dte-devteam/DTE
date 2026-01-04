@@ -113,6 +113,9 @@
     <ClInclude Include="pointer\iterator.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="pointer\raw_pointer.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="pointer\documentation-ru.md" />

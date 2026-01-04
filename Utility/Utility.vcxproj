@@ -50,6 +50,7 @@
     <ClInclude Include="memory\static_array.hpp" />
     <ClInclude Include="pointer\iterator.hpp" />
     <ClInclude Include="pointer\pointer_base.hpp" />
+    <ClInclude Include="pointer\raw_pointer.hpp" />
     <ClInclude Include="pointer\ref.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />
     <ClInclude Include="template_forwarding.hpp" />
