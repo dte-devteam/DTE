@@ -47,8 +47,8 @@ namespace dte_utils {
 				}
 			}
 			template<typename U>
-			unknown_ref(const pointer_base<U>& other, bool strength = false)
-			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : weak_ref<T, RC>(other), _strength(strength) {
+			unknown_ref(const raw_pointer<U>& instance, bool strength = false)
+			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : weak_ref<T, RC>(instance), _strength(strength) {
 				if (get_strength()) {
 					this->_counter->add_strong();
 				}

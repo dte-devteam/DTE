@@ -66,58 +66,56 @@ namespace dte_utils {
 
 	//at = invalid/nulptr -> UB
 	template<typename T, typename ...Args>
-	inline void place_at(const pointer_base<T>& at, Args&&... args)
+	inline void place_at(const raw_pointer<T>& at, Args&&... args)
 	noexcept(std::is_nothrow_constructible_v<T, Args...>) 
 	requires(std::is_constructible_v<T, Args...> && !std::is_const_v<T>) {
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
-			*at = T(std::forward<Args>(args)...);
+			*(at.operator raw_pointer<T>::pointer()) = T(std::forward<Args>(args)...);
 		}
 		else {
-			new (at.operator->()) T(std::forward<Args>(args)...);
+			new (at.operator raw_pointer<T>::pointer()) T(std::forward<Args>(args)...);
 		}
 	}
 
-	//at = invalid/nulptr -> UB
-	//see defenition limitations: place_at
 	//can throw - xmalloc can throw bad_malloc
 	template<typename T, typename ...Args>
-	inline pointer_base<T> cnew(Args&&... args)
+	inline raw_pointer<T> cnew(Args&&... args)
 	requires(std::is_constructible_v<T, Args...>) {
-		pointer_base<T> ptr(aligned_tmalloc<T>(1));
+		raw_pointer<T> ptr(aligned_tmalloc<T>(1));
 		place_at(ptr, std::forward<Args>(args)...);
 		return ptr;
 	}
 
 	//at = invalid/nulptr -> UB
 	template<typename T>
-	inline void destuct_at(const pointer_base<T>& at)
+	inline void destuct_at(const raw_pointer<T>& at)
 	noexcept(std::is_nothrow_destructible_v<T>)
 	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		if constexpr (std::is_array_v<T>) {
-			for (std::remove_pointer_t<std::decay_t<T>>& elem : *at) {
+			for (std::remove_pointer_t<std::decay_t<T>>& elem : *(at.operator raw_pointer<T>::pointer())) {
 				destuct_at(std::addressof(elem));
 			}
 		}
 		else {
-			at->~T();
+			(at.operator raw_pointer<T>::pointer())->~T();
 		}
 	}
 
 	//at = invalid -> UB
-	//see defenition limitations: destuct_at (except for nulptr)
+	//see defenition limitations: destuct_at (except for nuläptr)
 	template<typename T>
-	inline void cdelete(const pointer_base<T>& at)
+	inline void cdelete(const raw_pointer<T>& at)
 	noexcept(std::is_nothrow_destructible_v<T>)
 	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
-		if (at.operator->()) {
+		if (at) {
 			//don`t call destructor of trivial type
 			if constexpr (!std::is_trivially_destructible_v<T>) {
 				destuct_at(at);
 			}
 			//function can`t be freed
 			if constexpr (!return_type_v<T>) {
-				aligned_free(at.operator->());
+				aligned_free(at.operator raw_pointer<T>::pointer());
 			}
 		}
 	}
@@ -125,7 +123,7 @@ namespace dte_utils {
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename T, template<typename> typename It, typename ...Args>
-	inline void construct_range(It<T> begin, const pointer_base<T>& end, Args&&... args)
+	inline void construct_range(It<T> begin, const raw_pointer<T>& end, Args&&... args)
 	noexcept(std::is_nothrow_constructible_v<T, Args...>) 
 	requires(std::is_constructible_v<T, Args...> && is_iteroid_v<It, T> && !std::is_const_v<T>) {
 		while (begin != end) {
@@ -136,7 +134,7 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
-	inline void copy_range(ItT<T> begin, const pointer_base<T>& end, ItU<U> dest)
+	inline void copy_range(ItT<T> begin, const raw_pointer<T>& end, ItU<U> dest)
 	noexcept(std::is_constructible_v<U, T>)
 	requires(std::is_constructible_v<U, T> && is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U>) {
 		while (begin != end) {
@@ -148,7 +146,7 @@ namespace dte_utils {
 	//begin/end/dest = invalid/nullptr -> UB
 	//see defenition limitations: place_at (all restrictions)
 	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
-	inline void move_range(ItT<T> begin, const pointer_base<T>& end, ItU<U> dest)
+	inline void move_range(ItT<T> begin, const raw_pointer<T>& end, ItU<U> dest)
 	noexcept(std::is_nothrow_constructible_v<U, T&&>) 
 	requires(std::is_constructible_v<U, T&&> && is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !(std::is_const_v<T> || std::is_const_v<U>)) {
 		while (begin != end) {
@@ -160,7 +158,7 @@ namespace dte_utils {
 	//begin/end = invalid/nullptr -> UB
 	//see defenition limitations: destuct_at (all restrictions)
 	template<typename T, template<typename> typename It>
-	inline void destruct_range(It<T> begin, const pointer_base<T>& end)
+	inline void destruct_range(It<T> begin, const raw_pointer<T>& end)
 	noexcept(std::is_nothrow_destructible_v<T>)
 	requires(std::is_destructible_v<T> && is_iteroid_v<It, T> && !std::is_const_v<T>) {
 		while (begin != end) {
@@ -216,7 +214,7 @@ namespace dte_utils {
 	//dest/src = invalid/nullptr -> UB
 	//count = invalid -> UB
 	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
-	inline void array_to_array(const ItT<const T>& begin, const pointer_base<const T>& end, const ItU<U>& dest)
+	inline void array_to_array(const ItT<const T>& begin, const raw_pointer<const T>& end, const ItU<U>& dest)
 	noexcept(std::is_nothrow_constructible_v<U, const T&>)
 	requires(is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U> && std::is_constructible_v<U, T> ) {
 		copy_range(begin, end, dest);
@@ -225,7 +223,7 @@ namespace dte_utils {
 	//dest/src = invalid/nullptr -> UB
 	//count = invalid -> UB
 	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
-	inline void array_to_array(const ItT<T>& begin, const pointer_base<T>& end, const ItU<U>& dest)
+	inline void array_to_array(const ItT<T>& begin, const raw_pointer<T>& end, const ItU<U>& dest)
 	noexcept(std::is_constructible_v<U, T&&> ? std::is_nothrow_constructible_v<U, T&&> : std::is_nothrow_constructible_v<U, const T&>)
 	requires(is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U> && (std::is_constructible_v<U, T> || std::is_constructible_v<U, T&&>)) {
 		if constexpr (std::is_constructible_v<U, T&&>) {

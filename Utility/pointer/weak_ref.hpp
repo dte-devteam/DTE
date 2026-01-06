@@ -31,8 +31,8 @@ namespace dte_utils {
 				_counter->add_weak();
 			}
 			template<typename U>
-			weak_ref(const pointer_base<U>& other)
-			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : weak_ref(other.operator->()){}
+			weak_ref(const raw_pointer<U>& instance)
+			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : weak_ref(instance.operator raw_pointer<U>::pointer()){}
 
 			~weak_ref() {
 				_weak_decrease();

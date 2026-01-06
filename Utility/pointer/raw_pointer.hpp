@@ -15,7 +15,8 @@ namespace dte_utils {
 	}
 	template<typename T>
 	struct raw_pointer {
-		using pointer	= typename std::conditional_t<is_field_v<drop_pointer_t<T>>, T, T*>;
+		using raw_type	= typename drop_pointer_t<T>;
+		using pointer	= typename std::conditional_t<is_field_v<raw_type>, T, T*>;
 		using type		= typename std::remove_pointer_t<pointer>;
 		protected:
 			pointer _instance;
@@ -63,6 +64,15 @@ namespace dte_utils {
 			template<typename U>
 			bool operator!=(const raw_pointer<U>& other) const noexcept {
 				return !(*this == other);
+			}
+			template<bool is_fail_safe = false>
+			std::conditional_t<std::is_same_v<raw_type, type>, std::add_lvalue_reference_t<type>, raw_pointer<std::conditional_t<is_field_v<raw_type>, type, std::remove_pointer_t<type>>>> get_value() const noexcept(is_fail_safe) {
+				if constexpr (!is_fail_safe) {
+					if (!_instance) {
+						throw nullptr_access();
+					}
+				}
+				return *_instance;
 			}
 	};
 }

@@ -105,7 +105,7 @@ struct SAS : SA {
 
 };
 void g() {
-	strong_ref<SAS> ll = cnew<SAS>().operator->();
+	strong_ref<SAS> ll = cnew<SAS>();
 	strong_ref<const SA> l = strong_ref<const SA>(ll);
 
 	f_iterator<int> kk;
@@ -190,14 +190,20 @@ int main(int argc, const char* argv[]) {
 
 	const SA GH;
 
-	//pointer_base<int(SA::**)()>::pointer;
-	//pointer_base<int(SA::*)()>::pointer;
-	//pointer_base<int(SA::*)>::pointer;
-	//pointer_base<int>::pointer;
+	//compiles but causes nullptr error
+	/*
+	int* iptr = nullptr;
+	pointer_base<int*> pb(&iptr);
+	pointer_base<double(SA::***)> pbp;
+	pb.get_value().get_value();
+	pbp.get_value().get_value();
+	*/
 
 	float(SA::* fi) = &SA::fl;
 
 	f_iterator<float(SA::*)> fii(&fi);
+
+	nigga.**fii;
 
 	pointer_base<void(SA::*)(float) const> rwqo(&SA::fff);
 
@@ -244,7 +250,7 @@ int main(int argc, const char* argv[]) {
 	}
 	ifstr_args* ifstr_args_i = cnew<ifstr_args>(
 		"C:\\Users\\User\\Desktop\\DynamicTokenEngine\\DTE\\bin\\README.txt"
-	).operator->();
+	).operator raw_pointer<ifstr_args>::pointer();
 	std::cout << "-----------------" << std::endl;
 	stream* strf = new stream{ 0, {10000}, {} };
 	dte_function dteff({ "FILE", 0 },
@@ -281,7 +287,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator->());
+	));
 	atomic_strong_ref<dte_function> r1(cnew<dte_function>(
 		dte_function::metadata{ "FILE", 0 },
 		dynamic_array<dte_function::step>{
@@ -291,7 +297,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator->());
+	));
 	dte_function add_and_log({ "FILE", 0 },
 		{
 			{r0, {1}, {size_t(0)}},
@@ -312,7 +318,7 @@ int main(int argc, const char* argv[]) {
 			semi_pointer(size_t(0))
 		}
 	}
-	).operator->());
+	));
 	atomic_strong_ref<dte_function> thr1(cnew<dte_function>(
 		dte_function::metadata{ "NOP&THR", 0 },
 		dynamic_array<dte_function::step>{
@@ -327,7 +333,7 @@ int main(int argc, const char* argv[]) {
 				semi_pointer(size_t(0))
 		}
 	}
-	).operator->());
+	));
 	dte_function thr_catch({ "CALL", 0 },
 		{
 			{thr0, {1}, {size_t(0)}},
@@ -355,8 +361,8 @@ int main(int argc, const char* argv[]) {
 
 	delete strf;
 
-	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>().operator->());
-	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>().operator->());
+	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>());
+	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>());
 	dte_t0->add_parent(dte_t1);
 
 	std::cout << dte_t0->is_basic_type() << std::endl;

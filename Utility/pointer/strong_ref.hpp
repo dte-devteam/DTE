@@ -28,8 +28,8 @@ namespace dte_utils {
 				this->_counter->add_strong();
 			}
 			template<typename U>
-			strong_ref(const pointer_base<U>& other)
-			requires(std::is_convertible_v<typename pointer_base<U>::pointer, pointer>) : strong_ref(other.operator->()) {}
+			strong_ref(const raw_pointer<U>& other)
+			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : strong_ref(other.operator raw_pointer<U>::pointer()) {}
 
 			~strong_ref() {
 				this->_strong_decrease();
