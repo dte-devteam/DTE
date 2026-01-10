@@ -16,17 +16,17 @@ namespace dte_utils {
 		protected:
 			//TODO: second array_to_array can be optimised by b_iterator
 			alloc_inst _provide_spaced_buffer(const iterator& gap_pointer, size_type gap_size) const {
-				alloc_inst new_allocator(this->get_allocated() + gap_size);
+				alloc_inst new_allocator(get_allocated() + gap_size);
 				//TODO: size can be negative
-				size_type first_section_size = gap_pointer - this->begin();
+				size_type first_section_size = gap_pointer - begin();
 				array_to_array(
-					this->begin(),
-					this->begin() + first_section_size,
+					begin(),
+					begin() + first_section_size,
 					new_allocator.operator iterator()
 				);
 				array_to_array(
-					this->begin() + first_section_size,
-					this->end(),
+					begin() + first_section_size,
+					end(),
 					new_allocator.operator iterator() + first_section_size + gap_size
 				);
 				return new_allocator;
@@ -35,85 +35,85 @@ namespace dte_utils {
 			template<typename U, template<typename> typename It>
 			void insert(const It<type>& pos, const U& value) 
 			requires is_iteroid_v<It, type> {
-				if (pos < this->begin() || pos > this->end()) {
+				if (pos < begin() || pos > end()) {
 					throw out_of_range();
 				}
-				if (this->get_used() == this->get_allocated()) {
-					this->_allocated = this->_extend_by_el();
+				if (get_used() == get_allocated()) {
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(new_allocator.operator iterator() + (pos - this->begin()), value);
+					place_at(new_allocator.operator iterator() + (pos - begin()), value);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(this->begin(), this->end());
+						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
-					iterator over_pos = this->end();
+					iterator over_pos = end();
 					place_at(over_pos, value);
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
 					}
 				}
-				++this->_used;
+				++_used;
 			}
 			template<typename U, template<typename> typename It>
 			void insert(const It<type>& pos, U&& value) 
 			requires is_iteroid_v<It, type> {
-				if (pos < this->begin() || pos > this->end()) {
+				if (pos < begin() || pos > end()) {
 					throw out_of_range();
 				}
-				if (this->get_used() == this->get_allocated()) {
-					this->_allocated = this->_extend_by_el();
+				if (get_used() == get_allocated()) {
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(new_allocator.operator iterator() + (pos - this->begin()), std::move(value));
+					place_at(new_allocator.operator iterator() + (pos - begin()), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(this->begin(), this->end());
+						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
-					iterator over_pos = this->end();
+					iterator over_pos = end();
 					place_at(over_pos, std::move(value));
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
 					}
 				}
-				++this->_used;
+				++_used;
 			}
 			
 			//TODO: check, if other iterators (pos) can be used
 			template<typename U>
 			void insert(iterator pos, const U& value, size_type num) {
-				if (pos < this->begin() || pos > this->end()) {
+				if (pos < begin() || pos > end()) {
 					throw out_of_range();
 				}
-				if (this->get_used() + num > this->get_allocated()) {
-					this->_allocated = this->get_used() + num;
-					alloc_inst new_allocator = this->_provide_spaced_buffer(pos, num);
-					iterator target = new_allocator.operator iterator() + (pos - this->begin());
+				if (get_used() + num > get_allocated()) {
+					_allocated = get_used() + num;
+					alloc_inst new_allocator = _provide_spaced_buffer(pos, num);
+					iterator target = new_allocator.operator iterator() + (pos - begin());
 					while (num) {
 						place_at(target, value);
 						--num;
 						++target;
 					}
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(this->begin(), this->end());
+						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
-					this->_used = this->get_allocated();
+					_allocator = std::move(new_allocator);
+					_used = get_allocated();
 				}
 				else {
-					iterator over_pos = this->end() + num;
-					while (this->end() != over_pos) {
+					iterator over_pos = end() + num;
+					while (end() != over_pos) {
 						place_at(--over_pos, value);
 					}
 					while (num) {
-						over_pos = this->end();
+						over_pos = end();
 						while (over_pos != pos) {
 							std::swap(*--over_pos, *over_pos);
 						}
 						++pos;
-						++this->_used;
+						++_used;
 						--num;
 					}
 				}
@@ -122,38 +122,38 @@ namespace dte_utils {
 			template<typename U, template<typename> typename ItT, template<typename> typename ItU>
 			void insert(iterator pos, const ItT<U>& first, ItU<U> last) 
 			requires is_iteroid_v<ItT, U> && is_iteroid_v<ItU, U> {
-				if (pos < this->begin() || pos > this->end()) {
+				if (pos < begin() || pos > end()) {
 					throw out_of_range();
 				}
 				//TODO: check if num can be negative
 				size_type num = last - first;
-				if (this->get_used() + num > this->get_allocated()) {
-					this->_allocated = this->get_used() + num;
+				if (get_used() + num > get_allocated()) {
+					_allocated = get_used() + num;
 					alloc_inst new_allocator = _provide_spaced_buffer(pos, num);
-					iterator target = new_allocator.operator iterator() + (pos - this->begin());
+					iterator target = new_allocator.operator iterator() + (pos - begin());
 					array_to_array(
 						first,
 						last,
 						target
 					);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(this->begin(), this->end());
+						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
-					this->_used = this->get_allocated();
+					_allocator = std::move(new_allocator);
+					_used = get_allocated();
 				}
 				else {
-					iterator over_pos = this->end() + num;
-					while (this->end() != over_pos) {
+					iterator over_pos = end() + num;
+					while (end() != over_pos) {
 						place_at(--over_pos, *--last);
 					}
 					while (num) {
-						over_pos = this->end();
+						over_pos = end();
 						while (over_pos != pos) {
 							std::swap(*--over_pos, *over_pos);
 						}
 						++pos;
-						++this->_used;
+						++_used;
 						--num;
 					}
 				}
@@ -166,26 +166,26 @@ namespace dte_utils {
 			//TODO: check, if other iterators (pos) can be used
 			template<typename ...Args>
 			void emplace(const iterator& pos, Args&&... args) {
-				if (pos < this->begin() || pos > this->end()) {
+				if (pos < begin() || pos > end()) {
 					throw out_of_range();
 				}
-				if (this->get_used() == this->get_allocated()) {
-					this->_allocated = this->_extend_by_el();
+				if (get_used() == get_allocated()) {
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_spaced_buffer(pos, 1);
-					place_at(new_allocator.operator iterator() + (pos - this->begin()), std::forward<Args>(args)...);
+					place_at(new_allocator.operator iterator() + (pos - begin()), std::forward<Args>(args)...);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(this->begin(), this->end());
+						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
-					iterator over_pos = this->end();
+					iterator over_pos = end();
 					place_at(over_pos, std::forward<Args>(args)...);
 					while (over_pos != pos) {
 						std::swap(*--over_pos, *over_pos);
 					}
 				}
-				++this->_used;
+				++_used;
 			}
 
 			//TODO: check, if other iterators (pos) can be used
@@ -197,16 +197,16 @@ namespace dte_utils {
 				is_fail_safe
 			) {
 				if constexpr (!is_fail_safe) {
-					if (pos < this->begin() || pos > this->end()) {
+					if (pos < begin() || pos > end()) {
 						throw out_of_range();
 					}
 				}
-				--this->_used;
-				while (pos != this->end()) {
+				--_used;
+				while (pos != end()) {
 					std::swap(*++pos, *pos);
 				}
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destuct_at(this->end());
+					destuct_at(end());
 				}
 			}
 			//TODO: check, if other iterators (pos) can be used
@@ -221,20 +221,20 @@ namespace dte_utils {
 					if (first > last) {
 						throw invalid_range();
 					}
-					if (first < this->begin() || last > this->end()) {
+					if (first < begin() || last > end()) {
 						throw out_of_range();
 					}
 				}
 				size_type size = last - first;
-				while (last != this->end()) {
+				while (last != end()) {
 					std::swap(*first, *last);
 					++first;
 					++last;
 				}
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destruct_range(this->end() - size, this->end());
+					destruct_range(end() - size, end());
 				}
-				this->_used -= size;
+				_used -= size;
 			}
 
 			//unordered removal (faster, but order breaks)
@@ -246,14 +246,14 @@ namespace dte_utils {
 				is_fail_safe
 			) {
 				if constexpr (!is_fail_safe) {
-					if (pos < this->begin() || pos > this->end()) {
+					if (pos < begin() || pos > end()) {
 						throw out_of_range();
 					}
 				}
-				--this->_used;
-				std::swap(*pos, *(this->end()));
+				--_used;
+				std::swap(*pos, *(end()));
 				if constexpr (!std::is_trivially_destructible_v<type>) {
-					destuct_at(this->end());
+					destuct_at(end());
 				}
 			}
 			//TODO: check, if other iterators (pos) can be used
@@ -269,19 +269,19 @@ namespace dte_utils {
 					if (first > last) {
 						throw invalid_range();
 					}
-					if (first < this->begin() || last > this->end()) {
+					if (first < begin() || last > end()) {
 						throw out_of_range();
 					}
 				}
-				if (last == this->end()) {
+				if (last == end()) {
 					if constexpr (!std::is_trivially_destructible_v<type>) {
-						destruct_range(first, this->end());
+						destruct_range(first, end());
 					}
-					this->_used -= last - first;
+					_used -= last - first;
 				}
 				else {
-					iterator over_pos = this->end();
-					this->_used -= last - first;
+					iterator over_pos = end();
+					_used -= last - first;
 					while (last != first) {
 						std::swap(*--last, *--over_pos);
 						if constexpr (!std::is_trivially_destructible_v<type>) {

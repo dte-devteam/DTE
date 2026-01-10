@@ -30,7 +30,7 @@
     <ClCompile Include="exceptions\memory_exception.cpp" />
     <ClCompile Include="exceptions\pointer_exception.cpp" />
     <ClCompile Include="memory\mem_handler.cpp" />
-    <ClCompile Include="pointer\ref.cpp" />
+    <ClCompile Include="pointer\ref_counter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exceptions\error_codes.hpp" />
@@ -48,10 +48,12 @@
     <ClInclude Include="memory\memory.hpp" />
     <ClInclude Include="memory\mem_handler.hpp" />
     <ClInclude Include="memory\static_array.hpp" />
+    <ClInclude Include="pointer\complex_pointer.hpp" />
     <ClInclude Include="pointer\iterator.hpp" />
     <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\raw_pointer.hpp" />
-    <ClInclude Include="pointer\ref.hpp" />
+    <ClInclude Include="pointer\ref_base.hpp" />
+    <ClInclude Include="pointer\ref_counter.hpp" />
     <ClInclude Include="pointer\strong_ref.hpp" />
     <ClInclude Include="template_forwarding.hpp" />
     <ClInclude Include="pointer\unigue_ref.hpp" />

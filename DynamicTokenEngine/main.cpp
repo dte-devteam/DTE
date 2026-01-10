@@ -24,6 +24,8 @@
 
 #include "pointer/iterator.hpp"
 
+#include "pointer/complex_pointer.hpp"
+
 #include <iostream>
 
 #include <chrono>
@@ -199,6 +201,19 @@ int main(int argc, const char* argv[]) {
 	pbp.get_value().get_value();
 	*/
 
+	SAS GI;
+	float(SA:: * sd) = &SAS::fl;
+
+	complex_pointer<float(SAS::*), true> yyy(&SAS::fl, &GI);
+	complex_pointer<float(SA::*), true> yyy2(yyy);
+	yyy.get_owner();
+	yyy2();
+	complex_pointer<int> zzz(new int);
+	*zzz = 100;
+	delete zzz.operator->();
+
+	complex_pointer<float(SA::*)>().set_owner(new SAS);
+
 	float(SA::* fi) = &SA::fl;
 
 	f_iterator<float(SA::*)> fii(&fi);
@@ -363,10 +378,10 @@ int main(int argc, const char* argv[]) {
 
 	atomic_strong_ref<dte_type> dte_t0(cnew<dte_type>());
 	atomic_strong_ref<dte_type> dte_t1(cnew<dte_type>());
-	dte_t0->add_parent(dte_t1);
+	//dte_t0->add_parent(dte_t1);
 
-	std::cout << dte_t0->is_basic_type() << std::endl;
-	std::cout << dte_t1->is_basic_type() << std::endl;
+	//std::cout << dte_t0->is_basic_type() << std::endl;
+	//std::cout << dte_t1->is_basic_type() << std::endl;
 
 	std::cin.get();
 	return 0;

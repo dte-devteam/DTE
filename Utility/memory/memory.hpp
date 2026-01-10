@@ -64,11 +64,17 @@ namespace dte_utils {
 		}
 	}
 
-	//at = invalid/nulptr -> UB
-	template<typename T, typename ...Args>
+	//at = invalid -> UB
+	//at = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, bool is_fail_safe = false, typename ...Args>
 	inline void place_at(const raw_pointer<T>& at, Args&&... args)
-	noexcept(std::is_nothrow_constructible_v<T, Args...>) 
+	noexcept(std::is_nothrow_constructible_v<T, Args...> && is_fail_safe) 
 	requires(std::is_constructible_v<T, Args...> && !std::is_const_v<T>) {
+		if constexpr (!is_fail_safe) {
+			if (!at.operator raw_pointer<T>::pointer()) {
+				throw nullptr_access();
+			}
+		}
 		if constexpr (std::is_trivially_constructible_v<T, Args&&...>) {
 			*(at.operator raw_pointer<T>::pointer()) = T(std::forward<Args>(args)...);
 		}
@@ -82,16 +88,22 @@ namespace dte_utils {
 	inline raw_pointer<T> cnew(Args&&... args)
 	requires(std::is_constructible_v<T, Args...>) {
 		raw_pointer<T> ptr(aligned_tmalloc<T>(1));
-		place_at(ptr, std::forward<Args>(args)...);
+		place_at<T, true, Args...>(ptr, std::forward<Args>(args)...);
 		return ptr;
 	}
 
-	//at = invalid/nulptr -> UB
-	template<typename T>
+	//at = invalid -> UB
+	//at = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, bool is_fail_safe = false>
 	inline void destuct_at(const raw_pointer<T>& at)
-	noexcept(std::is_nothrow_destructible_v<T>)
+	noexcept(std::is_nothrow_destructible_v<T> && is_fail_safe)
 	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
 		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
+		if constexpr (!is_fail_safe) {
+			if (!at.operator raw_pointer<T>::pointer()) {
+				throw nullptr_access();
+			}
+		}
 		if constexpr (std::is_array_v<T>) {
 			for (std::remove_pointer_t<std::decay_t<T>>& elem : *(at.operator raw_pointer<T>::pointer())) {
 				destuct_at(std::addressof(elem));
@@ -103,7 +115,6 @@ namespace dte_utils {
 	}
 
 	//at = invalid -> UB
-	//see defenition limitations: destuct_at (except for nuläptr)
 	template<typename T>
 	inline void cdelete(const raw_pointer<T>& at)
 	noexcept(std::is_nothrow_destructible_v<T>)
@@ -111,7 +122,7 @@ namespace dte_utils {
 		if (at) {
 			//don`t call destructor of trivial type
 			if constexpr (!std::is_trivially_destructible_v<T>) {
-				destuct_at(at);
+				destuct_at<T, true>(at);
 			}
 			//function can`t be freed
 			if constexpr (!return_type_v<T>) {
@@ -120,47 +131,71 @@ namespace dte_utils {
 		}
 	}
 
-	//begin/end = invalid/nullptr -> UB
-	//see defenition limitations: place_at (all restrictions)
-	template<typename T, template<typename> typename It, typename ...Args>
+	//begin/end = invalid -> UB
+	//begin/end = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, template<typename> typename It, bool is_fail_safe = false, typename ...Args>
 	inline void construct_range(It<T> begin, const raw_pointer<T>& end, Args&&... args)
-	noexcept(std::is_nothrow_constructible_v<T, Args...>) 
+	noexcept(std::is_nothrow_constructible_v<T, Args...> && is_fail_safe)
 	requires(std::is_constructible_v<T, Args...> && is_iteroid_v<It, T> && !std::is_const_v<T>) {
+		//check once instead of checking in cycle
+		if constexpr (!is_fail_safe) {
+			if ((begin != end) && !(begin && end)) {
+				throw nullptr_access();
+			}
+		}
 		while (begin != end) {
-			place_at(begin, std::forward<Args>(args)...);
+			place_at<T, true, Args...>(begin, std::forward<Args>(args)...);
 			++begin;
 		}
 	}
-	//begin/end/dest = invalid/nullptr -> UB
-	//see defenition limitations: place_at (all restrictions)
-	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	//begin/end/dest = invalid -> UB
+	//begin/end/dest = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU, bool is_fail_safe = false>
 	inline void copy_range(ItT<T> begin, const raw_pointer<T>& end, ItU<U> dest)
-	noexcept(std::is_constructible_v<U, T>)
+	noexcept(std::is_constructible_v<U, T> && is_fail_safe)
 	requires(std::is_constructible_v<U, T> && is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U>) {
+		//check once instead of checking in cycle
+		if constexpr (!is_fail_safe) {
+			if ((begin != end) && !(begin && end && dest)) {
+				throw nullptr_access();
+			}
+		}
 		while (begin != end) {
-			place_at(dest, *begin);
+			place_at<U, true, T&>(dest, begin.operator*<true>());
 			++dest;
 			++begin;
 		}
 	}
-	//begin/end/dest = invalid/nullptr -> UB
-	//see defenition limitations: place_at (all restrictions)
-	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	//begin/end/dest = invalid -> UB
+	//begin/end/dest = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU, bool is_fail_safe = false>
 	inline void move_range(ItT<T> begin, const raw_pointer<T>& end, ItU<U> dest)
-	noexcept(std::is_nothrow_constructible_v<U, T&&>) 
+	noexcept(std::is_nothrow_constructible_v<U, T&&> && is_fail_safe)
 	requires(std::is_constructible_v<U, T&&> && is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !(std::is_const_v<T> || std::is_const_v<U>)) {
+		//check once instead of checking in cycle
+		if constexpr (!is_fail_safe) {
+			if ((begin != end) && !(begin && end && dest)) {
+				throw nullptr_access();
+			}
+		}
 		while (begin != end) {
 			place_at(dest, std::move(*begin));
 			++dest;
 			++begin;
 		}
 	}
-	//begin/end = invalid/nullptr -> UB
-	//see defenition limitations: destuct_at (all restrictions)
-	template<typename T, template<typename> typename It>
+	//begin/end = invalid -> UB
+	//begin/end = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, template<typename> typename It, bool is_fail_safe = false>
 	inline void destruct_range(It<T> begin, const raw_pointer<T>& end)
-	noexcept(std::is_nothrow_destructible_v<T>)
+	noexcept(std::is_nothrow_destructible_v<T> && is_fail_safe)
 	requires(std::is_destructible_v<T> && is_iteroid_v<It, T> && !std::is_const_v<T>) {
+		//check once instead of checking in cycle
+		if constexpr (!is_fail_safe) {
+			if ((begin != end) && !(begin && end)) {
+				throw nullptr_access();
+			}
+		}
 		while (begin != end) {
 			destuct_at(begin);
 			++begin;
@@ -211,26 +246,26 @@ namespace dte_utils {
 	}
 
 	//Copies array elements
-	//dest/src = invalid/nullptr -> UB
-	//count = invalid -> UB
-	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	//begin/end/dest = invalid/nullptr -> UB
+	//begin/end/dest -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU, bool is_fail_safe = false>
 	inline void array_to_array(const ItT<const T>& begin, const raw_pointer<const T>& end, const ItU<U>& dest)
-	noexcept(std::is_nothrow_constructible_v<U, const T&>)
+	noexcept(std::is_nothrow_constructible_v<U, const T&> && is_fail_safe)
 	requires(is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U> && std::is_constructible_v<U, T> ) {
-		copy_range(begin, end, dest);
+		copy_range<const T, U, ItT, ItU, is_fail_safe>(begin, end, dest);
 	}
 	//Moves array elements, if not possible copies array elements
-	//dest/src = invalid/nullptr -> UB
-	//count = invalid -> UB
-	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU>
+	//begin/end/dest = invalid/nullptr -> UB
+	//begin/end/dest -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
+	template<typename T, typename U, template<typename> typename ItT, template<typename> typename ItU, bool is_fail_safe = false>
 	inline void array_to_array(const ItT<T>& begin, const raw_pointer<T>& end, const ItU<U>& dest)
-	noexcept(std::is_constructible_v<U, T&&> ? std::is_nothrow_constructible_v<U, T&&> : std::is_nothrow_constructible_v<U, const T&>)
+	noexcept(std::is_constructible_v<U, T&&> ? std::is_nothrow_constructible_v<U, T&&> : std::is_nothrow_constructible_v<U, const T&> && is_fail_safe)
 	requires(is_iteroid_v<ItT, T> && is_iteroid_v<ItU, U> && !std::is_const_v<U> && (std::is_constructible_v<U, T> || std::is_constructible_v<U, T&&>)) {
 		if constexpr (std::is_constructible_v<U, T&&>) {
-			move_range(begin, end, dest);
+			move_range<T, U, ItT, ItU, is_fail_safe>(begin, end, dest);
 		}
 		else {
-			copy_range(begin, end, dest);
+			copy_range<T, U, ItT, ItU, is_fail_safe>(begin, end, dest);
 		}
 	}	
 }

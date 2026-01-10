@@ -53,8 +53,9 @@ namespace dte_utils {
 		using return_type	= int;	//we use non void type, because we can use references and function arguments
 		using class_type	= int;	//we use non void type, because we can use references and function arguments
 		using packed_args	= typename args_list<>;
-		static constexpr bool is_noexcept = false;
-		static constexpr bool is_const = false;
+		static constexpr bool is_noexcept	= false;
+		static constexpr bool is_const		= false;
+		static constexpr size_t arg_num		= 0;
 	};
 	template<typename C, typename R, typename... Args>
 	struct is_field_function<R(C::*)(Args...)> : std::true_type {
@@ -100,4 +101,6 @@ namespace dte_utils {
 	using field_function_c = typename is_field_function<T>::class_type;
 	template<typename T>
 	using field_function_a = typename is_field_function<T>::packed_args;
+	template<typename T>
+	inline constexpr size_t is_field_function_arg_num_v = field_function_a<T>::arg_num;
 }

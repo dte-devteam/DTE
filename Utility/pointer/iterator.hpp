@@ -38,18 +38,18 @@ namespace dte_utils {
 		protected:
 			void _inc(size_type add = 1) noexcept {
 				if constexpr (std::is_void_v<type>) {
-					this->_instance = static_cast<char*>(this->_instance) + add;
+					_instance = static_cast<char*>(_instance) + add;
 				}
 				else {
-					this->_instance += add;
+					_instance += add;
 				}
 			}
 			void _dec(size_type sub = 1) noexcept {
 				if constexpr (std::is_void_v<type>) {
-					this->_instance = static_cast<char*>(this->_instance) - sub;
+					_instance = static_cast<char*>(_instance) - sub;
 				}
 				else {
-					this->_instance -= sub;
+					_instance -= sub;
 				}
 			}
 	};
@@ -61,29 +61,29 @@ namespace dte_utils {
 		using iterator_base<T>::iterator_base;
 		public:
 			f_iterator& operator++() noexcept {
-				this->_inc();
+				_inc();
 				return *this;
 			}
 			f_iterator operator++(int) noexcept {
 				f_iterator iter(*this);
-				this->_inc();
+				_inc();
 				return iter;
 			}
 			f_iterator& operator--() noexcept {
-				this->_dec();
+				_dec();
 				return *this;
 			}
 			f_iterator operator--(int) noexcept {
 				f_iterator iter(*this);
-				this->_dec();
+				_dec();
 				return iter;
 			}
 			f_iterator& operator+=(size_type add) noexcept {
-				this->_inc(add);
+				_inc(add);
 				return *this;
 			}
 			f_iterator& operator-=(size_type sub) noexcept {
-				this->_dec(sub);
+				_dec(sub);
 				return *this;
 			}
 			f_iterator operator+(size_type add) const noexcept {
@@ -100,10 +100,10 @@ namespace dte_utils {
 			size_type operator-(const iterator_base<U>& other) const noexcept 
 			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				if constexpr (std::is_void_v<type>) {
-					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
+					return static_cast<char*>(_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
 				}
 				else {
-					return this->_instance - other.operator iterator_base<U>::pointer();
+					return _instance - other.operator iterator_base<U>::pointer();
 				}
 			}
 			template<bool is_fail_safe = false>
@@ -140,29 +140,29 @@ namespace dte_utils {
 		using iterator_base<T>::iterator_base;
 		public:
 			b_iterator& operator++() noexcept {
-				this->_dec();
+				_dec();
 				return *this;
 			}
 			b_iterator operator++(int) noexcept {
 				b_iterator iter(*this);
-				this->_dec();
+				_dec();
 				return iter;
 			}
 			b_iterator& operator--() noexcept {
-				this->_inc();
+				_inc();
 				return *this;
 			}
 			b_iterator operator--(int) noexcept {
 				b_iterator iter(*this);
-				this->_inc();
+				_inc();
 				return iter;
 			}
 			b_iterator& operator+=(size_type sub) noexcept {
-				this->_dec(sub);
+				_dec(sub);
 				return *this;
 			}
 			b_iterator& operator-=(size_type add) noexcept {
-				this->_inc(add);
+				_inc(add);
 				return *this;
 			}
 			b_iterator operator+(size_type sub) const noexcept {
@@ -179,10 +179,10 @@ namespace dte_utils {
 			size_type operator-(const iterator_base<U>& other) const noexcept
 			requires(std::is_same_v<std::remove_cv_t<typename iterator_base<U>::type>, std::remove_cv_t<type>>) {
 				if constexpr (std::is_void_v<type>) {
-					return static_cast<char*>(this->_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
+					return static_cast<char*>(_instance) - static_cast<char*>(other.operator iterator_base<U>::pointer());
 				}
 				else {
-					return this->_instance - other.operator iterator_base<U>::pointer();
+					return _instance - other.operator iterator_base<U>::pointer();
 				}
 			}
 			template<bool is_fail_safe = false>

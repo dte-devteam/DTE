@@ -1,4 +1,5 @@
 #pragma once
+#include "exceptions/memory_exception.hpp"
 #include "type_properties.hpp"
 namespace dte_utils {
 	template<typename T>
@@ -25,7 +26,7 @@ namespace dte_utils {
 			raw_pointer(const raw_pointer& other) noexcept : _instance(other._instance) {}
 			template<typename U>
 			raw_pointer(const raw_pointer<U>& other) noexcept
-				requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : _instance(other.operator raw_pointer<U>::pointer()) {}
+			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : _instance(other.operator raw_pointer<U>::pointer()) {}
 
 			explicit operator pointer() const noexcept {
 				return _instance;
@@ -36,13 +37,13 @@ namespace dte_utils {
 
 			template<typename U>
 			raw_pointer& operator=(U* ptr) noexcept
-				requires(std::is_convertible_v<U*, pointer>) {
+			requires(std::is_convertible_v<U*, pointer>) {
 				_instance = ptr;
 				return *this;
 			}
 			template<typename U>
 			raw_pointer& operator=(const raw_pointer<U>& other) noexcept
-				requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) {
+			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) {
 				_instance = other.operator raw_pointer<U>::pointer();
 				return *this;
 			}
@@ -75,4 +76,17 @@ namespace dte_utils {
 				return *_instance;
 			}
 	};
+	template<typename T>
+	inline raw_pointer<T> remove_const_ptr_base(const raw_pointer<T>& ptr) noexcept {
+		return ptr;
+	}
+	template<typename T>
+	inline raw_pointer<T> remove_const_ptr_base(const raw_pointer<const T>& ptr) noexcept {
+		return raw_pointer<T>(remove_const_ptr(ptr.operator raw_pointer<const T>::pointer()));
+	}
+	template<typename T, typename F>
+	inline raw_pointer<T> static_cast_ptr_base(const raw_pointer<F>& ptr) noexcept
+	requires(is_static_castable_v<typename raw_pointer<F>::pointer, typename raw_pointer<T>::pointer>) {
+		return raw_pointer<T>(static_cast<raw_pointer<T>::pointer>(ptr.operator raw_pointer<F>::pointer()));
+	}
 }

@@ -16,12 +16,12 @@ namespace dte_utils {
 		
 		using array::dynamic_array;
 		dynamic_string(size_t alocate_extra_size = 0) : array(alocate_extra_size + 1) {
-			place_at(this->end(), 0);
-			++this->_used;
+			place_at(end(), 0);
+			++_used;
 		}
 
 		size_type str_len() const noexcept {
-			return this->get_used() - 1;
+			return get_used() - 1;
 		}
 		bool empty_str() const noexcept {
 			return !str_len();
@@ -29,21 +29,21 @@ namespace dte_utils {
 
 		void clear() noexcept(std::is_nothrow_destructible_v<type>) {
 			if constexpr (!std::is_trivially_destructible_v<type>) {
-				destruct_range(this->begin() + 1, this->end());
+				destruct_range(begin() + 1, end());
 			}
-			this->_used = 1;
-			this->back<true>() = 0;
+			_used = 1;
+			back<true>() = 0;
 		}
 
 		void push_back(const_type& value) {
 			if (value) {
-				this->back<true>() = value;
+				back<true>() = value;
 				stack::push_back(0);
 			}
 		}
 		void push_back(type&& value) {
 			if (value) {
-				this->back<true>() = std::move(value);
+				back<true>() = std::move(value);
 				stack::push_back(0);
 			}
 		}
@@ -67,7 +67,7 @@ namespace dte_utils {
 				}
 			}
 			stack::pop_back<true>();
-			this->back<true>() = 0;
+			back<true>() = 0;
 		}
 		template<bool is_fail_safe = false>
 		void pop_back(size_type num)
@@ -78,7 +78,7 @@ namespace dte_utils {
 				}
 			}
 			stack::pop_back<true>(num);
-			this->back<true>() = 0;
+			back<true>() = 0;
 		}
 		//don`t forget - string must end by 0!
 		template<bool is_fail_safe = false>
@@ -100,7 +100,7 @@ namespace dte_utils {
 			if (to > str_len()) {
 				throw out_of_range();
 			}
-			dynamic_string new_str(this->begin() + from, to - from, 1);
+			dynamic_string new_str(begin() + from, to - from, 1);
 			place_at(new_str.end(), 0);
 			++new_str._used;
 			return new_str;
@@ -125,7 +125,7 @@ namespace dte_utils {
 
 		template<typename U, template<typename> typename UA>
 		dynamic_string operator+(const dynamic_string<U, UA>& other) const {
-			dynamic_string new_str(this->begin(), this->get_used() - 1, other.get_used());
+			dynamic_string new_str(begin(), get_used() - 1, other.get_used());
 			array_to_array(other.begin(), other.end(), new_str.end());
 			new_str._used += other.get_used();
 			return new_str;
@@ -133,7 +133,7 @@ namespace dte_utils {
 
 		template<typename U, size_t N>
 		dynamic_string operator+(const U(&arr)[N]) {
-			dynamic_string new_str(this->begin(), this->get_used() - 1, N);
+			dynamic_string new_str(begin(), get_used() - 1, N);
 			array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, new_str.end());
 			new_str._used += N;
 			return new_str;

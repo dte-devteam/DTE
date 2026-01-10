@@ -13,21 +13,21 @@ namespace dte_utils {
 			bool _strength;
 			void _unknown_decrease() noexcept(std::is_nothrow_destructible_v<T>) {
 				if (get_strength()) {
-					this->_strong_decrease();
+					_strong_decrease();
 				}
 			}
 			void _unknown_increase() {
 				if (get_strength()) {
-					if (this->expired()) {
+					if (expired()) {
 						throw bad_weak_ptr();
 					}
-					this->_counter->add_strong();
+					_counter->add_strong();
 				}
 			}
 		public:
 			unknown_ref(pointer instance = nullptr, bool strength = false) : weak_ref<T, RC>(instance), _strength(strength) {
 				if (get_strength()) {
-					this->_counter->add_strong();
+					_counter->add_strong();
 				}
 			}
 			unknown_ref(const unknown_ref& other, bool strength = false) : weak_ref<T, RC>(other), _strength(strength) {
@@ -39,7 +39,7 @@ namespace dte_utils {
 			requires(std::is_convertible_v<typename weak_ref<U, RC>::pointer, pointer>) : weak_ref<T, RC>(other), _strength(strength) {
 				if constexpr (is_fail_safe) {
 					if (get_strength()) {
-						this->_counter->add_strong();
+						_counter->add_strong();
 					}
 				}
 				else {
@@ -50,7 +50,7 @@ namespace dte_utils {
 			unknown_ref(const raw_pointer<U>& instance, bool strength = false)
 			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : weak_ref<T, RC>(instance), _strength(strength) {
 				if (get_strength()) {
-					this->_counter->add_strong();
+					_counter->add_strong();
 				}
 			}
 
@@ -75,9 +75,9 @@ namespace dte_utils {
 			
 			unknown_ref& operator=(pointer instance) {
 				_unknown_decrease();
-				this->_instance = instance;
-				if (this->_counter->sub_weak()) {
-					this->_counter = cnew<ref_counter>(1, get_strength());
+				_instance = instance;
+				if (_counter->sub_weak()) {
+					_counter = cnew<ref_counter>(1, get_strength());
 				}
 				return *this;
 			}
@@ -98,8 +98,8 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				std::swap(this->_instance, other._instance);
-				std::swap(this->_counter, other._counter);
+				std::swap(_instance, other._instance);
+				std::swap(_counter, other._counter);
 				return *this;
 			}
 

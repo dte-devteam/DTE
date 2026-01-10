@@ -11,10 +11,10 @@ namespace dte_utils {
 		using pointer	= typename weak_ref<T, RC>::pointer;
 		public:
 			strong_ref(pointer instance = nullptr) : weak_ref<T, RC>(instance) {
-				this->_counter->add_strong();
+				_counter->add_strong();
 			}
 			strong_ref(const strong_ref& other) noexcept : weak_ref<T, RC>(other) {
-				this->_counter->add_strong();
+				_counter->add_strong();
 			}
 
 			template<typename U, bool is_fail_safe = false>
@@ -25,25 +25,25 @@ namespace dte_utils {
 						throw bad_weak_ptr();
 					}
 				}
-				this->_counter->add_strong();
+				_counter->add_strong();
 			}
 			template<typename U>
 			strong_ref(const raw_pointer<U>& other)
 			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : strong_ref(other.operator raw_pointer<U>::pointer()) {}
 
 			~strong_ref() {
-				this->_strong_decrease();
+				_strong_decrease();
 			}
 
 
 			strong_ref& operator=(pointer instance) {
-				this->_strong_decrease();
-				this->_instance = instance;
-				if (this->_counter->sub_weak()) {
-					this->_counter = cnew<RC>(1, 1);
+				_strong_decrease();
+				_instance = instance;
+				if (_counter->sub_weak()) {
+					_counter = cnew<RC>(1, 1);
 				}
 				else {
-					this->_counter->add_strong();
+					_counter->add_strong();
 				}
 				return *this;
 			}
@@ -57,9 +57,9 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				this->_strong_decrease();
+				_strong_decrease();
 				weak_ref<T, RC>::operator=(other);
-				this->_counter->add_strong();
+				_counter->add_strong();
 				return *this;
 			}
 
@@ -67,8 +67,8 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				std::swap(this->_instance, other._instance);
-				std::swap(this->_counter, other._counter);
+				std::swap(_instance, other._instance);
+				std::swap(_counter, other._counter);
 				return *this;
 			}
 
@@ -84,9 +84,9 @@ namespace dte_utils {
 						throw bad_weak_ptr();
 					}
 				}
-				this->_strong_decrease();
+				_strong_decrease();
 				weak_ref<T, RC>::operator=(other);
-				this->_counter->add_strong();
+				_counter->add_strong();
 				return *this;
 			}
 

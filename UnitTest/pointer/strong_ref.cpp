@@ -10,7 +10,7 @@ namespace dte_test::pointer::strong_reference {
 namespace Microsoft::VisualStudio::CppUnitTestFramework {
 	template<> static std::wstring ToString<dte_test::pointer::strong_reference::A>(dte_test::pointer::strong_reference::A* ptr) { return L"A*"; }
 
-	template<> static std::wstring ToString<pointer_base<const ref_counter>>(const pointer_base<const ref_counter>& ptr) { return L"pointer_base<const ref_counter>"; }
+	template<> static std::wstring ToString<complex_pointer<const ref_counter>>(const complex_pointer<const ref_counter>& ptr) { return L"complex_pointer<const ref_counter>"; }
 
 	template<> static std::wstring ToString<strong_ref<dte_test::pointer::strong_reference::A>>(const strong_ref<dte_test::pointer::strong_reference::A>& ptr) { return L"strong_ref<A>"; }
 }
@@ -121,12 +121,12 @@ namespace dte_test::pointer::strong_reference {
 				);
 			}
 			void rval_operator() {
-				const pointer_base<A> a_0(cnew<A>());
-				const pointer_base<A> a_1(cnew<B>());
+				const complex_pointer<A> a_0(cnew<A>());
+				const complex_pointer<A> a_1(cnew<B>());
 				strong_ref<A> ptr_0(a_0);
 				strong_ref<A> ptr_1(a_1);
-				const pointer_base<const ref_counter> RC_0 = ptr_0.get_counter();
-				const pointer_base<const ref_counter> RC_1 = ptr_1.get_counter();
+				const complex_pointer<const ref_counter> RC_0 = ptr_0.get_counter();
+				const complex_pointer<const ref_counter> RC_1 = ptr_1.get_counter();
 				ptr_0 = std::move(ptr_1);
 				Assert::AreEqual(
 					a_1.operator->(),

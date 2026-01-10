@@ -88,5 +88,7 @@ namespace dte_utils {
 	using set_pointer_t = set_pointer<T, N>::type;
 
 	template<typename ...Args>
-	struct args_list {};
+	struct args_list {
+		static constexpr size_t arg_num = sizeof...(Args);
+	};
 }

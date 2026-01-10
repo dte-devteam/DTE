@@ -23,7 +23,7 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				std::swap(this->_instance, other._instance);
+				std::swap(_instance, other._instance);
 				return *this;
 			}
 	};

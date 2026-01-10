@@ -17,10 +17,10 @@ namespace dte_utils {
 		protected:
 			size_type _used;
 			size_type _extend_by_el() const noexcept {
-				return this->get_allocated() * 2 + 1;
+				return get_allocated() * 2 + 1;
 			}
 			alloc_inst _provide_buffer() const {
-				alloc_inst new_allocator(this->get_allocated());
+				alloc_inst new_allocator(get_allocated());
 				array_to_array(begin(), end(), new_allocator.operator iterator());
 				return new_allocator;
 			}
@@ -53,10 +53,10 @@ namespace dte_utils {
 			}
 
 			iterator begin() noexcept {
-				return this->_allocator.operator iterator();
+				return _allocator.operator iterator();
 			}
 			const_iterator begin() const noexcept {
-				return this->_allocator.operator const_iterator();
+				return _allocator.operator const_iterator();
 			}
 			iterator end() noexcept {
 				return begin() + get_used();
@@ -209,13 +209,13 @@ namespace dte_utils {
 					}
 					_used = size;
 				}
-				if (this->get_allocated() != size) {
-					this->_allocated = size;
+				if (get_allocated() != size) {
+					_allocated = size;
 					alloc_inst new_allocator = _provide_buffer();
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 			}
 			void clear() noexcept(std::is_nothrow_destructible_v<type>) {
@@ -227,11 +227,11 @@ namespace dte_utils {
 
 
 			void push_back(const_type& value) {
-				if (this->get_allocated() == get_used()) {
+				if (get_allocated() == get_used()) {
 					//push reallocated
-					this->_allocated = _extend_by_el();
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_buffer();
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 					place_at(end(), value);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
@@ -244,11 +244,11 @@ namespace dte_utils {
 				++_used;
 			}
 			void push_back(type&& value) {
-				if (this->get_allocated() == get_used()) {
+				if (get_allocated() == get_used()) {
 					//push reallocated
-					this->_allocated = _extend_by_el();
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_buffer();
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 					place_at(end(), std::move(value));
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
@@ -262,11 +262,11 @@ namespace dte_utils {
 			}
 			template<typename ...Args>
 			void emplace_back(Args&&... args) {
-				if (this->get_allocated() == get_used()) {
+				if (get_allocated() == get_used()) {
 					//emplace reallocated
-					this->_allocated = _extend_by_el();
+					_allocated = _extend_by_el();
 					alloc_inst new_allocator = _provide_buffer();
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 					place_at(end(), std::forward<Args>(args)...);
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(new_allocator.operator iterator(), new_allocator.operator iterator() + get_used());
@@ -335,10 +335,10 @@ namespace dte_utils {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
 				}
-				if (other.get_used() > this->get_allocated()) {
-					this->_allocated = other.get_used();
+				if (other.get_used() > get_allocated()) {
+					_allocated = other.get_used();
 					alloc_inst new_allocator(other.get_used());
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				array_to_array(other.begin(), other.end(), begin());
 				_used = other.get_used();
@@ -348,8 +348,8 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				std::swap(this->_allocator, other._allocator);
-				std::swap(this->_allocated, other._allocated);
+				std::swap(_allocator, other._allocator);
+				std::swap(_allocated, other._allocated);
 				std::swap(_used, other._used);
 				return *this;
 			}
@@ -360,10 +360,10 @@ namespace dte_utils {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
 				}
-				if (other.get_used() > this->get_allocated()) {
-					this->_allocated = other.get_used();
+				if (other.get_used() > get_allocated()) {
+					_allocated = other.get_used();
 					alloc_inst new_allocator(other.get_used());
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				array_to_array(other.begin(), other.end(), begin());
 				_used = other.get_used();
@@ -375,10 +375,10 @@ namespace dte_utils {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
 				}
-				if (il.size() > this->get_allocated()) {
-					this->_allocated = il.size();
+				if (il.size() > get_allocated()) {
+					_allocated = il.size();
 					alloc_inst new_allocator(il.size());
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				array_to_array(il.begin(), il.end(), begin());
 				_used = il.size();
@@ -389,10 +389,10 @@ namespace dte_utils {
 				if constexpr (!std::is_trivially_destructible_v<type>) {
 					destruct_range(begin(), end());
 				}
-				if (N > this->get_allocated()) {
-					this->_allocated = N;
+				if (N > get_allocated()) {
+					_allocated = N;
 					alloc_inst new_allocator(N);
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				array_to_array(arr, arr + N, begin());
 				_used = N;
@@ -402,14 +402,14 @@ namespace dte_utils {
 
 			template<typename U, template<typename> typename UA>
 			dynamic_stack& operator +=(const dynamic_stack<U, UA>& other) {
-				if (get_used() + other.get_used() > this->get_allocated()) {
-					this->_allocated = get_used() + other.get_used();
+				if (get_used() + other.get_used() > get_allocated()) {
+					_allocated = get_used() + other.get_used();
 					alloc_inst new_allocator = _provide_buffer();
 					array_to_array(other.begin(), other.end(), new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
 					//copy to unused
@@ -422,14 +422,14 @@ namespace dte_utils {
 
 
 			dynamic_stack& operator +=(std::initializer_list<type> il) {
-				if (get_used() + il.size() > this->get_allocated()) {
-					this->_allocated = get_used() + il.size();
+				if (get_used() + il.size() > get_allocated()) {
+					_allocated = get_used() + il.size();
 					alloc_inst new_allocator = _provide_buffer();
 					array_to_array(il.begin(), il.end(), new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
 					array_to_array(il.begin(), il.end(), begin());
@@ -439,14 +439,14 @@ namespace dte_utils {
 			}
 			template<typename U, size_type N>
 			dynamic_stack& operator +=(const U(&arr)[N]) {
-				if (get_used() + N > this->get_allocated()) {
-					this->_allocated = get_used() + N;
+				if (get_used() + N > get_allocated()) {
+					_allocated = get_used() + N;
 					alloc_inst new_allocator = _provide_buffer();
 					array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, new_allocator.operator iterator() + get_used());
 					if constexpr (!std::is_trivially_destructible_v<type>) {
 						destruct_range(begin(), end());
 					}
-					this->_allocator = std::move(new_allocator);
+					_allocator = std::move(new_allocator);
 				}
 				else {
 					array_to_array(f_iterator<const U>(arr), f_iterator<const U>(arr) + N, end());

@@ -27,7 +27,7 @@
     <ClCompile Include="exceptions\pointer_exception.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="pointer\ref.cpp">
+    <ClCompile Include="pointer\ref_counter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="memory\mem_handler.cpp">
@@ -56,7 +56,7 @@
     <ClInclude Include="function_traits.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\ref.hpp">
+    <ClInclude Include="pointer\ref_counter.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="pointer\strong_ref.hpp">
@@ -114,6 +114,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="pointer\raw_pointer.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="pointer\complex_pointer.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="pointer\ref_base.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

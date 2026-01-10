@@ -5,6 +5,7 @@
 namespace dte_utils {
 	template<typename T>
 	struct pointer_base : raw_pointer<T> {
+		using raw_type	= typename raw_pointer<T>::raw_type;
 		using type		= typename raw_pointer<T>::type;
 		using pointer	= typename raw_pointer<T>::pointer;
 		using raw_pointer<T>::raw_pointer;
@@ -48,6 +49,7 @@ namespace dte_utils {
 	};
 	template<typename C, typename V>
 	struct pointer_base<V(C::*)> : raw_pointer<V(C::*)> {
+		using raw_type	= typename raw_pointer<V(C::*)>::raw_type;
 		using type		= typename raw_pointer<V(C::*)>::type;
 		using pointer	= typename raw_pointer<V(C::*)>::pointer;
 		using raw_pointer<V(C::*)>::raw_pointer;
@@ -88,17 +90,4 @@ namespace dte_utils {
 				}
 			}
 	};
-	template<typename T>
-	inline pointer_base<T> remove_const_ptr_base(const pointer_base<T>& ptr) noexcept {
-		return ptr;
-	}
-	template<typename T>
-	inline pointer_base<T> remove_const_ptr_base(const pointer_base<const T>& ptr) noexcept {
-		return pointer_base<T>(remove_const_ptr(ptr.operator->()));
-	}
-	template<typename T, typename F>
-	inline pointer_base<T> static_cast_ptr_base(const pointer_base<F>& ptr) noexcept
-	requires(is_static_castable_v<typename pointer_base<F>::pointer, typename pointer_base<T>::pointer>) {
-		return pointer_base<T>(static_cast<pointer_base<T>::pointer>(ptr.operator->()));
-	}
 }
