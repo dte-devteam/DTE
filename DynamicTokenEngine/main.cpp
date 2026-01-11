@@ -204,10 +204,11 @@ int main(int argc, const char* argv[]) {
 	SAS GI;
 	float(SA:: * sd) = &SAS::fl;
 
-	complex_pointer<float(SAS::*), true> yyy(&SAS::fl, &GI);
-	complex_pointer<float(SA::*), true> yyy2(yyy);
+	complex_pointer<float(SAS::*), false> yyy(&SAS::fl, &GI);
+	complex_pointer<float(SA::*), false> yyy2(yyy);
 	yyy.get_owner();
-	yyy2();
+	yyy2() = 10;
+	std::cout << yyy2() << std::endl;
 	complex_pointer<int> zzz(new int);
 	*zzz = 100;
 	delete zzz.operator->();
