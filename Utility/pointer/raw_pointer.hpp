@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "exceptions/memory_exception.hpp"
 #include "type_properties.hpp"
 namespace dte_utils {
@@ -7,12 +9,8 @@ namespace dte_utils {
 		return static_cast<void*>(const_cast<std::remove_cv_t<T>*>(ptr));
 	}
 	template<typename T>
-	inline T* remove_const_ptr(T* ptr) noexcept {
-		return ptr;
-	}
-	template<typename T>
-	inline T* remove_const_ptr(const T* ptr) noexcept {
-		return const_cast<T*>(ptr);
+	inline std::remove_const_t<T>* remove_const_ptr(T* ptr) noexcept {
+		return const_cast<std::remove_const_t<T>*>(ptr);
 	}
 	template<typename T>
 	struct raw_pointer {
@@ -26,7 +24,7 @@ namespace dte_utils {
 			raw_pointer(const raw_pointer& other) noexcept : _instance(other._instance) {}
 			template<typename U>
 			raw_pointer(const raw_pointer<U>& other) noexcept
-			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : _instance(other.operator raw_pointer<U>::pointer()) {}
+			requires((std::is_base_of_v<type, typename raw_pointer<U>::type> || std::is_same_v<std::remove_cv_t<type>, std::remove_cv_t<typename raw_pointer<U>::type>>) && std::is_const_v<type> >= std::is_const_v<typename raw_pointer<U>::type>) : _instance(other.operator raw_pointer<U>::pointer()) {}
 
 			explicit operator pointer() const noexcept {
 				return _instance;
@@ -37,13 +35,13 @@ namespace dte_utils {
 
 			template<typename U>
 			raw_pointer& operator=(U* ptr) noexcept
-			requires(std::is_convertible_v<U*, pointer>) {
+			requires(std::is_base_of_v<type, U> || std::is_same_v<type, U>) {
 				_instance = ptr;
 				return *this;
 			}
 			template<typename U>
 			raw_pointer& operator=(const raw_pointer<U>& other) noexcept
-			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) {
+			requires(std::is_base_of_v<type, typename raw_pointer<U>::type> || std::is_same_v<type, typename raw_pointer<U>::type>) {
 				_instance = other.operator raw_pointer<U>::pointer();
 				return *this;
 			}
@@ -53,27 +51,71 @@ namespace dte_utils {
 				//we force comparement by casting everything to void*
 				return downgrade_ptr(_instance) == downgrade_ptr(ptr);
 			}
+			
 			template<typename U>
 			bool operator!=(U* ptr) const noexcept {
 				return !(*this == ptr);
 			}
-
 			template<typename U>
-			bool operator==(const raw_pointer<U>& other) const noexcept {
+			bool operator==(const raw_pointer<U>& other) const noexcept 
+			requires(!(is_field_v<U> || is_field_v<type>)) {
 				return *this == other.operator raw_pointer<U>::pointer();
 			}
 			template<typename U>
-			bool operator!=(const raw_pointer<U>& other) const noexcept {
+			bool operator!=(const raw_pointer<U>& other) const noexcept 
+			requires(!(is_field_v<U> || is_field_v<type>)) {
 				return !(*this == other);
 			}
+			
+			template<typename V, typename C>
+			bool operator==(V(C::*field_ptr)) const noexcept 
+			requires(std::is_same_v<V(C::*), type>) {
+				return _instance == field_ptr;
+			}
+			template<typename V, typename C>
+			bool operator!=(V(C::* field_ptr)) const noexcept
+			requires(std::is_same_v<V(C::*), type>) {
+				return !(*this == field_ptr);
+			}
+			template<typename V, typename C>
+			bool operator==(const raw_pointer<V(C::*)>& other) const noexcept
+			requires(std::is_same_v<V(C::*), type>) {
+				return *this == other.operator raw_pointer<V(C::*)>::pointer();
+			}
+			template<typename V, typename C>
+			bool operator!=(const raw_pointer<V(C::*)>& other) const noexcept
+			requires(std::is_same_v<V(C::*), type>) {
+				return !(*this == other);
+			}
+
+
 			template<bool is_fail_safe = false>
-			std::conditional_t<std::is_same_v<raw_type, type>, std::add_lvalue_reference_t<type>, raw_pointer<std::conditional_t<is_field_v<raw_type>, type, std::remove_pointer_t<type>>>> get_value() const noexcept(is_fail_safe) {
+			std::conditional_t<std::is_same_v<raw_type, type>, std::add_lvalue_reference_t<type>, raw_pointer<std::conditional_t<is_field_v<raw_type>, type, std::remove_pointer_t<type>>>> get_value() noexcept(is_fail_safe) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
 						throw nullptr_access();
 					}
 				}
-				return *_instance;
+				if constexpr (is_field_v<type>) {
+					return _instance;
+				}
+				else {
+					return *_instance;
+				}
+			}
+			template<bool is_fail_safe = false>
+			std::conditional_t<std::is_same_v<raw_type, type>, std::conditional_t<is_field_v<type>, std::add_lvalue_reference_t<std::add_const_t<type>>, std::add_lvalue_reference_t<type>>, raw_pointer<std::conditional_t<is_field_v<raw_type>, type, std::remove_pointer_t<type>>>> get_value() const noexcept(is_fail_safe) {
+				if constexpr (!is_fail_safe) {
+					if (!_instance) {
+						throw nullptr_access();
+					}
+				}
+				if constexpr (is_field_v<type>) {
+					return _instance;
+				}
+				else {
+					return *_instance;
+				}
 			}
 	};
 	template<typename T>

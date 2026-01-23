@@ -61,14 +61,14 @@ f_step::step(const step&& other) noexcept : _is_dynamic(other.get_is_dynamic()),
 f_step::~step() {
 	if (get_is_dynamic()) {
 		if (get_is_weak()) {
-			_func_unit.weak_dte_func.~weak_ref();
+			destuct(_func_unit.weak_dte_func);
 		}
 		else {
-			_func_unit.strong_dte_func.~strong_ref();
+			destuct(_func_unit.strong_dte_func);
 		}
 	}
 	else {
-		_func_unit.c_func.~weak_ref();
+		destuct(_func_unit.c_func);
 	}
 }
 bool f_step::get_is_dynamic() const noexcept {

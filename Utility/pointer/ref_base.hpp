@@ -30,5 +30,10 @@ namespace dte_utils {
 			bool expired() const noexcept {
 				return !_counter->get_strong();
 			}
+
+			ref_base& operator=(ref_base&& other) {
+				std::swap(_counter, other._counter);
+				return *this;
+			}
 	};
 }

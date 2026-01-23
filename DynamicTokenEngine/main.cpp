@@ -79,6 +79,10 @@ size_t nop(data_stack& ds, const semi_pointer::data& spd) {
 size_t thr(data_stack& ds, const semi_pointer::data& spd) {
 	throw exception(0, "HAHA");
 }
+struct H
+{
+	int i = 1000;
+};
 constexpr size_t s = 10;
 struct SA {
 	SA() {
@@ -89,6 +93,9 @@ struct SA {
 	}
 	float fl = 0;
 	int* i;
+	operator int*() {
+		return i;
+	}
 	f_iterator<int> begin() { return i; }
 	f_iterator<int> end() { return begin() + s; }
 	int f() const noexcept {
@@ -106,29 +113,22 @@ struct SA {
 struct SAS : SA {
 
 };
+struct FF {
+	SAS sas;
+};
+struct FFF : H, FF {
+
+};
 void g() {
-	strong_ref<SAS> ll = cnew<SAS>();
-	strong_ref<const SA> l = strong_ref<const SA>(ll);
-
-	f_iterator<int> kk;
-
-	strong_ref<const int> k = strong_ref<const int>(kk);
-	k = kk;
-
-	pointer_base<void> s;
-	s = kk;
-
-	pointer_base<int> a = static_cast_ptr_base<int>(s);
+	//weak_ref<float(SAS::*), ref_counter, ref_type::EVENT_NOEXCEPT> hj;
+	//weak_ref<float(SAS::*), ref_counter, ref_type::EVENT_NOEXCEPT> hj2 = weak_ref<float(SAS::*), ref_counter, ref_type::EVENT_NOEXCEPT_CONST>(hj);
 
 
 
-	pointer_base<SAS> g;
+	//weak_ref<float(SAS::*)> ds;
+	//weak_ref<float(SAS::*), ref_counter, ref_type::EVENT_NOEXCEPT> hj2 = weak_ref<float(SAS::*), ref_counter, ref_type::EVENT_NOEXCEPT_CONST>(ds);
 
-	pointer_base<SA> gg = pointer_base<SA>(g);
 
-	weak_ref<SAS> h;
-	weak_ref<SA> hh = weak_ref<SA>(h);
-	weak_ref<SA> hhh = weak_ref<SA>(g);
 }
 void ref_compability() {
 	//checking compability
@@ -145,12 +145,13 @@ void ref_compability() {
 	f_iterator<int> aaa;
 	f_iterator<const int> hg;
 
-	q = aaa;
+	//q = aaa;
 
 	aaa - aaa;
 
 	//aaa is nullptr (by constructor), so... we get nullptr_access error
 	//aaa.operator*();
+
 	pointer_base<const int> llx;
 	pointer_base<const int> llz = pointer_base<const int>(pointer_base<int>());
 	pointer_base<const int>(pointer_base<int>(0));
@@ -170,12 +171,39 @@ void ref_compability() {
 	f_iterator<const volatile void> vit;
 	std::cout << (aaa == vit) << std::endl;
 
-	//weak_ref<const int> kk = weak_ref<const int>(www);
+	weak_ref<const int> kk = weak_ref<const int>(www);
 
 
 	remove_const_ptr(llx.operator->());
-}
+} 
 int main(int argc, const char* argv[]) {
+
+	weak_ref_no_event<float(SA::*), ref_counter, false> ah = weak_ref_no_event<float(SA::*), ref_counter, false>{};
+	weak_ref_no_event<float(SA::*), ref_counter, true> ad = weak_ref_no_event<float(SA::*), ref_counter, true>(ah);
+	weak_ref_no_event<float(SA::*), ref_counter, true> ad2 = weak_ref_no_event<float(SA::*), ref_counter, true>{};
+
+	std::cout << ad.get_counter().get_value().get_weak() << "\n";
+
+
+	raw_pointer<int> rint;
+	raw_pointer<int> rint2;
+	weak_ref_no_event<SA(FF::*), ref_counter, true> wrne_int222 = { nullptr, nullptr };
+	weak_ref_no_event<SAS(FFF::*), ref_counter, true> wrne_int = { nullptr, nullptr };
+	rint == rint2;
+
+	//will cause error - uncomparable types
+	//rint == wrne_int;
+	//rint == wrne_int222;
+	//if (wrne_int222 == wrne_int) {
+	//	std::cout << "YES\n";
+	//}
+
+	ad = weak_ref_no_event<float(SA::*), ref_counter, false>();
+
+	std::cout << ad.get_counter().get_value().get_weak() << "\n";
+
+	
+
 	g();
 	ref_compability();
 	//test_memory();
@@ -205,15 +233,13 @@ int main(int argc, const char* argv[]) {
 	float(SA:: * sd) = &SAS::fl;
 
 	complex_pointer<float(SAS::*), false> yyy(&SAS::fl, &GI);
-	complex_pointer<float(SA::*), false> yyy2(yyy);
+	complex_pointer<float(SAS::*), false> yyy2(yyy);
 	yyy.get_owner();
 	yyy2() = 10;
 	std::cout << yyy2() << std::endl;
 	complex_pointer<int> zzz(new int);
 	*zzz = 100;
 	delete zzz.operator->();
-
-	complex_pointer<float(SA::*)>().set_owner(new SAS);
 
 	float(SA::* fi) = &SA::fl;
 
@@ -255,7 +281,7 @@ int main(int argc, const char* argv[]) {
 	rwqo(GH, 0.05F);
 
 
-
+	
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
 	//test_pointer();

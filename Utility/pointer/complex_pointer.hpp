@@ -18,31 +18,28 @@ namespace dte_utils {
 		protected:
 			pointer_base<owner> _class;
 		public:
-			complex_pointer(const pointer_base<V(C::*)>& instance = nullptr, const pointer_base<owner>& instance_owner = nullptr) noexcept : pointer_base<V(C::*)>(instance), _class(instance_owner) {}
-			complex_pointer(const complex_pointer& other) noexcept : complex_pointer(other._instance, other._class) {}
-			template<typename U>
-			complex_pointer(const complex_pointer<V(U::*), true>& other) noexcept
-			requires(std::is_base_of_v<C, U> && is_const) : complex_pointer(static_cast<V(C::*)>(other.operator complex_pointer<V(U::*), true>::pointer()), other.get_owner()) {}
-			template<typename U>
-			complex_pointer(const complex_pointer<V(U::*), false>& other) noexcept
-			requires(std::is_base_of_v<C, U>) : complex_pointer(static_cast<V(C::*)>(other.operator complex_pointer<V(U::*), false>::pointer()), other.get_owner()) {}
+			complex_pointer(const pointer_base<type>& instance = nullptr, const pointer_base<owner>& instance_owner = nullptr) noexcept : pointer_base<type>(instance), _class(instance_owner) {}
+			complex_pointer(const complex_pointer& instance) noexcept : pointer_base<type>(instance), _class(instance.get_owner()) {}
+			template<bool other_const>
+			complex_pointer(const complex_pointer<type, other_const>& other) noexcept
+			requires(is_const > other_const) : complex_pointer(other.operator complex_pointer<type, true>::pointer(), other.get_owner()) {}
+			template<bool other_const>
+			complex_pointer(const complex_pointer<type, other_const>& other)
+			requires(is_const < other_const) = delete;
 
-			template<typename U>
-			complex_pointer<V(C::*), is_const>& operator=(const complex_pointer<V(U::*), false>& other) noexcept
-			requires(std::is_base_of_v<C, U>) {
-				_instance = other._instance;
+			template<bool other_const>
+			complex_pointer<type, is_const>& operator=(const complex_pointer<type, other_const>& other) noexcept
+			requires(is_const >= other_const) {
+				_instance = other.operator complex_pointer<type, other_const>::pointer();
+				_class = other.get_owner();
 				return *this;
 			}
-			template<typename U>
-			complex_pointer<V(C::*), is_const>& operator=(const complex_pointer<V(U::*), true>& other) noexcept
-			requires(std::is_base_of_v<C, U> && is_const) {
-				_instance = other._instance;
-				return *this;
-			}
-			template<typename U>
-			complex_pointer<V(C::*), is_const>& operator=(complex_pointer<V(U::*), is_const>&& other) noexcept
-			requires(std::is_base_of_v<C, U>) {
+			complex_pointer<type, is_const>& operator=(complex_pointer&& other) noexcept {
+				if (this == &other) {
+					return *this;
+				}
 				std::swap(_instance, other._instance);
+				std::swap(_class, other._class);
 				return *this;
 			}
 
@@ -55,7 +52,7 @@ namespace dte_utils {
 						throw nullptr_access(1);
 					}
 				}
-				return pointer_base<V(C::*)>::operator()<true>(_class.operator*<true>(), std::forward<Args>(args)...);
+				return pointer_base<type>::operator()<true>(_class.operator*<true>(), std::forward<Args>(args)...);
 			}
 
 			void set_owner(const pointer_base<owner>& instance_owner = nullptr) noexcept {
@@ -64,5 +61,8 @@ namespace dte_utils {
 			const pointer_base<owner>& get_owner() const noexcept {
 				return _class;
 			}
-		};
+			void set_field(pointer instance) noexcept {
+				_instance = instance;
+			}
+	};
 }

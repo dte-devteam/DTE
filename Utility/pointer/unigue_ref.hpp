@@ -9,7 +9,7 @@ namespace dte_utils {
 			unique_ref(pointer instance = nullptr) noexcept : pointer_base<T>(instance) {}
 			template<typename U>
 			unique_ref(const raw_pointer<U>& instance) noexcept 
-			requires(std::is_convertible_v<typename raw_pointer<U>::pointer, pointer>) : unique_ref(instance.operator raw_pointer<U>::pointer()) {}
+			requires(std::is_base_of_v<type, typename raw_pointer<U>::type> || std::is_same_v<type, typename raw_pointer<U>::type>) : unique_ref(instance.operator raw_pointer<U>::pointer()) {}
 			unique_ref(const unique_ref&) = delete;
 			unique_ref(unique_ref&& other) noexcept : pointer_base<T>(other._instance) {
 				other._instance = nullptr;

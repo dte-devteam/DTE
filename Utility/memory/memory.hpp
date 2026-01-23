@@ -92,13 +92,19 @@ namespace dte_utils {
 		return ptr;
 	}
 
+	template<typename T>
+	inline void destuct(T& object) 
+	noexcept(std::is_nothrow_destructible_v<T>)
+	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
+		object.~T();
+	}
+
 	//at = invalid -> UB
 	//at = nullptr -> error: nullptr_access (disable ptr checks: is_fail_safe = true)
 	template<typename T, bool is_fail_safe = false>
 	inline void destuct_at(const raw_pointer<T>& at)
 	noexcept(std::is_nothrow_destructible_v<T> && is_fail_safe)
 	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
-		static_assert(!std::is_trivially_destructible_v<T>, "do not try destructing trivial data");
 		if constexpr (!is_fail_safe) {
 			if (!at.operator raw_pointer<T>::pointer()) {
 				throw nullptr_access();
