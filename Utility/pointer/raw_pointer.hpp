@@ -24,7 +24,7 @@ namespace dte_utils {
 			raw_pointer(const raw_pointer& other) noexcept : _instance(other._instance) {}
 			template<typename U>
 			raw_pointer(const raw_pointer<U>& other) noexcept
-			requires((std::is_base_of_v<type, typename raw_pointer<U>::type> || std::is_same_v<std::remove_cv_t<type>, std::remove_cv_t<typename raw_pointer<U>::type>>) && std::is_const_v<type> >= std::is_const_v<typename raw_pointer<U>::type>) : _instance(other.operator raw_pointer<U>::pointer()) {}
+			requires(is_static_castable_v<pointer, typename raw_pointer<U>::pointer>) : _instance(static_cast<pointer>(other.operator raw_pointer<U>::pointer())) {}
 
 			explicit operator pointer() const noexcept {
 				return _instance;
@@ -34,60 +34,34 @@ namespace dte_utils {
 			}
 
 			template<typename U>
-			raw_pointer& operator=(U* ptr) noexcept
-			requires(std::is_base_of_v<type, U> || std::is_same_v<type, U>) {
-				_instance = ptr;
+			raw_pointer& operator=(U ptr) noexcept
+			requires(is_static_castable_v<pointer, U>) {
+				_instance = static_cast<pointer>(ptr);
 				return *this;
 			}
 			template<typename U>
 			raw_pointer& operator=(const raw_pointer<U>& other) noexcept
-			requires(std::is_base_of_v<type, typename raw_pointer<U>::type> || std::is_same_v<type, typename raw_pointer<U>::type>) {
-				_instance = other.operator raw_pointer<U>::pointer();
+			requires(is_static_castable_v<pointer, typename raw_pointer<U>::pointer>) {
+				*this = other.operator raw_pointer<U>::pointer();
 				return *this;
 			}
 
 			template<typename U>
-			bool operator==(U* ptr) const noexcept {
+			bool operator==(U* ptr) const noexcept 
+			requires(!is_field_v<type>) {
 				//we force comparement by casting everything to void*
 				return downgrade_ptr(_instance) == downgrade_ptr(ptr);
 			}
-			
-			template<typename U>
-			bool operator!=(U* ptr) const noexcept {
-				return !(*this == ptr);
+			template<typename V, typename C>
+			bool operator==(V(C::* field_ptr)) const noexcept
+			requires(is_static_castable_v<pointer, V(C::*)>) {
+				return _instance == static_cast<pointer>(field_ptr);
 			}
 			template<typename U>
 			bool operator==(const raw_pointer<U>& other) const noexcept 
-			requires(!(is_field_v<U> || is_field_v<type>)) {
+			requires(is_static_castable_v<pointer, typename raw_pointer<U>::pointer>) {
 				return *this == other.operator raw_pointer<U>::pointer();
 			}
-			template<typename U>
-			bool operator!=(const raw_pointer<U>& other) const noexcept 
-			requires(!(is_field_v<U> || is_field_v<type>)) {
-				return !(*this == other);
-			}
-			
-			template<typename V, typename C>
-			bool operator==(V(C::*field_ptr)) const noexcept 
-			requires(std::is_same_v<V(C::*), type>) {
-				return _instance == field_ptr;
-			}
-			template<typename V, typename C>
-			bool operator!=(V(C::* field_ptr)) const noexcept
-			requires(std::is_same_v<V(C::*), type>) {
-				return !(*this == field_ptr);
-			}
-			template<typename V, typename C>
-			bool operator==(const raw_pointer<V(C::*)>& other) const noexcept
-			requires(std::is_same_v<V(C::*), type>) {
-				return *this == other.operator raw_pointer<V(C::*)>::pointer();
-			}
-			template<typename V, typename C>
-			bool operator!=(const raw_pointer<V(C::*)>& other) const noexcept
-			requires(std::is_same_v<V(C::*), type>) {
-				return !(*this == other);
-			}
-
 
 			template<bool is_fail_safe = false>
 			std::conditional_t<std::is_same_v<raw_type, type>, std::add_lvalue_reference_t<type>, raw_pointer<std::conditional_t<is_field_v<raw_type>, type, std::remove_pointer_t<type>>>> get_value() noexcept(is_fail_safe) {

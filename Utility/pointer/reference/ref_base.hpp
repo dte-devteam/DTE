@@ -1,6 +1,6 @@
 #pragma once
 #include "ref_counter.hpp"
-#include "complex_pointer.hpp"
+#include "../complex_pointer.hpp"
 namespace dte_utils {
 	//_counter = invalid/nullptr -> UB
 	template<typename RC = ref_counter>

@@ -27,7 +27,7 @@
     <ClCompile Include="exceptions\pointer_exception.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="pointer\ref_counter.cpp">
+    <ClCompile Include="pointer\reference\ref_counter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="memory\mem_handler.cpp">
@@ -44,25 +44,25 @@
     <ClInclude Include="memory\dynamic_string.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\unigue_ref.hpp">
+    <ClInclude Include="pointer\reference\unigue_ref.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="exceptions\logic_exception.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\weak_ref.hpp">
+    <ClInclude Include="pointer\reference\weak_ref.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="function_traits.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\ref_counter.hpp">
+    <ClInclude Include="pointer\reference\ref_counter.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\strong_ref.hpp">
+    <ClInclude Include="pointer\reference\strong_ref.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\unknown_ref.hpp">
+    <ClInclude Include="pointer\reference\unknown_ref.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="exceptions\pointer_exception.hpp">
@@ -119,11 +119,12 @@
     <ClInclude Include="pointer\complex_pointer.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="pointer\ref_base.hpp">
+    <ClInclude Include="pointer\reference\ref_base.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="pointer\documentation-ru.md" />
+    <None Include="pointer\README.md" />
   </ItemGroup>
 </Project>

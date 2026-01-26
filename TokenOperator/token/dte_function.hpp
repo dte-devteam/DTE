@@ -1,7 +1,7 @@
 #pragma once
 //#include "unit.hpp"
 #include "memory/dynamic_string.hpp"
-#include "pointer/strong_ref.hpp"
+#include "pointer/reference/strong_ref.hpp"
 #include "types.hpp"
 #include "semi_pointer.hpp"
 namespace dte_token {

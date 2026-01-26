@@ -20,11 +20,11 @@ namespace dte_utils {
 		public:
 			complex_pointer(const pointer_base<type>& instance = nullptr, const pointer_base<owner>& instance_owner = nullptr) noexcept : pointer_base<type>(instance), _class(instance_owner) {}
 			complex_pointer(const complex_pointer& instance) noexcept : pointer_base<type>(instance), _class(instance.get_owner()) {}
-			template<bool other_const>
-			complex_pointer(const complex_pointer<type, other_const>& other) noexcept
+			template<typename U, bool other_const>
+			complex_pointer(const complex_pointer<U, other_const>& other) noexcept
 			requires(is_const > other_const) : complex_pointer(other.operator complex_pointer<type, true>::pointer(), other.get_owner()) {}
-			template<bool other_const>
-			complex_pointer(const complex_pointer<type, other_const>& other)
+			template<typename U, bool other_const>
+			complex_pointer(const complex_pointer<U, other_const>& other)
 			requires(is_const < other_const) = delete;
 
 			template<bool other_const>

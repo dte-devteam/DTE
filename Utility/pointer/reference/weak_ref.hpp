@@ -11,17 +11,19 @@ namespace dte_utils {
 		using size_type = typename ref_base<RC>::size_type;
 		protected:
 			//be carefull - weak must be >= strong
-			weak_ref_no_event(const complex_pointer<T>& instance, size_type weak_num, size_type strong_num) : complex_pointer<T>(instance), ref_base<RC>(cnew<RC>(weak_num, strong_num)) {}
-			void _strong_decrease() noexcept(std::is_nothrow_destructible_v<T>) {
+			template<typename U>
+			weak_ref_no_event(const complex_pointer<U>& instance, size_type weak_num, size_type strong_num)
+			requires(is_static_castable_v<pointer, typename complex_pointer<U>::pointer>) : complex_pointer<type>(instance), ref_base<RC>(cnew<RC>(weak_num, strong_num)) {}
+			void _strong_decrease() noexcept(std::is_nothrow_destructible_v<type>) {
 				if (!_counter->sub_strong()) {
 					cdelete(remove_const_ptr_base(*this));
 				}
 			}
 		public:
-			weak_ref_no_event(const complex_pointer<T>& instance = {}) : weak_ref_no_event(instance, 1, 0) {}
+			weak_ref_no_event(const complex_pointer<type>& instance = {}) : weak_ref_no_event(instance, 1, 0) {}
 			template<typename U>
 			weak_ref_no_event(const weak_ref_no_event<U, RC>& other) noexcept
-			requires(std::is_base_of_v<type, typename weak_ref_no_event<U, RC>::type> || std::is_same_v<type, typename weak_ref_no_event<U, RC>::type>) : complex_pointer<T>(other), ref_base<RC>(remove_const_ptr_base(other.get_counter())) {
+			requires(is_static_castable_v<pointer, typename weak_ref_no_event<U, RC>::pointer>) : complex_pointer<type>(other), ref_base<RC>(remove_const_ptr_base(other.get_counter())) {
 				_counter->add_weak();
 			}
 			template<typename U, typename ORC>
@@ -29,12 +31,11 @@ namespace dte_utils {
 			weak_ref_no_event(const weak_ref_no_event<U, ORC>& other) = delete;
 
 			template<typename U>
-			weak_ref_no_event& operator=(const weak_ref_no_event<U, RC>& other)
-			requires(std::is_base_of_v<type, typename weak_ref_no_event<U, RC>::type> || std::is_same_v<type, typename weak_ref_no_event<U, RC>::type>) {
+			weak_ref_no_event& operator=(const weak_ref_no_event<type, RC>& other) {
 				if (*this == other) {
 					return *this;
 				}
-				complex_pointer<T>::operator=(other);
+				complex_pointer<type>::operator=(other);
 				if (_counter->sub_weak()) {
 					_counter = cnew<RC>(1, 0);
 				}
@@ -53,7 +54,7 @@ namespace dte_utils {
 				if (this == &other) {
 					return *this;
 				}
-				complex_pointer<T, is_const>::operator=(std::move(other));
+				complex_pointer<type>::operator=(std::move(other));
 				ref_base<RC>::operator=(std::move(other));
 				return *this;
 			}
@@ -67,7 +68,10 @@ namespace dte_utils {
 		using owner		= typename complex_pointer<V(C::*), is_const>::owner;
 		using size_type	= typename ref_base<RC>::size_type;
 		protected:
-			weak_ref_no_event(const complex_pointer<type, is_const>& instance, size_type weak_num, size_type strong_num) : complex_pointer<type, is_const>(instance), ref_base<RC>(cnew<RC>(weak_num, strong_num)) {}
+			//be carefull - weak must be >= strong
+			template<typename U>
+			weak_ref_no_event(const complex_pointer<U, is_const>& instance, size_type weak_num, size_type strong_num)
+			requires(is_static_castable_v<pointer, typename complex_pointer<U, is_const>::pointer>) : complex_pointer<type, is_const>(instance), ref_base<RC>(cnew<RC>(weak_num, strong_num)) {}
 			void _strong_decrease() noexcept(std::is_nothrow_destructible_v<C>) {
 				if (!_counter->sub_strong()) {
 					cdelete(remove_const_ptr_base(_class));
@@ -75,21 +79,21 @@ namespace dte_utils {
 			}
 		public:
 			weak_ref_no_event(const pointer_base<type>& instance = nullptr, const pointer_base<owner>& instance_owner = nullptr) : complex_pointer<type, is_const>(instance, instance_owner), ref_base<RC>(cnew<RC>(1, 0)) {}
-			template<bool other_const>
-			weak_ref_no_event(const complex_pointer<type, other_const>& instance)
-			requires(is_const >= other_const) : weak_ref_no_event(instance, 1, 0) {}
-			template<bool other_const>
-			weak_ref_no_event(const weak_ref_no_event<type, RC, other_const>& other) noexcept
-			requires(is_const >= other_const) : complex_pointer<type, is_const>(other), ref_base<RC>(remove_const_ptr_base(other.get_counter())) {
+			template<typename U, bool other_const>
+			weak_ref_no_event(const complex_pointer<U, other_const>& instance)
+			requires(is_const >= other_const && is_static_castable_v<pointer, typename complex_pointer<U, other_const>::pointer>) : weak_ref_no_event(instance, 1, 0) {}
+			template<typename U, bool other_const>
+			weak_ref_no_event(const weak_ref_no_event<U, RC, other_const>& other) noexcept
+			requires(is_const >= other_const && is_static_castable_v<pointer, typename weak_ref_no_event<U, RC, other_const>::pointer>) : complex_pointer<type, is_const>(other), ref_base<RC>(remove_const_ptr_base(other.get_counter())) {
 				_counter->add_weak();
 			}
 			template<typename U, typename ORC, bool other_const>
-			requires(is_const < other_const)
+			requires(is_const < other_const || !std::is_same_v<RC, ORC>)
 			weak_ref_no_event(const weak_ref_no_event<U, ORC, other_const>& other) = delete;
 
-			template<typename OV, typename OC, bool other_const>
-			weak_ref_no_event& operator=(const weak_ref_no_event<OV(OC::*), RC, other_const>& other)
-			requires(std::is_base_of_v<C, OC> && (is_const - other_const >= 0) && (std::is_same_v<V, OV> || std::is_base_of_v<V, OV>)) {
+			template<typename U, bool other_const>
+			weak_ref_no_event& operator=(const weak_ref_no_event<U, RC, other_const>& other)
+			requires(is_static_castable_v<pointer, typename weak_ref_no_event<U, RC, other_const>::pointer>) {
 				if (*this == other) {
 					return *this;
 				}

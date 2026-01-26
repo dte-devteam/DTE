@@ -30,7 +30,7 @@
     <ClCompile Include="exceptions\memory_exception.cpp" />
     <ClCompile Include="exceptions\pointer_exception.cpp" />
     <ClCompile Include="memory\mem_handler.cpp" />
-    <ClCompile Include="pointer\ref_counter.cpp" />
+    <ClCompile Include="pointer\reference\ref_counter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exceptions\error_codes.hpp" />
@@ -52,19 +52,23 @@
     <ClInclude Include="pointer\iterator.hpp" />
     <ClInclude Include="pointer\pointer_base.hpp" />
     <ClInclude Include="pointer\raw_pointer.hpp" />
-    <ClInclude Include="pointer\ref_base.hpp" />
-    <ClInclude Include="pointer\ref_counter.hpp" />
-    <ClInclude Include="pointer\strong_ref.hpp" />
+    <ClInclude Include="pointer\reference\ref_base.hpp" />
+    <ClInclude Include="pointer\reference\ref_counter.hpp" />
+    <ClInclude Include="pointer\reference\strong_ref.hpp" />
     <ClInclude Include="template_forwarding.hpp" />
-    <ClInclude Include="pointer\unigue_ref.hpp" />
-    <ClInclude Include="pointer\unknown_ref.hpp" />
-    <ClInclude Include="pointer\weak_ref.hpp" />
+    <ClInclude Include="pointer\reference\unigue_ref.hpp" />
+    <ClInclude Include="pointer\reference\unknown_ref.hpp" />
+    <ClInclude Include="pointer\reference\weak_ref.hpp" />
     <ClInclude Include="target_architecture.hpp" />
     <ClInclude Include="types.hpp" />
     <ClInclude Include="type_properties.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="pointer\documentation-ru.md">
+      <SubType>
+      </SubType>
+    </None>
+    <None Include="pointer\README.md">
       <SubType>
       </SubType>
     </None>

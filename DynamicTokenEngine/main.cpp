@@ -1,5 +1,5 @@
-#include "tests/memory/test_m.h"
-#include "tests/pointer/test_p.h"
+//#include "tests/memory/test_m.h"
+//#include "tests/pointer/test_p.h"
 
 #include "memory/static_array.hpp"
 
@@ -162,11 +162,12 @@ void ref_compability() {
 	weak_ref<int> www;
 	f_iterator<int> qw(www);
 	f_iterator<const volatile int> rrr(aaa);
-	rrr == ll;
-	ll == rrr;
-	q == aaa;
-	aaa != (const int*)0;
-	llx == (int*)0;
+	bool bv;
+	bv = rrr == ll;
+	bv = ll == rrr;
+	bv = q == aaa;
+	bv = aaa != (const int*)0;
+	bv = llx == (int*)0;
 
 	f_iterator<const volatile void> vit;
 	std::cout << (aaa == vit) << std::endl;
@@ -175,12 +176,38 @@ void ref_compability() {
 
 
 	remove_const_ptr(llx.operator->());
-} 
+}
 int main(int argc, const char* argv[]) {
+	SAS(FF:: * fgh) = nullptr;
+	SAS(FFF:: * fgh2) = nullptr;
+	bool io = (fgh == static_cast<SAS(FF::*)>(fgh2));
+	fgh2 = fgh;
+
+	complex_pointer<SAS(FFF::*), false> cpo = &FFF::sas;
+	weak_ref_no_event<SAS(FF::*), ref_counter, false> sdr = weak_ref_no_event<SAS(FF::*), ref_counter, false>(cpo);
+	weak_ref_no_event<SAS(FFF::*), ref_counter, false> sdr2 = weak_ref_no_event<SAS(FFF::*), ref_counter, false>(sdr);
+	weak_ref_no_event<SAS(FF::*), ref_counter, false> sdr3 = weak_ref_no_event<SAS(FF::*), ref_counter, false>(sdr2);
+
+	raw_pointer<SAS(FFF::*)> rawd2;
+	raw_pointer<SAS(FF::*)> rawd = rawd2;
+	rawd == rawd2;
+	rawd2 == rawd;
+	pointer_base<SAS(FFF::*)> pbsas;
+	complex_pointer<SAS(FF::*), false> yg = complex_pointer<SAS(FF::*), false>(rawd2);
+	complex_pointer<SAS(FF::*), false> yg2 = complex_pointer<SAS(FF::*), false>(pbsas);
+
+	raw_pointer<int*> kl = new int*(new int(100));
+	kl.get_value();
+	delete static_cast<int*>(kl.get_value());
+	delete static_cast<int**>(kl);
 
 	weak_ref_no_event<float(SA::*), ref_counter, false> ah = weak_ref_no_event<float(SA::*), ref_counter, false>{};
 	weak_ref_no_event<float(SA::*), ref_counter, true> ad = weak_ref_no_event<float(SA::*), ref_counter, true>(ah);
 	weak_ref_no_event<float(SA::*), ref_counter, true> ad2 = weak_ref_no_event<float(SA::*), ref_counter, true>{};
+
+	weak_ref_no_event<SAS, ref_counter> flwr;
+	weak_ref_no_event<SA, ref_counter> iwr = flwr;
+
 
 	std::cout << ad.get_counter().get_value().get_weak() << "\n";
 
@@ -230,7 +257,7 @@ int main(int argc, const char* argv[]) {
 	*/
 
 	SAS GI;
-	float(SA:: * sd) = &SAS::fl;
+	float(SA:: * sd) = static_cast<float(SA::*)>(&SAS::fl);
 
 	complex_pointer<float(SAS::*), false> yyy(&SAS::fl, &GI);
 	complex_pointer<float(SAS::*), false> yyy2(yyy);

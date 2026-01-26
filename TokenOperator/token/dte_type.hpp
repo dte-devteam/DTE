@@ -1,5 +1,5 @@
 #pragma once
-#include "pointer/strong_ref.hpp"
+#include "pointer/reference/strong_ref.hpp"
 #include "memory/dynamic_string.hpp"
 namespace dte_token {
 	struct dte_type {
