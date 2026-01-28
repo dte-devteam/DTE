@@ -3,6 +3,69 @@
 #include "exceptions/pointer_exception.hpp"
 #include "template_forwarding.hpp"
 namespace dte_utils {
+	template<typename T, typename RC, bool = false>
+	requires is_ref_counter_v<RC>
+	struct strong_ref_no_event : weak_ref_no_event<T, RC> {
+		using raw_type	= typename weak_ref_no_event<T, RC>::raw_type;
+		using type		= typename weak_ref_no_event<T, RC>::type;
+		using pointer	= typename weak_ref_no_event<T, RC>::pointer;
+		using owner		= typename weak_ref_no_event<T, RC>::owner;
+		using size_type	= typename weak_ref_no_event<T, RC>::size_type;
+		public:
+			strong_ref_no_event(const complex_pointer<type>& instance = {}) : weak_ref_no_event<type, RC>(instance, 1, 1) {}
+			template<typename U, bool is_fail_safe = false>
+			strong_ref_no_event(const weak_ref_no_event<U, RC>& other, template_forwarding<bool, is_fail_safe> = {})
+			requires(is_static_castable_v<pointer, typename weak_ref_no_event<U, RC>::pointer>) : weak_ref_no_event<type, RC>(other) {
+				if constexpr (!is_fail_safe) {
+					if (other.expired()) {
+						throw bad_weak_ptr();
+					}
+				}
+				_counter->add_strong();
+			}
+			template<typename U, bool is_fail_safe = false>
+			strong_ref_no_event(const weak_ref_no_event<U, RC>& other, template_forwarding<bool, is_fail_safe> = {})
+			requires(!is_static_castable_v<pointer, typename weak_ref_no_event<U, RC>::pointer>) = delete;
+			template<typename U>
+			strong_ref_no_event(const strong_ref_no_event<U, RC>& other) noexcept
+			requires(is_static_castable_v<pointer, typename weak_ref_no_event<U, RC>::pointer>) : weak_ref_no_event<type, RC>(other) {
+				_counter->add_strong();
+			}
+			template<typename U, typename ORC>
+			strong_ref_no_event(const strong_ref_no_event<U, ORC>& other) = delete;
+			~strong_ref_no_event() {
+				_strong_decrease();
+			}
+			/*
+			template<typename U, bool is_fail_safe = false>
+			strong_ref_no_event& operator=(const weak_ref_no_event<U, RC>& other)
+			requires(is_static_castable<pointer, typename weak_ref_no_event<U, RC>::pointer>) {
+				if constexpr (!is_fail_safe) {
+					if (other.expired()) {
+						throw bad_weak_ptr();
+					}
+				}
+				if (*this == other) {
+					return *this;
+				}
+				_strong_decrease();
+				weak_ref_no_event<type, RC>::set_value<false>(other);
+				_instance = other.operator weak_ref_no_event<U, RC>::pointer();
+				if (_counter->sub_weak()) {
+					_counter = cnew<RC>(1, 1);
+				}
+				else {
+					_counter->add_strong();
+				}
+				return *this;
+			}*/
+	};
+
+
+
+
+
+
 	template<typename T, typename RC = ref_counter>
 	requires is_ref_counter_v<RC>
 	struct strong_ref : weak_ref<T, RC> {

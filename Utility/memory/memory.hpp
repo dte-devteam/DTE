@@ -124,7 +124,7 @@ namespace dte_utils {
 	template<typename T>
 	inline void cdelete(const raw_pointer<T>& at)
 	noexcept(std::is_nothrow_destructible_v<T>)
-	requires(std::is_destructible_v<T> && !std::is_const_v<T>) {
+	requires(std::is_destructible_v<T> && !std::is_const_v<T> && !is_field_v<T>) {
 		if (at) {
 			//don`t call destructor of trivial type
 			if constexpr (!std::is_trivially_destructible_v<T>) {

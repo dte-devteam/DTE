@@ -24,7 +24,7 @@ namespace dte_utils {
 			raw_pointer(const raw_pointer& other) noexcept : _instance(other._instance) {}
 			template<typename U>
 			raw_pointer(const raw_pointer<U>& other) noexcept
-			requires(is_static_castable_v<pointer, typename raw_pointer<U>::pointer>) : _instance(static_cast<pointer>(other.operator raw_pointer<U>::pointer())) {}
+			requires(std::is_constructible_v<pointer, typename raw_pointer<U>::pointer>) : _instance(other.operator raw_pointer<U>::pointer()) {}
 
 			explicit operator pointer() const noexcept {
 				return _instance;
@@ -35,13 +35,13 @@ namespace dte_utils {
 
 			template<typename U>
 			raw_pointer& operator=(U ptr) noexcept
-			requires(is_static_castable_v<pointer, U>) {
-				_instance = static_cast<pointer>(ptr);
+			requires(std::is_assignable_v<pointer&, U>) {
+				_instance = ptr;
 				return *this;
 			}
 			template<typename U>
 			raw_pointer& operator=(const raw_pointer<U>& other) noexcept
-			requires(is_static_castable_v<pointer, typename raw_pointer<U>::pointer>) {
+			requires(std::is_assignable_v<pointer&, typename raw_pointer<U>::pointer>) {
 				*this = other.operator raw_pointer<U>::pointer();
 				return *this;
 			}

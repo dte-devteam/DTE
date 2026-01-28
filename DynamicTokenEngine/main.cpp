@@ -177,7 +177,35 @@ void ref_compability() {
 
 	remove_const_ptr(llx.operator->());
 }
+struct dout {
+	~dout() {
+		std::cout << "~dout()\n";
+	}
+};
 int main(int argc, const char* argv[]) {
+	weak_ref_no_event<dout, ref_counter> dout_ptr = cnew<dout>();
+	weak_ref_with_event<dout, ref_counter, true> weakptr = dout_ptr;
+	weak_ref_with_event<dout, ref_counter, false> weakptr2 = weakptr;
+	strong_ref_no_event<dout, ref_counter> strd = cnew<dout>();
+	strong_ref_no_event<dout, ref_counter, true> strd2 = strd;
+
+	weak_ref_no_event<int, ref_counter> qwe;
+	weak_ref_no_event<int, atomic_ref_counter> qwe2;
+	//error :)
+	//qwe = qwe2;
+	//qwe = pointer_base<int>();
+
+	float(SA:: * we) = nullptr;
+	float(SAS:: * we2) = nullptr;
+	//we = we2;
+	//we2 = we;
+
+	complex_pointer<float(SA::*), false> qp;
+	complex_pointer<float(SAS::*), false> qp2 = complex_pointer<float(SAS::*), false>{ qp };
+	
+	//TODO: Why error occures?
+	//is_same_template_v<weak_ref_no_event, complex_pointer>;
+
 	SAS(FF:: * fgh) = nullptr;
 	SAS(FFF:: * fgh2) = nullptr;
 	bool io = (fgh == static_cast<SAS(FF::*)>(fgh2));
@@ -188,13 +216,13 @@ int main(int argc, const char* argv[]) {
 	weak_ref_no_event<SAS(FFF::*), ref_counter, false> sdr2 = weak_ref_no_event<SAS(FFF::*), ref_counter, false>(sdr);
 	weak_ref_no_event<SAS(FF::*), ref_counter, false> sdr3 = weak_ref_no_event<SAS(FF::*), ref_counter, false>(sdr2);
 
-	raw_pointer<SAS(FFF::*)> rawd2;
-	raw_pointer<SAS(FF::*)> rawd = rawd2;
-	rawd == rawd2;
-	rawd2 == rawd;
-	pointer_base<SAS(FFF::*)> pbsas;
+	raw_pointer<SAS(FF::*)> rawd2;
+	raw_pointer<SAS(FFF::*)> rawd = rawd2;
+
+
+	pointer_base<SAS(FF::*)> pbsas;
 	complex_pointer<SAS(FF::*), false> yg = complex_pointer<SAS(FF::*), false>(rawd2);
-	complex_pointer<SAS(FF::*), false> yg2 = complex_pointer<SAS(FF::*), false>(pbsas);
+	complex_pointer<SAS(FFF::*), false> yg2 = complex_pointer<SAS(FFF::*), false>(pbsas);
 
 	raw_pointer<int*> kl = new int*(new int(100));
 	kl.get_value();

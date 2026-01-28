@@ -91,4 +91,11 @@ namespace dte_utils {
 	struct args_list {
 		static constexpr size_t arg_num = sizeof...(Args);
 	};
+
+	template<template<typename...> typename T, template<typename...> typename U>
+	struct is_same_template : std::false_type {};
+	template<template<typename...> typename T>
+	struct is_same_template<T, T> : std::true_type {};
+	template<template<typename...> typename T, template<typename...> typename U>
+	inline constexpr bool is_same_template_v = is_same_template<T, U>::value;
 }
