@@ -11,8 +11,8 @@ namespace dte_utils {
 		using raw_pointer<T>::raw_pointer;
 		public:
 			template<bool is_fail_safe = false>
-			std::add_lvalue_reference_t<type> operator*() const noexcept(is_fail_safe)
-			requires(!(return_type_v<type> || std::is_void_v<type>)) {
+			constexpr std::add_lvalue_reference_t<type> operator*() const noexcept(is_fail_safe)
+			requires(!(return_type_v<type> || std::is_void_v<type> || is_field_v<type>)) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
 						throw nullptr_access();
@@ -20,12 +20,9 @@ namespace dte_utils {
 				}
 				return *_instance;
 			}
-			pointer operator->() const noexcept {
-				return _instance;
-			}
 
 			template<bool is_fail_safe = false, typename ...Args>
-			return_type_t<type> operator()(Args&&... args) const 
+			constexpr return_type_t<type> operator()(Args&&... args) const
 			noexcept(return_type_noexcept<type> && is_fail_safe)
 			requires(return_type_v<type>) {
 				if constexpr (!is_fail_safe) {
@@ -36,7 +33,7 @@ namespace dte_utils {
 				return _instance(std::forward<Args>(args)...);
 			}
 			template<bool is_fail_safe = false, typename ...Args>
-			is_functor_t<type, Args...> operator()(Args&&... args) const 
+			constexpr is_functor_t<type, Args...> operator()(Args&&... args) const
 			noexcept(is_functor_noexcept_v<type, Args...> && is_fail_safe) 
 			requires(is_functor_v<type, Args...>) {
 				if constexpr (!is_fail_safe) {
@@ -56,7 +53,7 @@ namespace dte_utils {
 		public:
 			template<bool is_fail_safe = false, typename ...Args>
 			requires(std::is_same_v<args_list<Args...>, field_function_a<pointer>>)
-			std::conditional_t<is_field_function_v<pointer>, field_function_r<pointer>, std::add_lvalue_reference_t<V>> operator()(C& c, Args&&... args) const 
+			constexpr std::conditional_t<is_field_function_v<pointer>, field_function_r<pointer>, std::add_lvalue_reference_t<V>> operator()(C& c, Args&&... args) const
 			noexcept(is_fail_safe && (is_field_function_v<pointer> ? is_field_function_noexcept_v<pointer> : true)) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {
@@ -75,7 +72,7 @@ namespace dte_utils {
 				std::is_same_v<args_list<Args...>, field_function_a<pointer>> &&
 				(is_field_function_v<pointer> ? is_field_function_const_v<pointer> : true)
 			)
-			std::conditional_t<is_field_function_v<pointer>, field_function_r<pointer>, std::add_lvalue_reference_t<std::add_const_t<V>>> operator()(const C& c, Args&&... args) const 
+			constexpr std::conditional_t<is_field_function_v<pointer>, field_function_r<pointer>, std::add_lvalue_reference_t<std::add_const_t<V>>> operator()(const C& c, Args&&... args) const
 			noexcept(is_fail_safe && (is_field_function_v<pointer> ? is_field_function_noexcept_v<pointer> : true)) {
 				if constexpr (!is_fail_safe) {
 					if (!_instance) {

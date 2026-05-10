@@ -67,7 +67,7 @@ constexpr c_function fff[] = {
 	{ close_file, {} }
 };
 constexpr function_set fs(fff);
-
+constexpr raw_pointer<int> a { nullptr };
 dynamic_stack<atomic_weak_ref<const c_function>> ggg; // (cfh.begin(), cfh.get_num(), 0);
 size_t log_int(data_stack& ds, const semi_pointer::data& spd) {
 	std::cout << *get<int>(ds, spd.offset) << std::endl;
@@ -96,8 +96,6 @@ struct SA {
 	operator int*() {
 		return i;
 	}
-	f_iterator<int> begin() { return i; }
-	f_iterator<int> end() { return begin() + s; }
 	int f() const noexcept {
 		std::cout << "UUU" << fl << std::endl;
 		return 0;
@@ -130,53 +128,6 @@ void g() {
 
 
 }
-void ref_compability() {
-	//checking compability
-	is_iteroid_v<f_iterator, void>;
-	is_iteroid_v<b_iterator, void>;
-
-	b_iterator<void> e;
-	std::cout << (int*)(++e).operator->() << std::endl;
-
-	pointer_base<void> q;
-	q = (int*)0;
-
-	void* qq = nullptr;
-	f_iterator<int> aaa;
-	f_iterator<const int> hg;
-
-	//q = aaa;
-
-	aaa - aaa;
-
-	//aaa is nullptr (by constructor), so... we get nullptr_access error
-	//aaa.operator*();
-
-	pointer_base<const int> llx;
-	pointer_base<const int> llz = pointer_base<const int>(pointer_base<int>());
-	pointer_base<const int>(pointer_base<int>(0));
-	pointer_base<int> ll;// = llx;
-	iterator_base<int> gg(ll);
-	b_iterator<int> bbb(aaa);
-	b_iterator<int> ccc(ll);
-	weak_ref<int> www;
-	f_iterator<int> qw(www);
-	f_iterator<const volatile int> rrr(aaa);
-	bool bv;
-	bv = rrr == ll;
-	bv = ll == rrr;
-	bv = q == aaa;
-	bv = aaa != (const int*)0;
-	bv = llx == (int*)0;
-
-	f_iterator<const volatile void> vit;
-	std::cout << (aaa == vit) << std::endl;
-
-	weak_ref<const int> kk = weak_ref<const int>(www);
-
-
-	remove_const_ptr(llx.operator->());
-}
 struct dout {
 	~dout() {
 		std::cout << "~dout()\n";
@@ -200,8 +151,6 @@ int main(int argc, const char* argv[]) {
 	//we = we2;
 	//we2 = we;
 
-	complex_pointer<float(SA::*), false> qp;
-	complex_pointer<float(SAS::*), false> qp2 = complex_pointer<float(SAS::*), false>{ qp };
 	
 	//TODO: Why error occures?
 	//is_same_template_v<weak_ref_no_event, complex_pointer>;
@@ -211,67 +160,18 @@ int main(int argc, const char* argv[]) {
 	bool io = (fgh == static_cast<SAS(FF::*)>(fgh2));
 	fgh2 = fgh;
 
-	complex_pointer<SAS(FFF::*), false> cpo = &FFF::sas;
-	weak_ref_no_event<SAS(FF::*), ref_counter, false> sdr = weak_ref_no_event<SAS(FF::*), ref_counter, false>(cpo);
-	weak_ref_no_event<SAS(FFF::*), ref_counter, false> sdr2 = weak_ref_no_event<SAS(FFF::*), ref_counter, false>(sdr);
-	weak_ref_no_event<SAS(FF::*), ref_counter, false> sdr3 = weak_ref_no_event<SAS(FF::*), ref_counter, false>(sdr2);
 
 	raw_pointer<SAS(FF::*)> rawd2;
 	raw_pointer<SAS(FFF::*)> rawd = rawd2;
 
 
-	pointer_base<SAS(FF::*)> pbsas;
-	complex_pointer<SAS(FF::*), false> yg = complex_pointer<SAS(FF::*), false>(rawd2);
-	complex_pointer<SAS(FFF::*), false> yg2 = complex_pointer<SAS(FFF::*), false>(pbsas);
-
-	raw_pointer<int*> kl = new int*(new int(100));
-	kl.get_value();
-	delete static_cast<int*>(kl.get_value());
-	delete static_cast<int**>(kl);
-
-	weak_ref_no_event<float(SA::*), ref_counter, false> ah = weak_ref_no_event<float(SA::*), ref_counter, false>{};
-	weak_ref_no_event<float(SA::*), ref_counter, true> ad = weak_ref_no_event<float(SA::*), ref_counter, true>(ah);
-	weak_ref_no_event<float(SA::*), ref_counter, true> ad2 = weak_ref_no_event<float(SA::*), ref_counter, true>{};
-
-	weak_ref_no_event<SAS, ref_counter> flwr;
-	weak_ref_no_event<SA, ref_counter> iwr = flwr;
-
-
-	std::cout << ad.get_counter().get_value().get_weak() << "\n";
-
-
-	raw_pointer<int> rint;
-	raw_pointer<int> rint2;
-	weak_ref_no_event<SA(FF::*), ref_counter, true> wrne_int222 = { nullptr, nullptr };
-	weak_ref_no_event<SAS(FFF::*), ref_counter, true> wrne_int = { nullptr, nullptr };
-	rint == rint2;
-
-	//will cause error - uncomparable types
-	//rint == wrne_int;
-	//rint == wrne_int222;
-	//if (wrne_int222 == wrne_int) {
-	//	std::cout << "YES\n";
-	//}
-
-	ad = weak_ref_no_event<float(SA::*), ref_counter, false>();
-
-	std::cout << ad.get_counter().get_value().get_weak() << "\n";
-
 	
 
 	g();
-	ref_compability();
 	//test_memory();
 	//test_pointer();
 
 
-	SA nigga;
-	for (int u : nigga) {
-		std::cout << u << " ";
-	}
-	std::cout << nigga.begin()[1];
-	nigga.begin() + 3;
-	std::cout << std::endl;
 
 	const SA GH;
 
@@ -283,59 +183,25 @@ int main(int argc, const char* argv[]) {
 	pb.get_value().get_value();
 	pbp.get_value().get_value();
 	*/
-
-	SAS GI;
-	float(SA:: * sd) = static_cast<float(SA::*)>(&SAS::fl);
-
-	complex_pointer<float(SAS::*), false> yyy(&SAS::fl, &GI);
-	complex_pointer<float(SAS::*), false> yyy2(yyy);
-	yyy.get_owner();
-	yyy2() = 10;
-	std::cout << yyy2() << std::endl;
-	complex_pointer<int> zzz(new int);
-	*zzz = 100;
-	delete zzz.operator->();
-
-	float(SA::* fi) = &SA::fl;
-
-	f_iterator<float(SA::*)> fii(&fi);
-
-	nigga.**fii;
-
-	pointer_base<void(SA::*)(float) const> rwqo(&SA::fff);
-
-	void(SA::* abc)(float) const = &SA::fff;
-	pointer_base<void(SA::**)(float) const> gr(&abc);
-	decltype(*gr) a = *gr;
-	a = &SA::fff;
-	a = rwqo.operator pointer_base<void(SA::*)(float) const>::pointer();
-
-	rwqo(nigga, 0.F);
-
-	pointer_base<const int*(SA::*)> rq(&SA::ptr);
-	pointer_base<void(SA::*)(int)> rwq(&SA::ff);
-	pointer_base<float(SA::*)> qqh(&SA::fl);
-
-	pointer_base<int(SA::*)() const noexcept> qh(&SA::f);
-	if (qh) {
-		qh(nigga);
-	}
-	qqh(nigga) = 10;
-	if (qh) {
-		qh(nigga);
-	}
-	rwq(nigga, 100);
-
-	qqh(GH);
-	rq(GH);
-
-	rwq(nigga, 0);
-
-	rwq(nigga, 0);
-
-	rwqo(GH, 0.05F);
-
-
+	dynamic_stack<int>::iterator zxc;
+	b_iterator<float(SA::*)>::pointer bn;
+	iterable_pointer<void(*)()> as = g;
+	raw_pointer<iterable_pointer<void()>> jk = g;
+	jk.get_value()();
+	raw_pointer<const raw_pointer<const int>> jk2 = cnew<raw_pointer<const int>>(new int(100));
+	jk2.get_value().get_value();
+	int* xc = nullptr;
+	raw_pointer<int> fv;
+	fv += fv - xc;
+	fv <= fv;
+	raw_pointer<int> rpa, rpb;
+	std::cout << std::boolalpha << (rpa > rpb) << std::endl;
+	std::cout << rpa++.operator->() << std::endl;
+	std::cout << rpa.operator->() << std::endl;
+	++rpa;
+	fv = new int(10);
+	std::cout << fv[0] << std::endl;
+	delete fv.operator->();
 	
 	std::chrono::steady_clock::time_point t1, t2;
 	//test_memory();
@@ -366,7 +232,7 @@ int main(int argc, const char* argv[]) {
 	std::cout << strf->stack.get_block_num() << std::endl;
 	std::cout << strf->stack.get_memory_left() << std::endl;
 	//std::cout << static_cast<dte_token::unit*>(strf->stack[1])->get_cstr().begin() << std::endl;
-	std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin().operator f_iterator<char>::pointer() << std::endl;
+	//std::cout << static_cast<dynamic_cstring*>(strf->stack[1])->begin().operator f_iterator<char>::pointer() << std::endl;
 	delete strf;
 	std::cout << "-----------------" << std::endl;
 	strf = new stream{ 0, {10000}, {} };

@@ -24,10 +24,10 @@ namespace dte_utils {
 				return *this;
 			}
 			operator iterator() noexcept {
-				return static_cast<type*>(_ptr);
+				return static_cast<f_iterator<type>::pointer>(_ptr);
 			}
 			operator const_iterator() const noexcept {
-				return static_cast<const_type*>(_ptr);
+				return static_cast<f_iterator<const_type>::pointer>(_ptr);
 			}
 	};
 }

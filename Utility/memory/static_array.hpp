@@ -77,7 +77,7 @@ namespace dte_utils {
 			return begin() + N;
 		}
 		const_iterator end() const noexcept {
-			return begin() + N;
+			return begin() + (size_t)N;
 		}
 
 

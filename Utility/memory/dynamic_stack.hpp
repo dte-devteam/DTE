@@ -33,7 +33,7 @@ namespace dte_utils {
 			dynamic_stack(const It<U>& array, size_type used_size, size_type reserved_size) : _used(used_size), alloc_hand(used_size + reserved_size) {
 				array_to_array(array, array + get_used(), begin());
 			}
-			dynamic_stack(std::initializer_list<type> il, size_type reserved_size = 0) : dynamic_stack(f_iterator<const_type>(il.begin()), il.size(), reserved_size) {}
+			dynamic_stack(std::initializer_list<type> il, size_type reserved_size = 0) : dynamic_stack(const_iterator(il.begin()), il.size(), reserved_size) {}
 			dynamic_stack(const dynamic_stack& other) : _used(other.get_used()), alloc_hand(other.get_allocated()) {
 				array_to_array(other.begin(), other.end(), begin());
 			}
